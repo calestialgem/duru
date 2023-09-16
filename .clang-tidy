@@ -1,0 +1,1 @@
+Checks: "*,-llvmlibc-restrict-system-libc-headers"
