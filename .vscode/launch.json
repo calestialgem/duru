@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Debugs the duru tool after building it for Windows.
+      "name": "Launch (Windows)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "preLaunchTask": "${defaultBuildTask}",
+      "program": "${workspaceFolder}/build/duru",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "environment": [],
+      "stopAtEntry": false,
+      "console": "integratedTerminal"
+    }
+  ]
+}
