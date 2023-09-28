@@ -1,14 +1,14 @@
-cmake_minimum_required(VERSION 3.21)
-project(duru C)
+cmake_minimum_required(VERSION 3.12)
+project(duru CXX)
 
 ## The main executable, which is the duru tool.
 add_executable(${PROJECT_NAME}
-  src/main.c
+  src/main.cxx
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES
-  C_STANDARD 23
-  C_STANDARD_REQUIRED on
-  C_EXTENSIONS off
+  CXX_STANDARD 20
+  CXX_STANDARD_REQUIRED on
+  CXX_EXTENSIONS off
 )
 target_compile_options(${PROJECT_NAME} PRIVATE
   -Wall
