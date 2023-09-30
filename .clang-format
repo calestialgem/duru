@@ -1,1 +1,4 @@
 BasedOnStyle: LLVM
+FixNamespaceComments: false
+NamespaceIndentation: All
+IncludeBlocks: Regroup

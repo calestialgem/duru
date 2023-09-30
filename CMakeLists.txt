@@ -4,6 +4,7 @@ project(duru CXX)
 ## The main executable, which is the duru tool.
 add_executable(${PROJECT_NAME}
   src/main.cxx
+  src/launcher.cxx
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES
   CXX_STANDARD 20

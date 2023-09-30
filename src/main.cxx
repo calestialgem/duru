@@ -1,7 +1,8 @@
+#include "duru.hxx"
+
 #include <cstdlib>
-#include <iostream>
 
 int main() noexcept {
-  std::cout << "Hello, Duru!" << std::endl;
+  duru::launch();
   return EXIT_SUCCESS;
 }
