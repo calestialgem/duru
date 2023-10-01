@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch Java Program",
+      "request": "launch",
+      "mainClass": "duru/duru.launcher.Launcher",
+      "projectName": "duru",
+      "args": []
+    }
+  ]
+}
