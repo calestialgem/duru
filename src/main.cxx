@@ -3,6 +3,6 @@
 #include <cstdlib>
 
 int main() noexcept {
-  duru::launch();
+  duru::launch(duru::NominalSubject{"compiler"});
   return EXIT_SUCCESS;
 }
