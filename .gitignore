@@ -1,5 +1,2 @@
-# clangd artifacts
 .cache/
-
-# cmake artifacts
 build/

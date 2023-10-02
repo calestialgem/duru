@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(duru CXX)
 
-## The main executable, which is the duru tool.
 add_executable(${PROJECT_NAME}
   src/main.cxx
   src/launcher.cxx
