@@ -1,32 +1,44 @@
 #pragma once
 
-#include <ostream>
+#include <format>
+#include <optional>
 #include <string>
+#include <vector>
 
 namespace duru {
-  class Any {
+  class Diagnostic {
   public:
-    Any() = default;
-    Any(const Any&) = delete;
-    Any(Any&&) = delete;
-    virtual ~Any() = 0;
-    Any& operator=(const Any&) = delete;
-    Any& operator=(Any&&) = delete;
-  };
+    static Diagnostic create();
 
-  class Subject : public Any {
-  public:
-    virtual void append_to(std::ostream& target) const = 0;
-  };
+    void begin();
 
-  class NominalSubject final : public Subject {
-  public:
-    explicit NominalSubject(std::string name);
-    void append_to(std::ostream& target) const override;
+    void skip();
+
+    template <typename... Arguments>
+    void failure(std::string format, Arguments&&... arguments);
+
+    template <typename... Arguments>
+    void error(std::string format, Arguments&&... arguments);
+
+    template <typename... Arguments>
+    void warning(std::string format, Arguments&&... arguments);
+
+    template <typename... Arguments>
+    void info(std::_Fmt_string<Arguments...> format, Arguments&&... arguments);
 
   private:
-    std::string name;
-  };
+    struct MessageType {
+      std::string title;
+      bool is_fatal;
+    };
 
-  void launch(Subject const& subject);
+    struct Message {
+      MessageType type;
+      std::optional<std::string> subject;
+      std::string body;
+    };
+
+    std::vector<int> causes;
+    std::vector<Message> messages;
+  };
 }
