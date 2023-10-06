@@ -1,0 +1,88 @@
+using duru::Boolean;
+using duru::Byte;
+using duru::Natural64;
+using duru::Size;
+using duru::Span;
+using duru::TerminatedSpan;
+using duru::false;
+using duru::true;
+
+struct String(Span[Byte] bytes, Size length) {
+  public const String empty = view("");
+
+  template[Byte sentinel]
+  public proc view(TerminatedSpan[Byte, sentinel] viewed) String {
+    Size length = 0;
+    for viewed.get(length) != sentinel { length++; }
+    return String(viewed, length);
+  }
+
+  public proc get(String string, Size index) Byte {
+    return string:bytes.get(index);
+  }
+
+  public proc compare(String left, String right) Boolean {
+    if left:length != right:length { return false; }
+    for Size i = 0; i < left:length; i++ {
+      if left.get(i) != right.get(i) { return false; }
+    }
+    return true;
+  }
+
+  public proc hash(String hashed) Natural64 {
+    const Natural64 prime_factor = 53;
+    Natural64 result = 0;
+    for Size i = 0; i < hashed:length; i++ {
+      result *= prime_factor;
+      result += hashed.get(i);
+    }
+    return result;
+  }
+}
+
+enum Number(Natural64, Parsed, Added) {
+  public struct Parsed(source String) {}
+  public struct Added(Number base, Natural64 operand) {}
+
+  public const Number zero = create(0);
+
+  public proc create(Natural64 value) Number { return Number(value); }
+
+  template[Byte sentinel]
+  public proc parse(TerminatedSpan[Byte, sentinel] source) Number {
+    return Number(Parsed(String::view(source)));
+  }
+
+  public proc increment(Number* number) {
+    switch number {
+      case Natural64* value { value++; }
+      case _ { number = Added(number, 1); }
+    }
+  }
+
+  public proc compare(Number left, Number right) Boolean {
+    return left.get() == right.get();
+  }
+
+  proc get(Number number) Natural64 {
+    switch number {
+      case Natural64 value { return value; }
+      case Parsed(String source) {
+        Natural64 result = 0;
+        for Size i = 0; i < source:length; i++ {
+          result *= 10;
+          result += source.get(i) - '0';
+        }
+        return result;
+      }
+      case Added operation { return operation:base.get() + operation:operand; }
+    }
+  }
+}
+
+entrypoint {
+  Number n0 = Number::create(75846);
+  Number n1 = Number::parse("75845");
+  n1.increment();
+  duru::exit(n0.compare(n1));
+}
