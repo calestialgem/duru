@@ -1,5 +1,6 @@
 using duru::Boolean;
 using duru::Byte;
+using duru::Monostate;
 using duru::Natural64;
 using duru::Size;
 using duru::Span;
@@ -11,17 +12,17 @@ struct String(Span[Byte] bytes, Size length) {
   public const String empty = view("");
 
   template[Byte sentinel]
-  public proc view(TerminatedSpan[Byte, sentinel] viewed) String {
+  public String view(TerminatedSpan[Byte, sentinel] viewed) {
     Size length = 0;
     for viewed.get(length) != sentinel { length++; }
     return String(viewed, length);
   }
 
-  public proc get(String string, Size index) Byte {
+  public Byte get(String string, Size index) {
     return string:bytes.get(index);
   }
 
-  public proc compare(String left, String right) Boolean {
+  public Boolean compare(String left, String right) {
     if left:length != right:length { return false; }
     for Size i = 0; i < left:length; i++ {
       if left.get(i) != right.get(i) { return false; }
@@ -29,7 +30,7 @@ struct String(Span[Byte] bytes, Size length) {
     return true;
   }
 
-  public proc hash(String hashed) Natural64 {
+  public Natural64 hash(String hashed) {
     const Natural64 prime_factor = 53;
     Natural64 result = 0;
     for Size i = 0; i < hashed:length; i++ {
@@ -42,29 +43,30 @@ struct String(Span[Byte] bytes, Size length) {
 
 enum Number(Natural64, Parsed, Added) {
   public struct Parsed(source String) {}
+
   public struct Added(Number base, Natural64 operand) {}
 
   public const Number zero = create(0);
 
-  public proc create(Natural64 value) Number { return Number(value); }
+  public Number create(Natural64 value) { return Number(value); }
 
   template[Byte sentinel]
-  public proc parse(TerminatedSpan[Byte, sentinel] source) Number {
+  public Number parse(TerminatedSpan[Byte, sentinel] source) {
     return Number(Parsed(String::view(source)));
   }
 
-  public proc increment(Number* number) {
+  public Monostate increment(Number* number) {
     switch number {
       case Natural64* value { value++; }
       case _ { number = Added(number, 1); }
     }
   }
 
-  public proc compare(Number left, Number right) Boolean {
+  public Boolean compare(Number left, Number right) {
     return left.get() == right.get();
   }
 
-  proc get(Number number) Natural64 {
+  Natural64 get(Number number) {
     switch number {
       case Natural64 value { return value; }
       case Parsed(String source) {
