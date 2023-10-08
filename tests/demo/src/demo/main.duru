@@ -1,10 +1,10 @@
 using duru.Boolean;
 using duru.Byte;
-using duru.Monostate;
 using duru.Natural64;
 using duru.Size;
 using duru.Span;
 using duru.TerminatedSpan;
+using duru.Void;
 using duru.false;
 using duru.true;
 
@@ -55,7 +55,7 @@ enum Number(Natural64, Parsed, Added) {
     return Number(Parsed(String.view(source)));
   }
 
-  public Monostate increment(Number* number) {
+  public Void increment(Number* number) {
     switch number {
       case Natural64* value { value++; }
       case _ { number = Added(number, 1); }
