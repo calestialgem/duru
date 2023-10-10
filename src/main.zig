@@ -1,24 +1,41 @@
 const std = @import("std");
+const fs = std.fs;
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    var arena = std.heap.ArenaAllocator.init(gpa.allocator());
+    defer arena.deinit();
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
-
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
-
-    try bw.flush(); // don't forget to flush!
+    var tests = try fs.cwd().openDir("tests", .{});
+    defer tests.close();
+    const workspace_name = "hello";
+    tests.deleteTree(workspace_name) catch |e| if (e != error.FileNotFound) return e;
+    var workspace = try tests.makeOpenPath(workspace_name, .{});
+    defer workspace.close();
+    try initializeWorkspace(arena.allocator(), workspace);
 }
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+fn initializeWorkspace(allocator: std.mem.Allocator, workspace_directory: fs.Dir) !void {
+    var name = try workspace_directory.realpathAlloc(allocator, ".");
+    var i = name.len;
+    while (i != 0) : (i -= 1)
+        if (name[i - 1] == '\\')
+            break;
+    name = offset(u8, name, i);
+    var package_path = try allocator.alloc(u8, "src/".len + name.len);
+    std.mem.copy(u8, package_path, "src/");
+    std.mem.copy(u8, offset(u8, package_path, "src/".len), name);
+    var package_directory = try workspace_directory.makeOpenPath(package_path, .{});
+    defer package_directory.close();
+    var main_file = try package_directory.createFile("main.duru", .{});
+    defer main_file.close();
+    try main_file.writeAll("entrypoint {}\n");
+}
+
+fn offset(comptime Element: type, slice: []Element, amount: usize) []Element {
+    var mutable = slice;
+    mutable.ptr += amount;
+    mutable.len -= amount;
+    return mutable;
 }
