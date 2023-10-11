@@ -12,8 +12,9 @@ int main() {
       (DuruSize)strlen(staticMessage0) + (DuruSize)strlen(staticMessage1) + 1;
     char* message;
     duruDoOrDie(duruAllocateArray, &arena, char, messageLength, &message);
-    memcpy(message, staticMessage0, messageLength);
-    memcpy(message + strlen(staticMessage0), staticMessage1, messageLength);
+    memcpy(message, staticMessage0, strlen(staticMessage0));
+    memcpy(
+      message + strlen(staticMessage0), staticMessage1, strlen(staticMessage1));
     message[messageLength] = 0;
     puts(message);
     duruDoOrDie(duruDestroyArena, &arena);
