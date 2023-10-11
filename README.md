@@ -1,7 +1,6 @@
 # Duru
 
-Duru is a programming language similar to C. Indirection is explicit. Data and
-code are separate. Metaprogramming is unbounded.
+Duru is a general purpose programming language.
 
 ## License
 

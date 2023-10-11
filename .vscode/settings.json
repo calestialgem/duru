@@ -1,3 +1,10 @@
 {
-  "cSpell.words": ["clangd", "Duru", "Wextra", "Wpedantic"]
+  "cSpell.words": [
+    "clangd",
+    "constexpr",
+    "Duru",
+    "Parens",
+    "Wextra",
+    "Wpedantic"
+  ]
 }

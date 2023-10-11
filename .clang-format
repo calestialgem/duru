@@ -1,1 +1,111 @@
 BasedOnStyle: LLVM
+AlignAfterOpenBracket: AlwaysBreak
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveBitFields:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+# AlignConsecutiveShortCaseStatements: # not available yet
+#   Enabled: true
+#   AcrossEmptyLines: false
+#   AcrossComments: true
+#   AlignCaseColons: false
+AlignEscapedNewlines: Right
+AlignOperands: AlignAfterOperator
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
+AllowAllArgumentsOnNextLine: True
+AllowAllParametersOfDeclarationOnNextLine: True
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: True
+AllowShortEnumsOnASingleLine: True
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: True
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: True
+AttributeMacros: []
+BinPackArguments: false
+BinPackParameters: false
+BitFieldColonSpacing: None
+# BracedInitializerIndentWidth: -1 # not available yet
+BreakAfterAttributes: Leave
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Attach
+BreakBeforeInlineASMColon: OnlyMultiline
+BreakBeforeTernaryOperators: True
+BreakStringLiterals: false
+ColumnLimit: 80
+ContinuationIndentWidth: 2
+DerivePointerAlignment: False
+DisableFormat: False
+ForEachMacros: []
+IfMacros: []
+IncludeBlocks: Regroup
+IndentCaseBlocks: False
+IndentCaseLabels: true
+IndentGotoLabels: True
+IndentPPDirectives: BeforeHash
+IndentWidth: 4
+IndentWrappedFunctionNames: False
+InsertBraces: true
+InsertNewlineAtEOF: true
+IntegerLiteralSeparator:
+  Binary: 4
+  BinaryMinDigits: 6
+  Decimal: 3
+  DecimalMinDigits: 5
+  Hex: 4
+  HexMinDigits: 6
+# KeepEmptyLinesAtEOF: false # not available yet
+KeepEmptyLinesAtTheStartOfBlocks: False
+LineEnding: DeriveLF
+MaxEmptyLinesToKeep: 1
+PPIndentWidth: -1
+PointerAlignment: Left
+QualifierAlignment: Custom
+QualifierOrder:
+  ["inline", "static", "constexpr", "type", "const", "volatile", "restrict"]
+RawStringFormats: []
+ReflowComments: True
+RemoveBracesLLVM: false
+# RemoveParentheses: ReturnStatement # not available yet
+RemoveSemicolon: true
+SeparateDefinitionBlocks: Always
+SortIncludes: CaseSensitive
+SpaceAfterCStyleCast: False
+SpaceAfterLogicalNot: False
+SpaceAroundPointerQualifiers: Default
+SpaceBeforeAssignmentOperators: True
+SpaceBeforeCaseColon: False
+SpaceBeforeParens: ControlStatements
+SpaceBeforeSquareBrackets: False
+SpaceInEmptyBlock: False
+SpaceInEmptyParentheses: False
+SpacesBeforeTrailingComments: 1
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
+# SpacesInParens: Never # newer version of `SpacesInParentheses: false`
+SpacesInParentheses: false # will be replaced with `SpacesInParens: Never`
+SpacesInSquareBrackets: False
+StatementAttributeLikeMacros: []
+StatementMacros: []
+TypenameMacros: []
+UseTab: Never
+WhitespaceSensitiveMacros: []
