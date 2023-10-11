@@ -77,6 +77,7 @@ KeepEmptyLinesAtTheStartOfBlocks: False
 LineEnding: DeriveLF
 MaxEmptyLinesToKeep: 1
 PPIndentWidth: -1
+PenaltyReturnTypeOnItsOwnLine: 1000
 PointerAlignment: Left
 QualifierAlignment: Custom
 QualifierOrder:

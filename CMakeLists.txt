@@ -3,6 +3,7 @@ project(duru C)
 
 add_executable(${PROJECT_NAME}
   src/main.c
+  src/arena.c
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES
   C_STANDARD 23

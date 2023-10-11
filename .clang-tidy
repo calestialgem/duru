@@ -1,1 +1,1 @@
-Checks: "*,-llvmlibc-restrict-system-libc-headers"
+Checks: "*,-llvmlibc-restrict-system-libc-headers,-altera-struct-pack-align,-misc-no-recursion,-altera-unroll-loops,-readability-function-cognitive-complexity,-concurrency-mt-unsafe,-cppcoreguidelines-init-variables"
