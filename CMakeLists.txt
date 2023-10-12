@@ -3,6 +3,8 @@ project(duru C)
 
 add_executable(${PROJECT_NAME}
   src/main.c
+  src/platform.c
+  src/initializer.c
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES
   C_STANDARD 23
@@ -13,4 +15,5 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   -Wall
   -Wextra
   -Wpedantic
+  -Wno-gnu-zero-variadic-macro-arguments
 )

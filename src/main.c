@@ -1,5 +1,5 @@
 #include "duru.h"
 
-#include <stdio.h>
+#include <windows.h>
 
-int main() { puts("Hello, Duru!"); }
+int main() { duruInitialize(); }
