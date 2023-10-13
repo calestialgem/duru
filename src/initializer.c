@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 void duruInitialize() {
-    char* cwdName = duruGetCwdName();
-    FILE* configurationFile;
+    DuruByte* cwdName = duruGetCwdName();
+    FILE*     configurationFile;
     duruEnsure(
       fopen_s(&configurationFile, "project.duru", "wx") == 0,
       "Could not create the configuration file!");

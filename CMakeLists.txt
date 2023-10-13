@@ -3,6 +3,7 @@ project(duru C)
 
 add_executable(${PROJECT_NAME}
   src/main.c
+  src/arena.c
   src/platform.c
   src/initializer.c
 )

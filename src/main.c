@@ -2,4 +2,8 @@
 
 #include <windows.h>
 
-int main() { duruInitialize(); }
+int main() {
+    duruCreateArena();
+    duruInitialize();
+    duruDestroyArena();
+}
