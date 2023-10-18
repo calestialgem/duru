@@ -14,7 +14,13 @@ void duruInitialize() {
     duruEnsure(
             projectFile, "Could not open the file `%s`!", duruProjectFileName);
     duruEnsure(
-            fprintf(projectFile, "project %s {}\n", cwdName) >= 0,
+            fprintf(projectFile,
+                    "project %s {\n"
+                    "    version 0.1.0;\n"
+                    "    requires duru;\n"
+                    "}\n",
+                    cwdName)
+                    >= 0,
             "Could not write to the file `%s`!",
             duruProjectFileName);
     duruEnsure(
