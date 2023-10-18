@@ -3,28 +3,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define duruPackageFileName "package.duru"
-#define duruMainFileName    "main.duru"
+#define duruPackageFile "package.duru"
+#define duruMainFile    "src/main.duru"
 
 void duruInitialize() {
     char* cwd     = duruGetCwd();
     char* cwdName = duruGetFileName(cwd);
     free(cwd);
-    FILE* packageFile = fopen(duruPackageFileName, "wx");
-    duruEnsure(
-      packageFile, "Could not open the file `%s`!", duruPackageFileName);
+    FILE* packageFile = fopen(duruPackageFile, "wx");
+    duruEnsure(packageFile, "Could not open the file `%s`!", duruPackageFile);
     duruEnsure(
       fprintf(packageFile, "package %s {}\n", cwdName) >= 0,
       "Could not write to the file `%s`!",
-      duruPackageFileName);
+      duruPackageFile);
     duruEnsure(
       !fclose(packageFile),
       "Could not write to the file `%s`!",
-      duruPackageFileName);
+      duruPackageFile);
     duruEnsureDirectory("src");
-    char* mainFilePath = duruJoin("src", "/", duruMainFileName);
-    FILE* mainFile     = fopen(mainFilePath, "wx");
-    duruEnsure(mainFile, "Could not open the file `%s`!", mainFilePath);
+    FILE* mainFile = fopen(duruMainFile, "wx");
+    duruEnsure(mainFile, "Could not open the file `%s`!", duruMainFile);
     duruEnsure(
       fprintf(
         mainFile,
@@ -37,9 +35,8 @@ void duruInitialize() {
         "}\n")
         >= 0,
       "Could not write to the file `%s`!",
-      mainFilePath);
+      duruMainFile);
     duruEnsure(
-      !fclose(mainFile), "Could not write to the file `%s`!", mainFilePath);
-    free(mainFilePath);
+      !fclose(mainFile), "Could not write to the file `%s`!", duruMainFile);
     free(cwdName);
 }
