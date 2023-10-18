@@ -11,12 +11,9 @@ static void duruClearDirectory(char const* path);
 char* duruGetCwd() {
     size_t cwdSize = GetCurrentDirectory(0, 0);
     char*  cwd     = malloc(cwdSize);
-    if (!GetCurrentDirectory(cwdSize, cwd)) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not get the current working directory!\n");
-        abort();
-    }
+    duruEnsure(
+            GetCurrentDirectory(cwdSize, cwd),
+            "Could not get the current working directory!");
     return cwd;
 }
 
@@ -36,30 +33,21 @@ char* duruGetFileName(char const* path) {
 
 void duruEnter(char const* path) {
     if (SetCurrentDirectory(path)) { return; }
-    (void)fprintf(
-            stderr,
-            "failure: Could not set the current working directory to `%s`!\n",
-            path);
-    abort();
+    duruFail("Could not set the current working directory to `%s`!", path);
 }
 
 void duruEnsureDirectory(char const* path) {
     if (CreateDirectory(path, 0)) { return; }
     if (GetLastError() == ERROR_ALREADY_EXISTS) { return; }
-    (void)fprintf(
-            stderr, "failure: Could not create a directory at `%s`!\n", path);
-    abort();
+    duruFail("Could not create a directory at `%s`!", path);
 }
 
 void duruRecreateDirectory(char const* path) {
     if (CreateDirectory(path, 0)) { return; }
-    if (GetLastError() != ERROR_ALREADY_EXISTS) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not create a directory at `%s`!\n",
-                path);
-        abort();
-    }
+    duruEnsure(
+            GetLastError() == ERROR_ALREADY_EXISTS,
+            "Could not create a directory at `%s`!",
+            path);
     duruClearDirectory(path);
 }
 
@@ -67,44 +55,32 @@ static void duruClearDirectory(char const* path) {
     char*           searchString = duruJoin("", path, "\\*");
     WIN32_FIND_DATA entry;
     HANDLE          search = FindFirstFile(searchString, &entry);
-    if (search == INVALID_HANDLE_VALUE) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not iterate the entries of the directory `%s`!\n",
-                path);
-        abort();
-    }
+    duruEnsure(
+            search != INVALID_HANDLE_VALUE,
+            "Could not iterate the entries of the directory `%s`!",
+            path);
     do {
         if (strcmp(entry.cFileName, ".") == 0) { continue; }
         if (strcmp(entry.cFileName, "..") == 0) { continue; }
         char* entryPath = duruJoin(path, "\\", entry.cFileName);
         if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             duruClearDirectory(entryPath);
-            if (!RemoveDirectory(entryPath)) {
-                (void)fprintf(
-                        stderr,
-                        "failure: Could not delete the directory `%s`!",
-                        entryPath);
-                abort();
-            }
+            duruEnsure(
+                    RemoveDirectory(entryPath),
+                    "Could not delete the directory `%s`!",
+                    entryPath);
         } else {
-            if (!DeleteFile(entryPath)) {
-                (void)fprintf(
-                        stderr,
-                        "failure: Could not delete the file `%s`!",
-                        entryPath);
-                abort();
-            }
+            duruEnsure(
+                    DeleteFile(entryPath),
+                    "Could not delete the file `%s`!",
+                    entryPath);
         }
         free(entryPath);
     } while (FindNextFile(search, &entry));
-    if (GetLastError() != ERROR_NO_MORE_FILES) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not iterate the entries of the directory `%s`!\n",
-                path);
-        abort();
-    }
+    duruEnsure(
+            GetLastError() == ERROR_NO_MORE_FILES,
+            "Could not iterate the entries of the directory `%s`!",
+            path);
     FindClose(search);
     free(searchString);
 }

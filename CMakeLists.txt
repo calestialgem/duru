@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 project(duru C)
 
 add_executable(${PROJECT_NAME}
+  src/debug.c
   src/initializer.c
   src/main.c
   src/platform.c
@@ -17,4 +18,5 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   -Wextra
   -Wpedantic
   -Wno-deprecated-declarations
+  -Wno-gnu-zero-variadic-macro-arguments
 )

@@ -12,7 +12,7 @@ int main() {
 }
 
 static void duruTestInitialization() {
-    duruRecreateDirectory(duruInitializationTestDirectory);
+    // duruRecreateDirectory(duruInitializationTestDirectory);
     duruEnter(duruInitializationTestDirectory);
     duruInitialize();
 }

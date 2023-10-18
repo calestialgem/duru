@@ -11,53 +11,30 @@ void duruInitialize() {
     char* cwdName = duruGetFileName(cwd);
     free(cwd);
     FILE* projectFile = fopen(duruProjectFileName, "wx");
-    if (!projectFile) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not open the file `%s`!\n",
-                duruProjectFileName);
-        abort();
-    }
-    if (fprintf(projectFile, "project %s;\n", cwdName) < 0) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not write to the file `%s`!\n",
-                duruProjectFileName);
-        abort();
-    }
-    if (fclose(projectFile)) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not write to the file `%s`!\n",
-                duruProjectFileName);
-        abort();
-    }
+    duruEnsure(
+            projectFile, "Could not open the file `%s`!", duruProjectFileName);
+    duruEnsure(
+            fprintf(projectFile, "project %s;\n", cwdName) >= 0,
+            "Could not write to the file `%s`!",
+            duruProjectFileName);
+    duruEnsure(
+            !fclose(projectFile),
+            "Could not write to the file `%s`!",
+            duruProjectFileName);
     duruEnsureDirectory("src");
     char* packageName = duruJoin("src", "/", cwdName);
     duruEnsureDirectory(packageName);
     char* mainFilePath = duruJoin(packageName, "/", duruMainFileName);
     FILE* mainFile     = fopen(mainFilePath, "wx");
-    if (!mainFile) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not open the file `%s`!\n",
-                mainFilePath);
-        abort();
-    }
-    if (fprintf(mainFile, "entrypoint {}\n") < 0) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not write to the file `%s`!\n",
-                mainFilePath);
-        abort();
-    }
-    if (fclose(mainFile)) {
-        (void)fprintf(
-                stderr,
-                "failure: Could not write to the file `%s`!\n",
-                mainFilePath);
-        abort();
-    }
+    duruEnsure(mainFile, "Could not open the file `%s`!", mainFilePath);
+    duruEnsure(
+            fprintf(mainFile, "entrypoint {}\n") >= 0,
+            "Could not write to the file `%s`!",
+            mainFilePath);
+    duruEnsure(
+            !fclose(mainFile),
+            "Could not write to the file `%s`!",
+            mainFilePath);
     free(mainFilePath);
     free(packageName);
     free(cwdName);
