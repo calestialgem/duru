@@ -3,11 +3,11 @@
 #include <stdbool.h>
 
 [[noreturn]] void duruCrash(
-        char const* function,
-        char const* file,
-        unsigned    line,
-        char const* format,
-        ...) __attribute__((format(printf, 4, 5)));
+  char const* function,
+  char const* file,
+  unsigned    line,
+  char const* format,
+  ...) __attribute__((format(printf, 4, 5)));
 
 char* duruJoin(char const* prefix, char const* body, char const* suffix);
 

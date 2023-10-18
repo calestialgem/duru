@@ -51,7 +51,7 @@ BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: True
 BreakStringLiterals: false
 ColumnLimit: 80
-ContinuationIndentWidth: 8
+ContinuationIndentWidth: 2
 DerivePointerAlignment: False
 DisableFormat: False
 ForEachMacros: []

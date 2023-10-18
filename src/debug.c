@@ -8,11 +8,11 @@
 #include <string.h>
 
 void duruCrash(
-        char const* function,
-        char const* file,
-        unsigned    line,
-        char const* format,
-        ...) {
+  char const* function,
+  char const* file,
+  unsigned    line,
+  char const* format,
+  ...) {
     errno_t errorNo = errno;
     va_list arguments;
     va_start(arguments, format);
@@ -23,10 +23,10 @@ void duruCrash(
     size_t fullSize     = strlen(__FILE__);
     size_t relativeSize = strlen("debug.c");
     (void)fprintf(
-            stderr,
-            "in %s at %s:%u\n",
-            function,
-            file + (fullSize - relativeSize),
-            line);
+      stderr,
+      "in %s at %s:%u\n",
+      function,
+      file + (fullSize - relativeSize),
+      line);
     abort();
 }

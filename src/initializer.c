@@ -12,41 +12,41 @@ void duruInitialize() {
     free(cwd);
     FILE* projectFile = fopen(duruProjectFileName, "wx");
     duruEnsure(
-            projectFile, "Could not open the file `%s`!", duruProjectFileName);
+      projectFile, "Could not open the file `%s`!", duruProjectFileName);
     duruEnsure(
-            fprintf(projectFile,
-                    "project %s {\n"
-                    "    version 0.1.0;\n"
-                    "    requires duru;\n"
-                    "}\n",
-                    cwdName)
-                    >= 0,
-            "Could not write to the file `%s`!",
-            duruProjectFileName);
+      fprintf(
+        projectFile,
+        "project %s {\n"
+        "    version 0.1.0;\n"
+        "    requires duru;\n"
+        "}\n",
+        cwdName)
+        >= 0,
+      "Could not write to the file `%s`!",
+      duruProjectFileName);
     duruEnsure(
-            !fclose(projectFile),
-            "Could not write to the file `%s`!",
-            duruProjectFileName);
+      !fclose(projectFile),
+      "Could not write to the file `%s`!",
+      duruProjectFileName);
     duruEnsureDirectory("src");
     char* mainFilePath = duruJoin("src", "/", duruMainFileName);
     FILE* mainFile     = fopen(mainFilePath, "wx");
     duruEnsure(mainFile, "Could not open the file `%s`!", mainFilePath);
     duruEnsure(
-            fprintf(mainFile,
-                    "using duru.Entrypoint;\n"
-                    "using duru.print;\n"
-                    "\n"
-                    "@Entrypoint\n"
-                    "main() {\n"
-                    "    print(\"Hello, World!\\n\");\n"
-                    "}\n")
-                    >= 0,
-            "Could not write to the file `%s`!",
-            mainFilePath);
+      fprintf(
+        mainFile,
+        "using duru.Entrypoint;\n"
+        "using duru.print;\n"
+        "\n"
+        "@Entrypoint\n"
+        "main() {\n"
+        "    print(\"Hello, World!\\n\");\n"
+        "}\n")
+        >= 0,
+      "Could not write to the file `%s`!",
+      mainFilePath);
     duruEnsure(
-            !fclose(mainFile),
-            "Could not write to the file `%s`!",
-            mainFilePath);
+      !fclose(mainFile), "Could not write to the file `%s`!", mainFilePath);
     free(mainFilePath);
     free(cwdName);
 }

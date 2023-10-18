@@ -18,8 +18,8 @@ static void duruTestErrorReporting();
 int main(int argumentCount, char const* arguments[const argumentCount]) {
     duruEnsure(argumentCount == 2, "Provide the test to be executed!");
     duruEnsure(
-            strlen(arguments[1]) == 1,
-            "The test indicator must be a single character!");
+      strlen(arguments[1]) == 1,
+      "The test indicator must be a single character!");
     DuruTest test;
     switch (arguments[1][0]) {
         case 'i': test = duruInitializationTest; break;

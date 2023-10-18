@@ -12,8 +12,8 @@ char* duruGetCwd() {
     size_t cwdSize = GetCurrentDirectory(0, 0);
     char*  cwd     = malloc(cwdSize);
     duruEnsure(
-            GetCurrentDirectory(cwdSize, cwd),
-            "Could not get the current working directory!");
+      GetCurrentDirectory(cwdSize, cwd),
+      "Could not get the current working directory!");
     return cwd;
 }
 
@@ -45,9 +45,9 @@ void duruEnsureDirectory(char const* path) {
 void duruRecreateDirectory(char const* path) {
     if (CreateDirectory(path, 0)) { return; }
     duruEnsure(
-            GetLastError() == ERROR_ALREADY_EXISTS,
-            "Could not create a directory at `%s`!",
-            path);
+      GetLastError() == ERROR_ALREADY_EXISTS,
+      "Could not create a directory at `%s`!",
+      path);
     duruClearDirectory(path);
 }
 
@@ -56,9 +56,9 @@ static void duruClearDirectory(char const* path) {
     WIN32_FIND_DATA entry;
     HANDLE          search = FindFirstFile(searchString, &entry);
     duruEnsure(
-            search != INVALID_HANDLE_VALUE,
-            "Could not iterate the entries of the directory `%s`!",
-            path);
+      search != INVALID_HANDLE_VALUE,
+      "Could not iterate the entries of the directory `%s`!",
+      path);
     do {
         if (strcmp(entry.cFileName, ".") == 0) { continue; }
         if (strcmp(entry.cFileName, "..") == 0) { continue; }
@@ -66,21 +66,21 @@ static void duruClearDirectory(char const* path) {
         if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             duruClearDirectory(entryPath);
             duruEnsure(
-                    RemoveDirectory(entryPath),
-                    "Could not delete the directory `%s`!",
-                    entryPath);
+              RemoveDirectory(entryPath),
+              "Could not delete the directory `%s`!",
+              entryPath);
         } else {
             duruEnsure(
-                    DeleteFile(entryPath),
-                    "Could not delete the file `%s`!",
-                    entryPath);
+              DeleteFile(entryPath),
+              "Could not delete the file `%s`!",
+              entryPath);
         }
         free(entryPath);
     } while (FindNextFile(search, &entry));
     duruEnsure(
-            GetLastError() == ERROR_NO_MORE_FILES,
-            "Could not iterate the entries of the directory `%s`!",
-            path);
+      GetLastError() == ERROR_NO_MORE_FILES,
+      "Could not iterate the entries of the directory `%s`!",
+      path);
     FindClose(search);
     free(searchString);
 }
