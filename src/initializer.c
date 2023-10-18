@@ -3,31 +3,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define duruProjectFileName "project.duru"
+#define duruPackageFileName "package.duru"
 #define duruMainFileName    "main.duru"
 
 void duruInitialize() {
     char* cwd     = duruGetCwd();
     char* cwdName = duruGetFileName(cwd);
     free(cwd);
-    FILE* projectFile = fopen(duruProjectFileName, "wx");
+    FILE* packageFile = fopen(duruPackageFileName, "wx");
     duruEnsure(
-      projectFile, "Could not open the file `%s`!", duruProjectFileName);
+      packageFile, "Could not open the file `%s`!", duruPackageFileName);
     duruEnsure(
       fprintf(
-        projectFile,
-        "project %s {\n"
+        packageFile,
+        "package %s {\n"
         "    version 0.1.0;\n"
         "    requires duru;\n"
         "}\n",
         cwdName)
         >= 0,
       "Could not write to the file `%s`!",
-      duruProjectFileName);
+      duruPackageFileName);
     duruEnsure(
-      !fclose(projectFile),
+      !fclose(packageFile),
       "Could not write to the file `%s`!",
-      duruProjectFileName);
+      duruPackageFileName);
     duruEnsureDirectory("src");
     char* mainFilePath = duruJoin("src", "/", duruMainFileName);
     FILE* mainFile     = fopen(mainFilePath, "wx");
