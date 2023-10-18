@@ -1,4 +1,1 @@
-package initTest {
-    version 0.1.0;
-    requires duru;
-}
+package initTest {}

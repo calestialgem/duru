@@ -14,14 +14,7 @@ void duruInitialize() {
     duruEnsure(
       packageFile, "Could not open the file `%s`!", duruPackageFileName);
     duruEnsure(
-      fprintf(
-        packageFile,
-        "package %s {\n"
-        "    version 0.1.0;\n"
-        "    requires duru;\n"
-        "}\n",
-        cwdName)
-        >= 0,
+      fprintf(packageFile, "package %s {}\n", cwdName) >= 0,
       "Could not write to the file `%s`!",
       duruPackageFileName);
     duruEnsure(
