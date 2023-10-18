@@ -19,4 +19,5 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   -Wpedantic
   -Wno-deprecated-declarations
   -Wno-gnu-zero-variadic-macro-arguments
+  -Wno-microsoft-enum-forward-reference
 )
