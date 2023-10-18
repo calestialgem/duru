@@ -14,7 +14,7 @@ void duruInitialize() {
     duruEnsure(
             projectFile, "Could not open the file `%s`!", duruProjectFileName);
     duruEnsure(
-            fprintf(projectFile, "project %s;\n", cwdName) >= 0,
+            fprintf(projectFile, "project %s {}\n", cwdName) >= 0,
             "Could not write to the file `%s`!",
             duruProjectFileName);
     duruEnsure(
@@ -22,13 +22,19 @@ void duruInitialize() {
             "Could not write to the file `%s`!",
             duruProjectFileName);
     duruEnsureDirectory("src");
-    char* packageName = duruJoin("src", "/", cwdName);
-    duruEnsureDirectory(packageName);
-    char* mainFilePath = duruJoin(packageName, "/", duruMainFileName);
+    char* mainFilePath = duruJoin("src", "/", duruMainFileName);
     FILE* mainFile     = fopen(mainFilePath, "wx");
     duruEnsure(mainFile, "Could not open the file `%s`!", mainFilePath);
     duruEnsure(
-            fprintf(mainFile, "entrypoint {}\n") >= 0,
+            fprintf(mainFile,
+                    "using duru.Entrypoint;\n"
+                    "using duru.print;\n"
+                    "\n"
+                    "@Entrypoint\n"
+                    "main() {\n"
+                    "    print(\"Hello, World!\\n\");\n"
+                    "}\n")
+                    >= 0,
             "Could not write to the file `%s`!",
             mainFilePath);
     duruEnsure(
@@ -36,6 +42,5 @@ void duruInitialize() {
             "Could not write to the file `%s`!",
             mainFilePath);
     free(mainFilePath);
-    free(packageName);
     free(cwdName);
 }
