@@ -8,10 +8,13 @@
 int main() {
     DuruArena arena;
     char*     message;
+    int*      number;
     duruEnforce(duruCreateArena(&arena, 1024));
-    duruEnforce(duruAllocateFromArena(
-      &arena, strlen(duruMessage) + 1, 1, (void**)&message));
+    duruEnforce(
+      duruAllocateArray(&arena, char, strlen(duruMessage) + 1, &message));
     strcpy(message, duruMessage);
-    puts(message);
+    duruEnforce(duruAllocate(&arena, int, &number));
+    *number = 17;
+    (void)fprintf(stderr, "%s %i\n", message, *number);
     duruEnforce(duruDestroyArena(&arena));
 }

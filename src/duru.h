@@ -21,13 +21,14 @@ struct DuruArena {
     ptrdiff_t size;
 };
 
+DuruDiagnostic duruCreateDiagnostic(
+  char const* function, char const* file, int line, char const* format, ...)
+  __attribute__((format(printf, 4, 5)));
+
 DuruDiagnostic duruCreateArena(DuruArena* arena, ptrdiff_t capacity);
 DuruDiagnostic duruDestroyArena(DuruArena* arena);
 DuruDiagnostic duruAllocateFromArena(
   DuruArena* arena, ptrdiff_t size, ptrdiff_t alignment, void** address);
-DuruDiagnostic duruCreateDiagnostic(
-  char const* function, char const* file, int line, char const* format, ...)
-  __attribute__((format(printf, 4, 5)));
 
 #define duruComplete()                                                         \
     do { return (DuruDiagnostic){}; } while (false)
@@ -59,3 +60,19 @@ DuruDiagnostic duruCreateDiagnostic(
             abort();                                                           \
         }                                                                      \
     } while (false)
+
+#define duruAllocateArray(                                                     \
+  duruAllocateArrayArena,                                                      \
+  duruAllocateArrayElement,                                                    \
+  duruAllocateArrayLength,                                                     \
+  duruAllocateArrayAddress)                                                    \
+    duruAllocateFromArena(                                                     \
+      duruAllocateArrayArena,                                                  \
+      sizeof(duruAllocateArrayElement) * (duruAllocateArrayLength),            \
+      alignof(duruAllocateArrayElement),                                       \
+      (void**)(duruAllocateArrayAddress))
+
+#define duruAllocate(                                                          \
+  duruAllocateArena, duruAllocateObject, duruAllocateAddress)                  \
+    duruAllocateArray(                                                         \
+      duruAllocateArena, duruAllocateObject, 1, duruAllocateAddress)
