@@ -1,1 +1,1 @@
-Checks: "*,-llvmlibc-restrict-system-libc-headers"
+Checks: "*,-llvmlibc-restrict-system-libc-headers,-bugprone-suspicious-include,-altera-unroll-loops,-altera-id-dependent-backward-branch,-misc-no-recursion,-cppcoreguidelines-init-variables,-android-cloexec-fopen"

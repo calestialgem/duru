@@ -1,3 +1,18 @@
-#include <stdio.h>
+#include "internal.h"
 
-int main() { puts("Hello, Duru!"); }
+#define duruTestDirectory               "tests"
+#define duruInitializationTestDirectory "initTest"
+
+static void duruTestInitialization();
+
+int main() {
+    duruEnsureDirectory(duruTestDirectory);
+    duruEnter(duruTestDirectory);
+    duruTestInitialization();
+}
+
+static void duruTestInitialization() {
+    duruRecreateDirectory(duruInitializationTestDirectory);
+    duruEnter(duruInitializationTestDirectory);
+    duruInitialize();
+}

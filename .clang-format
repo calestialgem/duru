@@ -51,7 +51,7 @@ BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: True
 BreakStringLiterals: false
 ColumnLimit: 80
-ContinuationIndentWidth: 2
+ContinuationIndentWidth: 8
 DerivePointerAlignment: False
 DisableFormat: False
 ForEachMacros: []
@@ -77,6 +77,7 @@ KeepEmptyLinesAtTheStartOfBlocks: False
 LineEnding: DeriveLF
 MaxEmptyLinesToKeep: 1
 PPIndentWidth: -1
+PenaltyReturnTypeOnItsOwnLine: 999
 PointerAlignment: Left
 QualifierAlignment: Custom
 QualifierOrder:
