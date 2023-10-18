@@ -18,6 +18,7 @@ void  duruEnsureDirectory(char const* path);
 void  duruRecreateDirectory(char const* path);
 
 void duruInitialize();
+void duruCompile();
 
 #define duruFail(duruFailFormat, ...)                                          \
     do {                                                                       \

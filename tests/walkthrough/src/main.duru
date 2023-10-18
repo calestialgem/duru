@@ -1,0 +1,7 @@
+using duru.Entrypoint;
+using duru.print;
+
+@Entrypoint
+main() {
+    print("Hello, World!\n");
+}

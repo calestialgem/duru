@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 project(duru C)
 
 add_executable(${PROJECT_NAME}
+  src/compiler.c
   src/debug.c
   src/initializer.c
   src/main.c
