@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define duruPackageFile "package.duru"
-#define duruMainFile    "src/main.duru"
+#define duruMainFile "src/main.duru"
 
 void duruInitialize() {
     char* cwd     = duruGetCwd();

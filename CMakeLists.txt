@@ -21,4 +21,5 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   -Wno-deprecated-declarations
   -Wno-gnu-zero-variadic-macro-arguments
   -Wno-microsoft-enum-forward-reference
+  -Wno-gnu-empty-initializer
 )
