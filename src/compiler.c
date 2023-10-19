@@ -10,7 +10,7 @@ void duruCompile() {
     duruLoadFile(duruProjectFile, &projectFile);
     DuruStringView projectName =
       duruGetProjectName(duruViewString(projectFile));
-    printf("%.*s\n", (int)projectName.size, projectName.bytes);
+    duruRecreateDirectory(duruArtifactDirectory);
     duruDestroyString(projectFile);
 }
 

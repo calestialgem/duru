@@ -46,7 +46,9 @@ void           duruRecreateDirectory(DuruStringView path);
 void duruInitialize();
 void duruCompile();
 
-#define duruProjectFile duruView("project.duru")
+#define duruProjectFile       duruView("project.duru")
+#define duruSourceDirectory   duruView("src")
+#define duruArtifactDirectory duruView("art")
 
 #define duruFail(duruFailFormat, ...)                                          \
     do {                                                                       \

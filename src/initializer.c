@@ -16,7 +16,7 @@ void duruInitialize() {
     duruAppend(&projectFile, duruView(" {}\n"));
     duruStoreFile(duruProjectFile, duruViewString(projectFile));
     duruDestroyString(projectFile);
-    duruEnsureDirectory(duruView("src"));
+    duruEnsureDirectory(duruSourceDirectory);
     duruStoreFile(
       duruMainFile,
       duruView("using duru.Entrypoint;\n"
