@@ -2,7 +2,13 @@
 
 #include <stdbool.h>
 
-typedef struct DuruString DuruString;
+typedef struct DuruStringView DuruStringView;
+typedef struct DuruString     DuruString;
+
+struct DuruStringView {
+    char const* bytes;
+    size_t      size;
+};
 
 struct DuruString {
     char*  bytes;
@@ -17,20 +23,30 @@ struct DuruString {
   char const* format,
   ...) __attribute__((format(printf, 4, 5)));
 
-char*      duruJoin(char const* prefix, char const* body, char const* suffix);
-DuruString duruLoadFile(char const* path);
-void       duruDestroyString(DuruString string);
+DuruStringView duruView(char const* cString);
+DuruStringView duruViewString(DuruString string);
+DuruStringView duruRemoveLeading(DuruStringView string, size_t amount);
+DuruStringView duruRemoveTrailing(DuruStringView string, size_t amount);
+DuruStringView duruRemovePrefix(DuruStringView string, DuruStringView prefix);
+DuruStringView duruRemoveSuffix(DuruStringView string, DuruStringView suffix);
 
-char* duruGetCwd();
-char* duruGetFileName(char const* path);
-void  duruEnter(char const* path);
-void  duruEnsureDirectory(char const* path);
-void  duruRecreateDirectory(char const* path);
+void duruDestroyString(DuruString string);
+void duruReserveBytes(DuruString* string, size_t amount);
+void duruTerminateString(DuruString* string);
+void duruAppend(DuruString* string, DuruStringView suffix);
+
+DuruStringView duruGetFileName(DuruStringView path);
+DuruString     duruGetCwd();
+void           duruLoadFile(DuruStringView path, DuruString* contents);
+void           duruStoreFile(DuruStringView path, DuruStringView contents);
+void           duruEnter(DuruStringView path);
+void           duruEnsureDirectory(DuruStringView path);
+void           duruRecreateDirectory(DuruStringView path);
 
 void duruInitialize();
 void duruCompile();
 
-#define duruProjectFile "project.duru"
+#define duruProjectFile duruView("project.duru")
 
 #define duruFail(duruFailFormat, ...)                                          \
     do {                                                                       \

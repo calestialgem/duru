@@ -8,6 +8,7 @@ add_executable(${PROJECT_NAME}
   src/main.c
   src/platform.c
   src/string.c
+  src/stringView.c
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES
   C_STANDARD 23

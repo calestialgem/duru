@@ -2,10 +2,6 @@
 
 #include <string.h>
 
-#define duruTestDirectory               "tests"
-#define duruInitializationTestDirectory "initTest"
-#define duruWalkthroughDirectory        "walkthrough"
-
 typedef enum DuruTest DuruTest;
 
 enum DuruTest {
@@ -17,6 +13,10 @@ enum DuruTest {
 static void duruTestInitialization();
 static void duruTestErrorReporting();
 static void duruTestCompilingWalkthrough();
+
+#define duruTestDirectory               duruView("tests")
+#define duruInitializationTestDirectory duruView("initTest")
+#define duruWalkthroughDirectory        duruView("walkthrough")
 
 int main(int argumentCount, char const* arguments[const argumentCount]) {
     duruEnsure(argumentCount == 2, "Provide the test to be executed!");
