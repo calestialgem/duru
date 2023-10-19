@@ -18,12 +18,11 @@ DuruStringView duruGetFileName(DuruStringView path) {
     return path;
 }
 
-DuruString duruGetCwd() {
-    DuruString cwd = {};
-    duruReserveBytes(&cwd, MAX_PATH);
-    cwd.size = GetCurrentDirectory(cwd.capacity, cwd.bytes);
-    duruEnsure(cwd.size, "Could not get the current working directory!");
-    return cwd;
+void duruAppendCwd(DuruString* string) {
+    duruReserveBytes(string, MAX_PATH);
+    size_t cwd = GetCurrentDirectory(MAX_PATH, string->bytes + string->size);
+    duruEnsure(cwd, "Could not get the current working directory!");
+    string->size += cwd;
 }
 
 void duruLoadFile(DuruStringView path, DuruString* contents) {

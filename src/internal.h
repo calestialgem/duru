@@ -36,7 +36,7 @@ void duruTerminateString(DuruString* string);
 void duruAppend(DuruString* string, DuruStringView suffix);
 
 DuruStringView duruGetFileName(DuruStringView path);
-DuruString     duruGetCwd();
+void           duruAppendCwd(DuruString* string);
 void           duruLoadFile(DuruStringView path, DuruString* contents);
 void           duruStoreFile(DuruStringView path, DuruStringView contents);
 void           duruEnter(DuruStringView path);

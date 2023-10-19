@@ -6,10 +6,11 @@
 #define duruMainFile duruView("src/main.duru")
 
 void duruInitialize() {
-    DuruString     cwd         = duruGetCwd();
-    DuruStringView cwdName     = duruGetFileName(duruViewString(cwd));
-    DuruString     projectFile = {};
+    DuruString projectFile = {};
     duruAppend(&projectFile, duruView("project "));
+    DuruString cwd = {};
+    duruAppendCwd(&cwd);
+    DuruStringView cwdName = duruGetFileName(duruViewString(cwd));
     duruAppend(&projectFile, cwdName);
     duruDestroyString(cwd);
     duruAppend(&projectFile, duruView(" {}\n"));
