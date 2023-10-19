@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#define duruMaxASCII 127
+
 DuruStringView duruView(char const* cString) {
     return (DuruStringView){.bytes = cString, .size = strlen(cString)};
 }
@@ -41,4 +43,24 @@ DuruStringView duruRemoveSuffix(DuruStringView string, DuruStringView suffix) {
         string = duruRemoveTrailing(string, suffix.size);
     }
     return string;
+}
+
+int duruCompare(DuruStringView this, DuruStringView that) {
+    if (this.size < that.size) {
+        int suffix = memcmp(this.bytes, that.bytes, this.size);
+        if (suffix == 0) { return 1; }
+        return suffix;
+    }
+    if (this.size > that.size) {
+        int suffix = memcmp(this.bytes, that.bytes, that.size);
+        if (suffix == 0) { return -1; }
+        return suffix;
+    }
+    return memcmp(this.bytes, that.bytes, this.size);
+}
+
+int duruDecodeCharacter(DuruStringView string, size_t* byteIndex) {
+    char byte0 = string.bytes[(*byteIndex)++];
+    duruEnsure(byte0 <= duruMaxASCII, "UTF-8 is not implemented yet!");
+    return (int)byte0;
 }

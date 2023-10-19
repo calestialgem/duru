@@ -3,19 +3,17 @@
 #include <stdio.h>
 #include <string.h>
 
-static DuruStringView duruGetProjectName(DuruStringView projectFile);
-
 void duruCompile() {
     DuruString projectFile = {};
     duruLoadFile(duruProjectFile, &projectFile);
-    DuruStringView projectName =
-      duruGetProjectName(duruViewString(projectFile));
-    duruRecreateDirectory(duruArtifactDirectory);
+    DuruProjectConfiguration projectConfiguration = {};
+    duruParseProjectConfiguration(
+      &projectConfiguration, duruViewString(projectFile));
+    printf(
+      "Project: `%.*s`\n",
+      (int)projectConfiguration.name.size,
+      projectConfiguration.name.bytes);
+    duruDestroyProjectConfiguration(projectConfiguration);
     duruDestroyString(projectFile);
-}
-
-static DuruStringView duruGetProjectName(DuruStringView projectFile) {
-    projectFile = duruRemovePrefix(projectFile, duruView("project "));
-    projectFile = duruRemoveSuffix(projectFile, duruView(" {}\n"));
-    return projectFile;
+    duruRecreateDirectory(duruArtifactDirectory);
 }

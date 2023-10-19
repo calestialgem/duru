@@ -7,7 +7,9 @@ add_executable(${PROJECT_NAME}
   src/initializer.c
   src/main.c
   src/platform.c
+  src/projectConfiguration.c
   src/string.c
+  src/stringList.c
   src/stringView.c
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES
