@@ -30,7 +30,7 @@ void  duruRecreateDirectory(char const* path);
 void duruInitialize();
 void duruCompile();
 
-#define duruPackageFile "package.duru"
+#define duruProjectFile "project.duru"
 
 #define duruFail(duruFailFormat, ...)                                          \
     do {                                                                       \

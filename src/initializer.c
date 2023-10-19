@@ -9,16 +9,16 @@ void duruInitialize() {
     char* cwd     = duruGetCwd();
     char* cwdName = duruGetFileName(cwd);
     free(cwd);
-    FILE* packageFile = fopen(duruPackageFile, "wx");
-    duruEnsure(packageFile, "Could not open the file `%s`!", duruPackageFile);
+    FILE* projectFile = fopen(duruProjectFile, "wx");
+    duruEnsure(projectFile, "Could not open the file `%s`!", duruProjectFile);
     duruEnsure(
-      fprintf(packageFile, "package %s {}\n", cwdName) >= 0,
+      fprintf(projectFile, "project %s {}\n", cwdName) >= 0,
       "Could not write to the file `%s`!",
-      duruPackageFile);
+      duruProjectFile);
     duruEnsure(
-      !fclose(packageFile),
+      !fclose(projectFile),
       "Could not write to the file `%s`!",
-      duruPackageFile);
+      duruProjectFile);
     duruEnsureDirectory("src");
     FILE* mainFile = fopen(duruMainFile, "wx");
     duruEnsure(mainFile, "Could not open the file `%s`!", duruMainFile);
