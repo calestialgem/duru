@@ -8,7 +8,7 @@
       "preLaunchTask": "${defaultBuildTask}",
       "program": "${workspaceFolder}/build/duru",
       "cwd": "${workspaceFolder}",
-      "args": ["c"],
+      "args": ["i"],
       "environment": [],
       "stopAtEntry": false,
       "console": "integratedTerminal"

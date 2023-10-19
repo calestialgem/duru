@@ -12,18 +12,17 @@ void duruInitialize() {
     duruAppendCwd(&cwd);
     DuruStringView cwdName = duruGetFileName(duruViewString(cwd));
     duruAppend(&projectFile, cwdName);
-    duruDestroyString(cwd);
-    duruAppend(&projectFile, duruView(" {}\n"));
+    duruAppend(&projectFile, duruView(" {\n"));
+    duruAppend(&projectFile, duruView("    executable "));
+    duruAppend(&projectFile, cwdName);
+    duruAppend(&projectFile, duruView(";\n"));
+    duruAppend(&projectFile, duruView("}\n"));
     duruStoreFile(duruProjectFile, duruViewString(projectFile));
     duruDestroyString(projectFile);
     duruEnsureDirectory(duruSourceDirectory);
     duruStoreFile(
       duruMainFile,
-      duruView("using duru.Entrypoint;\n"
-               "using duru.print;\n"
-               "\n"
-               "@Entrypoint\n"
-               "main() {\n"
-               "    print(\"Hello, World!\\n\");\n"
+      duruView("main() {\n"
+               "    duru.print(\"Hello, World!\\n\");\n"
                "}\n"));
 }

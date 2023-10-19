@@ -1,1 +1,3 @@
-project walkthrough {}
+project walkthrough {
+    executable walkthrough;
+}
