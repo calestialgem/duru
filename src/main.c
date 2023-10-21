@@ -1,3 +1,4 @@
+#include <duru/launcher.h>
 #include <stdio.h>
 
-int main() { puts("Hello, Duru!"); }
+int main() { return greet(); }
