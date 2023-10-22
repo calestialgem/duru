@@ -1,6 +1,6 @@
 # Duru
 
-An imperative and expandible programming language.
+A limpid programming language.
 
 ## License
 
