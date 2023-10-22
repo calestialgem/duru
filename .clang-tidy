@@ -1,1 +1,1 @@
-Checks: "*,-llvmlibc-restrict-system-libc-headers"
+Checks: "*,-llvmlibc-restrict-system-libc-headers,-altera-struct-pack-align,-altera-unroll-loops"

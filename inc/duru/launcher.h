@@ -1,6 +1,8 @@
-#ifndef DURU_LAUNCHER_H
-#define DURU_LAUNCHER_H 1
+// Launches the tool for completing a specific task.
 
-int greet();
+#pragma once
 
-#endif // DURU_LAUNCHER_H
+#include <duru/diagnostic.h>
+
+/// Initializes a Duru project in the current working directory.
+DuruDiagnostic duruInitialize(void);

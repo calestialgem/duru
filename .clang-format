@@ -44,7 +44,7 @@ BinPackArguments: false
 BinPackParameters: false
 BitFieldColonSpacing: None
 # BracedInitializerIndentWidth: -1 # not available yet
-BreakAfterAttributes: Leave
+BreakAfterAttributes: Never
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Attach
 BreakBeforeInlineASMColon: OnlyMultiline
@@ -77,6 +77,7 @@ KeepEmptyLinesAtTheStartOfBlocks: False
 LineEnding: DeriveLF
 MaxEmptyLinesToKeep: 1
 PPIndentWidth: -1
+PenaltyReturnTypeOnItsOwnLine: 999
 PointerAlignment: Left
 QualifierAlignment: Custom
 QualifierOrder:

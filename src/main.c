@@ -1,4 +1,4 @@
+#include <duru/diagnostic.h>
 #include <duru/launcher.h>
-#include <stdio.h>
 
-int main() { return greet(); }
+int main() { duruAbortOnFailure(duruInitialize()); }

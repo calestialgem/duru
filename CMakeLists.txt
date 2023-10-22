@@ -12,6 +12,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   -Wall
   -Wextra
   -Wpedantic
+  -Wno-gnu-zero-variadic-macro-arguments
 )
 
 add_subdirectory(src)
