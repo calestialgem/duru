@@ -1,4 +1,4 @@
-package duru;
+package duru.launcher;
 
 final class Launcher {
     public static void main(String... arguments) {
