@@ -1,91 +1,54 @@
 package duru.model;
 
 public sealed interface Token {
-    record OpeningBrace(int start) implements Token {
+    record OpeningBrace(Portion portion) implements Token {
         @Override
-        public int length() { return "{".length(); }
-
-        @Override
-        public String explain(String contents) { return "punctuation `{`"; }
+        public String explain() { return "punctuation `{`"; }
     }
 
-    record ClosingBrace(int start) implements Token {
+    record ClosingBrace(Portion portion) implements Token {
         @Override
-        public int length() { return "}".length(); }
-
-        @Override
-        public String explain(String contents) { return "punctuation `}`"; }
+        public String explain() { return "punctuation `}`"; }
     }
 
-    record OpeningParenthesis(int start) implements Token {
+    record OpeningParenthesis(Portion portion) implements Token {
         @Override
-        public int length() { return "(".length(); }
-
-        @Override
-        public String explain(String contents) { return "punctuation `(`"; }
+        public String explain() { return "punctuation `(`"; }
     }
 
-    record ClosingParenthesis(int start) implements Token {
+    record ClosingParenthesis(Portion portion) implements Token {
         @Override
-        public int length() { return ")".length(); }
-
-        @Override
-        public String explain(String contents) { return "punctuation `)`"; }
+        public String explain() { return "punctuation `)`"; }
     }
 
-    record Semicolon(int start) implements Token {
+    record Semicolon(Portion portion) implements Token {
         @Override
-        public int length() { return ";".length(); }
-
-        @Override
-        public String explain(String contents) { return "punctuation `;`"; }
+        public String explain() { return "punctuation `;`"; }
     }
 
-    record Dot(int start) implements Token {
+    record Dot(Portion portion) implements Token {
         @Override
-        public int length() { return ".".length(); }
-
-        @Override
-        public String explain(String contents) { return "punctuation `.`"; }
+        public String explain() { return "punctuation `.`"; }
     }
 
-    record Entrypoint(int start) implements Token {
+    record Entrypoint(Portion portion) implements Token {
         @Override
-        public int length() { return "entrypoint".length(); }
-
-        @Override
-        public String explain(String contents) {
-            return "keyword `entrypoint`";
-        }
+        public String explain() { return "keyword `entrypoint`"; }
     }
 
-    record Identifier(int start, String text) implements Token {
+    record Identifier(Portion portion, String text) implements Token {
         @Override
-        public int length() { return text.length(); }
-
-        @Override
-        public String explain(String contents) {
-            return "identifier `%s`".formatted(text);
-        }
-
-        @Override
-        public String text(String contents) { return text; }
+        public String explain() { return "identifier `%s`".formatted(text); }
     }
 
-    record NumberConstant(int start, int length, long value) implements Token {
+    record NumberConstant(Portion portion, long value) implements Token {
         @Override
-        public String explain(String contents) {
+        public String explain() {
             return "number constant `%x`".formatted(value);
         }
     }
 
-    int start();
+    Portion portion();
 
-    int length();
-
-    String explain(String contents);
-
-    default String text(String contents) {
-        return contents.substring(start(), start() + length());
-    }
+    String explain();
 }
