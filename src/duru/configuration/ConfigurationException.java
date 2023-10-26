@@ -1,24 +1,16 @@
 package duru.configuration;
 
-public final class ConfigurationParseException extends Exception {
+public final class ConfigurationException extends Exception {
     private final String location;
 
-    private ConfigurationParseException(
-        String message,
-        Throwable cause,
-        String location)
-    {
-        super(message, cause);
-        this.location = location;
-    }
-
-    static ConfigurationParseException create(
+    public ConfigurationException(
         String contents,
         int start,
         int length,
         String format,
         Object... arguments)
     {
+        super(format.formatted(arguments));
         var line   = 1;
         var column = 1;
         for (var i = 0; i < start; i++) {
@@ -39,10 +31,7 @@ public final class ConfigurationParseException extends Exception {
             buffer.append(':');
             buffer.append(column + length);
         }
-        return new ConfigurationParseException(
-            format.formatted(arguments),
-            null,
-            buffer.toString());
+        location = buffer.toString();
     }
 
     public String location() { return location; }

@@ -1,7 +1,7 @@
 package duru.configuration;
 
-sealed interface Token {
-    record OpeningBrace(int start) implements Token {
+sealed interface ConfigurationToken {
+    record OpeningBrace(int start) implements ConfigurationToken {
         @Override
         public int length() { return "{".length(); }
 
@@ -9,7 +9,7 @@ sealed interface Token {
         public String explain(String contents) { return "punctuation `{`"; }
     }
 
-    record ClosingBrace(int start) implements Token {
+    record ClosingBrace(int start) implements ConfigurationToken {
         @Override
         public int length() { return "}".length(); }
 
@@ -17,7 +17,7 @@ sealed interface Token {
         public String explain(String contents) { return "punctuation `}`"; }
     }
 
-    record Semicolon(int start) implements Token {
+    record Semicolon(int start) implements ConfigurationToken {
         @Override
         public int length() { return ";".length(); }
 
@@ -25,7 +25,7 @@ sealed interface Token {
         public String explain(String contents) { return "punctuation `;`"; }
     }
 
-    record Dot(int start) implements Token {
+    record Dot(int start) implements ConfigurationToken {
         @Override
         public int length() { return ".".length(); }
 
@@ -33,7 +33,7 @@ sealed interface Token {
         public String explain(String contents) { return "punctuation `.`"; }
     }
 
-    record Project(int start) implements Token {
+    record Project(int start) implements ConfigurationToken {
         @Override
         public int length() { return "project".length(); }
 
@@ -41,7 +41,7 @@ sealed interface Token {
         public String explain(String contents) { return "keyword `project`"; }
     }
 
-    record Executable(int start) implements Token {
+    record Executable(int start) implements ConfigurationToken {
         @Override
         public int length() { return "executable".length(); }
 
@@ -51,7 +51,7 @@ sealed interface Token {
         }
     }
 
-    record Identifier(int start, int length) implements Token {
+    record Identifier(int start, int length) implements ConfigurationToken {
         @Override
         public String explain(String contents) {
             return "identifier `%s`".formatted(text(contents));

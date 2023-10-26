@@ -5,7 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import duru.configuration.Configuration;
-import duru.configuration.ConfigurationParseException;
+import duru.configuration.ConfigurationException;
+import duru.configuration.ConfigurationParser;
 
 final class Launcher {
     public static void main(String... arguments) {
@@ -22,9 +23,9 @@ final class Launcher {
         }
         Configuration configuration;
         try {
-            configuration = Configuration.parse(configurationText);
+            configuration = new ConfigurationParser().parse(configurationText);
         }
-        catch (ConfigurationParseException cause) {
+        catch (ConfigurationException cause) {
             throw new RuntimeException(
                 "%s:%s: error: Could not parse the configuration file!"
                     .formatted(

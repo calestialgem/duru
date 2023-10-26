@@ -3,22 +3,18 @@ package duru.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-final class Lexer {
+public final class ConfigurationLexer {
     private String contents;
 
-    private final List<Token> tokens;
+    private final List<ConfigurationToken> tokens;
 
     private int index;
 
-    private Lexer(String contents, List<Token> tokens, int index) {
-        this.contents = contents;
-        this.tokens   = tokens;
-        this.index    = index;
-    }
+    public ConfigurationLexer() { tokens = new ArrayList<>(); }
 
-    static Lexer create() { return new Lexer(null, new ArrayList<>(), 0); }
-
-    List<Token> lex(String contents) throws ConfigurationParseException {
+    public List<ConfigurationToken> lex(String contents)
+        throws ConfigurationException
+    {
         this.contents = contents;
         tokens.clear();
         index = 0;
@@ -26,7 +22,7 @@ final class Lexer {
         return List.copyOf(tokens);
     }
 
-    private void lex() throws ConfigurationParseException {
+    private void lex() throws ConfigurationException {
         while (hasCharacter()) {
             var start   = index;
             var initial = getCharacter();
@@ -42,10 +38,12 @@ final class Lexer {
                     }
                     advance();
                 }
-                case '{' -> tokens.add(new Token.OpeningBrace(start));
-                case '}' -> tokens.add(new Token.ClosingBrace(start));
-                case ';' -> tokens.add(new Token.Semicolon(start));
-                case '.' -> tokens.add(new Token.Dot(start));
+                case '{' ->
+                    tokens.add(new ConfigurationToken.OpeningBrace(start));
+                case '}' ->
+                    tokens.add(new ConfigurationToken.ClosingBrace(start));
+                case ';' -> tokens.add(new ConfigurationToken.Semicolon(start));
+                case '.' -> tokens.add(new ConfigurationToken.Dot(start));
                 default -> {
                     if (isLetter(initial)) {
                         while (hasCharacter() && isWord(getCharacter())) {
@@ -53,20 +51,23 @@ final class Lexer {
                         }
                         var word = getText(start);
                         tokens.add(switch (word) {
-                            case "project" -> new Token.Project(start);
-                            case "executable" -> new Token.Executable(start);
+                            case "project" ->
+                                new ConfigurationToken.Project(start);
+                            case "executable" ->
+                                new ConfigurationToken.Executable(start);
                             default ->
-                                new Token.Identifier(start, word.length());
+                                new ConfigurationToken.Identifier(
+                                    start,
+                                    word.length());
                         });
                         break;
                     }
-                    throw ConfigurationParseException
-                        .create(
-                            contents,
-                            start,
-                            1,
-                            "Unknown character `%c`!",
-                            initial);
+                    throw new ConfigurationException(
+                        contents,
+                        start,
+                        1,
+                        "Unknown character `%c`!",
+                        initial);
                 }
             }
         }

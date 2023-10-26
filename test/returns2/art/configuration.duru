@@ -1,1 +1,1 @@
-Configuration[name=returns2, executables=[PackageName[scopes=[returns2]]]]
+Configuration[name=returns2, executables=[ConfigurationPackage[scopes=[returns2]]]]
