@@ -1,50 +1,19 @@
-// Reports and propagates failures.
+// Reports failures.
 
 #pragma once
 
-/// Information about an failure.
-typedef struct DuruDiagnostic DuruDiagnostic;
+/// Use `duruFail` instead.
+[[noreturn, gnu::format(printf, 4, 5)]] void duruFailWithLocation(
+  char const* function,
+  char const* file,
+  unsigned    line,
+  char const* format,
+  ...);
 
-/// Staticly allocated information of a source file in the program.
-typedef struct DuruLocation DuruLocation;
-
-/// Creates a diagnostic originated at the given source location with the given
-/// formatted message.
-///
-/// Use `duruFail` instead of manually creating and returning diagnostics.
-[[gnu::format(printf, 2, 3)]] DuruDiagnostic duruCreateDiagnostic(
-  DuruLocation location, char const* format, ...);
-
-/// See `duruAbortOnFailure`.
-void duruAbortOnFailureWithLocation(
-  DuruLocation location, DuruDiagnostic diagnostic);
-
-/// Location of the invoker.
-#define duruHere()                                                             \
-    ((DuruLocation){.function = __func__, .file = __FILE__, .line = __LINE__})
-
-/// Returns a diagnostic with the given message.
+/// Crashes the program with a message and a subject location.
 #define duruFail(format, ...)                                                  \
-    do {                                                                       \
-        return duruCreateDiagnostic(duruHere(), format, __VA_ARGS__);          \
-    } while (0)
+    duruFailWithLocation(__func__, __FILE__, __LINE__, format, __VA_ARGS__)
 
-/// Checks the given diagnostic. Reports and aborts if there was a failure.
-#define duruAbortOnFailure(diagnostic)                                         \
-    duruAbortOnFailureWithLocation(duruHere(), diagnostic)
-
-/// Returns a diagnostic that indicates that an unimplemented code path is
-/// entered.
-#define duruUnimplemented() duruFail("Unimplemented yet!")
-
-struct DuruLocation {
-    char const* function;
-    char const* file;
-    unsigned    line;
-};
-
-struct DuruDiagnostic {
-    char* bytes;
-    int   size;
-    int   length;
-};
+/// Calls `duruFail` with a message explaining the feature is not implemented
+/// yet.
+#define duruUnimplemented() duruFail("Unimplemented!")

@@ -2,4 +2,4 @@
 
 #include <duru/diagnostic.h>
 
-DuruDiagnostic duruInitialize() { duruUnimplemented(); }
+void duruInitialize() { duruUnimplemented(); }
