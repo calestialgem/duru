@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-[[noreturn, gnu::format(printf, 4, 5)]] void duruFailWithLocation(
+void duruFailWithLocation(
   char const* function,
   char const* file,
   unsigned    line,
