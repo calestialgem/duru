@@ -16,5 +16,15 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 
 target_sources(${PROJECT_NAME} PRIVATE
     src/debug.c
+    src/initialize.c
     src/main.c
+    src/string.c
 )
+
+if(WIN32)
+    target_sources(${PROJECT_NAME} PRIVATE
+        src/platformWindows.c
+    )
+else()
+    message(FATAL_ERROR "Unsupported platform!")
+endif()

@@ -3,6 +3,7 @@
     "clangd",
     "constexpr",
     "Duru",
+    "LPWSTR",
     "Parens",
     "Wextra",
     "Wpedantic"
