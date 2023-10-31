@@ -44,7 +44,7 @@ static void createMainSource() {
 
     writeString(
       "main.duru",
-      "proc main() {\n"
+      "entrypoint {\n"
       "  duru.print(\"Hello, World!\\n\");\n"
       "}\n");
 }
