@@ -2,9 +2,14 @@
 
 #pragma once
 
-// Juxtaposes the given prefix and suffix to a new null-terminated string that
-// is allocated in the given arena.
-char* duruJoin(char const* prefix, char const* suffix);
+// Creates an allocated, null-terminated string via formatting the givens.
+[[gnu::format(printf, 1, 2)]] char* duruFormat(char const* format, ...);
+
+// Returns the name of the file at the given path.
+char const* duruGetFileName(char const* path);
+
+// Returns the current working directory.
+char* duruGetCurrentDirectory();
 
 // Changes the current working directory to the given path.
 void duruEnterDirectory(char const* path);

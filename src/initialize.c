@@ -2,4 +2,12 @@
 
 #include "duru.h"
 
-void duruInitialize() { duruCrash("Unimplemented!"); }
+#include <stdio.h>
+#include <stdlib.h>
+
+void duruInitialize() {
+    char*       cwd         = duruGetCurrentDirectory();
+    char const* projectName = duruGetFileName(cwd);
+    puts(projectName);
+    free(cwd);
+}

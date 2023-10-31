@@ -2,6 +2,7 @@
 
 #include "duru.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +20,26 @@ static void crashWithLocation(
 // Calls `crashWithLocation` with the invoker's location.
 #define crash(format, ...)                                                     \
     crashWithLocation(__func__, __FILE__, __LINE__, format, __VA_ARGS__)
+
+char const* duruGetFileName(char const* path) {
+    for (size_t i = strlen(path) - 1; i != 0; i--) {
+        if (path[i] == '\\' || path[i] == '/') { return path + i + 1; }
+    }
+    return path;
+}
+
+char* duruGetCurrentDirectory() {
+    char* cwd = malloc(MAX_PATH);
+    if (cwd == NULL) {
+        duruCrash(
+          "Could not allocate `%i` bytes for the current working directory!",
+          MAX_PATH);
+    }
+    if (!GetCurrentDirectory(MAX_PATH, cwd)) {
+        crash("Could not get the current working directory!");
+    }
+    return cwd;
+}
 
 void duruEnterDirectory(char const* path) {
     if (SetCurrentDirectory(path)) { return; }
@@ -45,7 +66,7 @@ static void removeDirectory(char const* path) {
     WIN32_FIND_DATA data   = {0};
     HANDLE          handle = {0};
     {
-        char* string = duruJoin(path, "/*");
+        char* string = duruFormat("%s/*", path);
         handle       = FindFirstFile(string, &data);
         free(string);
     }
@@ -53,12 +74,10 @@ static void removeDirectory(char const* path) {
         crash("Could not list the entries of the directory at `%s`!", path);
     }
 
-    char* parent = duruJoin(path, "/");
-
     do {
         if (strcmp(data.cFileName, ".") == 0) { continue; }
         if (strcmp(data.cFileName, "..") == 0) { continue; }
-        char* entry = duruJoin(parent, data.cFileName);
+        char* entry = duruFormat("%s/%s", path, data.cFileName);
         if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             removeDirectory(entry);
         } else {
@@ -68,8 +87,6 @@ static void removeDirectory(char const* path) {
         }
         free(entry);
     } while (FindNextFile(handle, &data));
-
-    free(parent);
 
     if (GetLastError() != ERROR_NO_MORE_FILES) {
         crash(
