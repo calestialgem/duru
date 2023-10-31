@@ -2,8 +2,14 @@
 
 #pragma once
 
+// Representation of a project configuration.
+typedef struct DuruConfiguration DuruConfiguration;
+
 // Path to the configuration file in the project directory.
 #define duruConfigurationPath "project.duru"
+
+// Parses the given string as a configuration.
+DuruConfiguration* duruParseConfiguration(char const* contents);
 
 // Creates an allocated, null-terminated string via formatting the givens.
 [[gnu::format(printf, 1, 2)]] char* duruFormat(char const* format, ...);

@@ -6,7 +6,9 @@
 #include <stdlib.h>
 
 void duruBuild() {
-    char* configuration = duruLoadFile(duruConfigurationPath);
-    puts(configuration);
+    char* configurationContents = duruLoadFile(duruConfigurationPath);
+    DuruConfiguration* configuration =
+      duruParseConfiguration(configurationContents);
     free(configuration);
+    free(configurationContents);
 }
