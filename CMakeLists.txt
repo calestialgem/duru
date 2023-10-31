@@ -7,7 +7,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   C_STANDARD_REQUIRED on
   C_EXTENSIONS on
 )
-target_include_directories(${PROJECT_NAME} PRIVATE inc)
 target_compile_options(${PROJECT_NAME} PRIVATE
   -Wall
   -Wextra
@@ -15,4 +14,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   -Wno-gnu-zero-variadic-macro-arguments
 )
 
-add_subdirectory(src)
+target_sources(${PROJECT_NAME} PRIVATE
+    src/debug.c
+    src/main.c
+)

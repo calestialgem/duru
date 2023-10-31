@@ -1,3 +1,8 @@
-#include <duru/launcher.h>
+// Contains the tool's entrypoint.
 
-int main() { duruInitialize(); }
+#include "duru.h"
+
+#include <stdio.h>
+
+// Enters to the tool.
+int main() { puts(duruDebugMessage()); }
