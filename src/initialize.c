@@ -36,14 +36,9 @@ static void createConfiguration(char const* projectName) {
 }
 
 static void createMainSource() {
-    // Path to the project's source directory.
-    char const sourceDirectory[] = "src";
-
-    duruEnsureDirectory(sourceDirectory);
-    duruEnterDirectory(sourceDirectory);
-
+    duruEnsureDirectory("src");
     writeString(
-      "main.duru",
+      "src/main.duru",
       "entrypoint {\n"
       "    duru.print(\"Hello, World!\\n\");\n"
       "}\n");

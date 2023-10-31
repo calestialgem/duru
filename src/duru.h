@@ -23,6 +23,9 @@ void duruRecreateDirectory(char const* path);
 // Sets up a new Duru project in the current working directory.
 void duruInitialize();
 
+// Compiles the Duru project in the current working directory.
+void duruBuild();
+
 // Prints the error message and aborts the program.
 //
 // Use `duruCrash` macro instead of manually passing the location.
