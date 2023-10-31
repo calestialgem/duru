@@ -1,0 +1,3 @@
+entrypoint {
+  duru.exit(2);
+}
