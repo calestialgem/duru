@@ -29,7 +29,7 @@ static void createConfiguration(char const* projectName) {
     writeString(
       "project.duru",
       "project %s {\n"
-      "  executable %s;\n"
+      "        executable %s;\n"
       "}\n",
       projectName,
       projectName);
@@ -45,7 +45,7 @@ static void createMainSource() {
     writeString(
       "main.duru",
       "entrypoint {\n"
-      "  duru.print(\"Hello, World!\\n\");\n"
+      "        duru.print(\"Hello, World!\\n\");\n"
       "}\n");
 }
 

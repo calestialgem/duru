@@ -1,0 +1,3 @@
+executable {
+        duru.exit(2);
+}

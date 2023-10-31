@@ -1,0 +1,3 @@
+entrypoint {
+        duru.print("Hello, World!\n");
+}

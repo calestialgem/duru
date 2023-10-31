@@ -17,16 +17,10 @@ int main() {
 
 static void testInitialization() {
     // Path to the test projects' directory.
-    char const testDirectory[] = "tests";
+    char const testDirectory[] = "initTest";
 
-    // Initialization test's project's name.
-    char const projectName[] = "init";
-
-    duruEnsureDirectory(testDirectory);
+    duruRecreateDirectory(testDirectory);
     duruEnterDirectory(testDirectory);
-
-    duruRecreateDirectory(projectName);
-    duruEnterDirectory(projectName);
 
     duruInitialize();
 }

@@ -1,0 +1,3 @@
+project initTest {
+        executable initTest;
+}
