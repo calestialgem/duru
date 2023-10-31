@@ -2,8 +2,19 @@
 
 #pragma once
 
+// Path to the configuration file in the project directory.
+#define duruConfigurationPath "project.duru"
+
 // Creates an allocated, null-terminated string via formatting the givens.
 [[gnu::format(printf, 1, 2)]] char* duruFormat(char const* format, ...);
+
+// Creates a new file at the given path and writes to formatted string to the
+// file. Fails if the file already exists.
+[[gnu::format(printf, 2, 3)]] void duruStoreFile(
+  char const* path, char const* format, ...);
+
+// Reads and stores the contents of the given file as a byte array.
+char* duruLoadFile(char const* path);
 
 // Returns the name of the file at the given path.
 char const* duruGetFileName(char const* path);

@@ -2,4 +2,11 @@
 
 #include "duru.h"
 
-void duruBuild() { duruCrash("Unimplemented!"); }
+#include <stdio.h>
+#include <stdlib.h>
+
+void duruBuild() {
+    char* configuration = duruLoadFile(duruConfigurationPath);
+    puts(configuration);
+    free(configuration);
+}

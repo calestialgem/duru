@@ -13,11 +13,6 @@ static void createConfiguration(char const* projectName);
 // Create the project's source directory and write the main source file.
 static void createMainSource();
 
-// Creates a new file at the given path and writes to formatted string to the
-// file. Fails if the file already exists.
-[[gnu::format(printf, 2, 3)]] static void writeString(
-  char const* path, char const* format, ...);
-
 void duruInitialize() {
     char* cwd = duruGetCurrentDirectory();
     createConfiguration(duruGetFileName(cwd));
@@ -26,8 +21,8 @@ void duruInitialize() {
 }
 
 static void createConfiguration(char const* projectName) {
-    writeString(
-      "project.duru",
+    duruStoreFile(
+      duruConfigurationPath,
       "project %s {\n"
       "    executable %s;\n"
       "}\n",
@@ -37,25 +32,9 @@ static void createConfiguration(char const* projectName) {
 
 static void createMainSource() {
     duruEnsureDirectory("src");
-    writeString(
+    duruStoreFile(
       "src/main.duru",
       "entrypoint {\n"
       "    duru.print(\"Hello, World!\\n\");\n"
       "}\n");
-}
-
-static void writeString(char const* path, char const* format, ...) {
-    FILE* file = {0};
-    if (fopen_s(&file, path, "wx")) {
-        duruCrash("Could not write to the file at `%s`!", path);
-    }
-    va_list arguments = {0};
-    va_start(arguments, format);
-    if (vfprintf(file, format, arguments) < 0) {
-        duruCrash("Could not format `%s` to the file at `%s`!", format, path);
-    }
-    va_end(arguments);
-    if (fclose(file)) {
-        duruCrash("Could not write to the file at `%s`!", path);
-    }
 }

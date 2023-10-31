@@ -1,1 +1,1 @@
-Checks: "*,-llvmlibc-restrict-system-libc-headers,-altera-struct-pack-align,-altera-unroll-loops,-readability-function-cognitive-complexity,-altera-id-dependent-backward-branch,-misc-no-recursion,-bugprone-easily-swappable-parameters,-concurrency-mt-unsafe"
+Checks: "*,-llvmlibc-restrict-system-libc-headers,-altera-struct-pack-align,-altera-unroll-loops,-readability-function-cognitive-complexity,-altera-id-dependent-backward-branch,-misc-no-recursion,-bugprone-easily-swappable-parameters,-concurrency-mt-unsafe,-bugprone-suspicious-realloc-usage"

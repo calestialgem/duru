@@ -17,6 +17,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 target_sources(${PROJECT_NAME} PRIVATE
     src/build.c
     src/debug.c
+    src/files.c
     src/initialize.c
     src/main.c
     src/string.c
