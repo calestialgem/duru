@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import duru.diagnostic.Subject;
-import duru.lectics.LexedSource;
 import duru.lectics.Lexer;
 import duru.source.Loader;
 import duru.source.Source;
@@ -21,7 +20,7 @@ import duru.syntactics.Parser;
 public final class Resolver {
   /** Resolves a package. */
   public static ResolvedPackage resolve(Path sources, Path artifacts) {
-    Resolver resolver = new Resolver(sources, artifacts);
+    var resolver = new Resolver(sources, artifacts);
     return resolver.resolve();
   }
 
@@ -68,16 +67,16 @@ public final class Resolver {
 
   /** Resolves a source file. */
   private void resolveFile(Path file) {
-    Source source = Loader.load(file);
+    var source = Loader.load(file);
     recordRepresentation(source.name(), "contents", source.contents());
-    LexedSource lectics = Lexer.lex(source);
+    var lectics = Lexer.lex(source);
     recordRepresentation(source.name(), "tokens", lectics.tokens());
-    ParsedSource syntactics = Parser.parse(lectics);
+    var syntactics = Parser.parse(lectics);
     recordRepresentation(
       source.name(),
       "declarations",
       syntactics.declarations());
-    for (Node.Declaration node : syntactics.declarations()) {
+    for (var node : syntactics.declarations()) {
       switch (node) {
         case Node.Entrypoint e -> {
           if (entrypoint.isPresent()) {
@@ -89,7 +88,7 @@ public final class Resolver {
           entrypoint = Optional.of(e);
         }
         case Node.Definition g -> {
-          String identifier = g.identifier().text();
+          var identifier = g.identifier().text();
           if (globals.containsKey(identifier)) {
             throw syntactics
               .subject(g)
@@ -110,7 +109,7 @@ public final class Resolver {
     String representationName,
     Object representation)
   {
-    Path representationPath =
+    var representationPath =
       artifacts
         .resolve(
           "%s.%s%s"

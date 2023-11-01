@@ -31,7 +31,7 @@ public record Source(Path path, String contents) {
 
   /** Returns the source file's name. */
   public String name() {
-    String name = path.getFileName().toString();
+    var name = path.getFileName().toString();
     return name.substring(0, name.length() - EXTENSION.length());
   }
 }
