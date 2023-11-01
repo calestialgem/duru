@@ -1,4 +1,4 @@
-package duru.semantics.resolver;
+package duru.resolution;
 
 import java.util.Map;
 import java.util.Optional;

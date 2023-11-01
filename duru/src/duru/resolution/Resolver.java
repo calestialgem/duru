@@ -1,4 +1,4 @@
-package duru.semantics.resolver;
+package duru.resolution;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,8 +12,8 @@ import duru.lectics.Lexer;
 import duru.source.Loader;
 import duru.source.Source;
 import duru.syntactics.Node;
-import duru.syntactics.Syntactics;
 import duru.syntactics.Parser;
+import duru.syntactics.Syntactics;
 
 /** First pass of the semantic analysis. Records down all the declarations in a
  * package. */
