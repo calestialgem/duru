@@ -2,7 +2,6 @@ package duru.lectics;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.IntFunction;
 
@@ -12,7 +11,7 @@ import duru.source.Source;
 public final class Lexer {
   /** Lexes a source file.. */
   public static LexedSource lex(Source source) {
-    Lexer lexer = new Lexer(source);
+    var lexer = new Lexer(source);
     return lexer.lex();
   }
 
@@ -38,7 +37,7 @@ public final class Lexer {
 
   /** Lexes the source file. */
   private LexedSource lex() {
-    tokens  = new ArrayList<Token>();
+    tokens  = new ArrayList<>();
     current = 0;
     while (hasCharacter()) {
       initial = getCharacter();
@@ -48,7 +47,7 @@ public final class Lexer {
         case ' ', '\t', '\r', '\n' -> {}
         case '#' -> {
           while (hasCharacter()) {
-            int character = getCharacter();
+            var character = getCharacter();
             advance();
             if (character == '\n') {
               break;
@@ -109,7 +108,7 @@ public final class Lexer {
             Token.EqualEqual::new,
             Token.EqualEqualEqual::new);
         case '"' -> {
-          StringBuilder builder = new StringBuilder();
+          var builder = new StringBuilder();
           while (true) {
             int character;
             if (!hasCharacter() || (character = getCharacter()) == '\n') {
@@ -124,7 +123,7 @@ public final class Lexer {
             }
             builder.appendCodePoint(character);
           }
-          String value = builder.toString();
+          var value = builder.toString();
           tokens.add(new Token.StringConstant(start, current, value));
         }
         default -> {
@@ -132,8 +131,8 @@ public final class Lexer {
             || initial >= 'A' && initial <= 'Z')
           {
             while (hasCharacter()) {
-              int     character = getCharacter();
-              boolean isWord    =
+              var character = getCharacter();
+              var isWord    =
                 character >= 'a' && character <= 'z'
                   || character >= 'A' && character <= 'Z'
                   || character >= '0' && character <= '9'
@@ -143,8 +142,8 @@ public final class Lexer {
               }
               advance();
             }
-            String text = source.contents().substring(start, current);
-            Token  token;
+            var   text = source.contents().substring(start, current);
+            Token token;
             switch (text) {
               case "entrypoint" -> token = new Token.Entrypoint(start);
               case "public" -> token = new Token.Public(start);
@@ -165,23 +164,23 @@ public final class Lexer {
             break;
           }
           if (initial >= '0' && initial <= '9') {
-            int        digit = initial - '0';
-            NumberBase base  = NumberBase.of(10);
+            var digit = initial - '0';
+            var base  = NumberBase.of(10);
             if (digit == 0 && hasCharacter()) {
-              Optional<NumberBase> givenBase = switch (getCharacter()) {
-                case 'b', 'B' -> Optional.of(NumberBase.of(2));
-                case 'o', 'O' -> Optional.of(NumberBase.of(8));
-                case 'd', 'D' -> Optional.of(NumberBase.of(10));
-                case 'x', 'X' -> Optional.of(NumberBase.of(16));
-                default -> Optional.empty();
-              };
-              if (givenBase.isPresent()) {
-                base = givenBase.get();
+              var givenBase = true;
+              switch (getCharacter()) {
+                case 'b', 'B' -> base = NumberBase.of(2);
+                case 'o', 'O' -> base = NumberBase.of(8);
+                case 'd', 'D' -> base = NumberBase.of(10);
+                case 'x', 'X' -> base = NumberBase.of(16);
+                default -> givenBase = false;
+              }
+              if (givenBase) {
                 advance();
                 digit = enforceDigit(base);
               }
             }
-            NumberBuilder builder = NumberBuilder.create(base);
+            var builder = NumberBuilder.create(base);
             try {
               builder.insert(digit);
               while (hasCharacter()) {
@@ -190,7 +189,7 @@ public final class Lexer {
                   builder.insert(enforceDigit(base));
                 }
                 else {
-                  OptionalInt maybeDigit = lexDigit(base);
+                  var maybeDigit = lexDigit(base);
                   if (maybeDigit.isEmpty()) {
                     break;
                   }
@@ -198,10 +197,10 @@ public final class Lexer {
                 }
               }
               if (hasCharacter() && getCharacter() == '.') {
-                int start = current;
+                var start = current;
                 advance();
                 builder.fractionSeparator();
-                OptionalInt firstDigit = lexDigit(base);
+                var firstDigit = lexDigit(base);
                 if (firstDigit.isEmpty()) {
                   current = start;
                 }
@@ -213,7 +212,7 @@ public final class Lexer {
                       builder.insert(enforceDigit(base));
                     }
                     else {
-                      OptionalInt maybeDigit = lexDigit(base);
+                      var maybeDigit = lexDigit(base);
                       if (maybeDigit.isEmpty()) {
                         break;
                       }
@@ -229,7 +228,7 @@ public final class Lexer {
                   || getCharacter() == exponentSeparator + 'A' - 'a'))
               {
                 advance();
-                boolean isNegative = hasCharacter() && getCharacter() == '-';
+                var isNegative = hasCharacter() && getCharacter() == '-';
                 if (isNegative || hasCharacter() && getCharacter() == '+') {
                   advance();
                 }
@@ -242,7 +241,7 @@ public final class Lexer {
                     builder.insert(enforceDigit(base));
                   }
                   else {
-                    OptionalInt maybeDigit = lexDigit(base);
+                    var maybeDigit = lexDigit(base);
                     if (maybeDigit.isEmpty()) {
                       break;
                     }
@@ -284,7 +283,7 @@ public final class Lexer {
 
   /** Takes a digit or throws. */
   private int enforceDigit(NumberBase base) {
-    OptionalInt digit = lexDigit(base);
+    var digit = lexDigit(base);
     if (digit.isPresent()) {
       return digit.getAsInt();
     }
@@ -301,8 +300,8 @@ public final class Lexer {
 
   /** Takes a new digit if it is of the given base. */
   private OptionalInt lexDigit(NumberBase base) {
-    int         start = current;
-    OptionalInt digit = lexDigit();
+    var start = current;
+    var digit = lexDigit();
     if (digit.isPresent() && digit.getAsInt() >= base.radix()) {
       current = start;
       return OptionalInt.empty();
@@ -315,7 +314,7 @@ public final class Lexer {
     if (!hasCharacter()) {
       return OptionalInt.empty();
     }
-    int character = getCharacter();
+    var character = getCharacter();
     if (character >= '0' && character <= '9') {
       advance();
       return OptionalInt.of(character - '0');
@@ -333,7 +332,7 @@ public final class Lexer {
 
   /** Lexes a single punctuation. */
   private void lexSingle(IntFunction<Token> lexerFunction) {
-    Token token = lexerFunction.apply(start);
+    var token = lexerFunction.apply(start);
     tokens.add(token);
   }
 

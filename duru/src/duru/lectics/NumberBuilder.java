@@ -175,7 +175,7 @@ final class NumberBuilder {
    * not invalidate or affect the builder. Throws {@link ArithmeticException} if
    * the built number does not fit. */
   int buildInt() {
-    long asLong = buildLong();
+    var asLong = buildLong();
     if (Long.compareUnsigned(asLong, Integer.toUnsignedLong(-1)) > 0) {
       throw new ArithmeticException(
         "Number does not fit to an 32-bit unsigned integral!");
@@ -189,13 +189,13 @@ final class NumberBuilder {
   long buildLong() {
     startBuild();
     if (exponent > 0) {
-      int consumableExponent =
+      var consumableExponent =
         Integer.min(exponent, Long.numberOfLeadingZeros(significand));
       significand <<= consumableExponent;
       exponent     -= consumableExponent;
     }
     if (exponent < 0) {
-      int consumableExponent =
+      var consumableExponent =
         Integer.min(-exponent, Long.numberOfTrailingZeros(significand));
       significand >>>= consumableExponent;
       exponent      += consumableExponent;
@@ -212,7 +212,7 @@ final class NumberBuilder {
     significand = digits;
     switch (base) {
       case NumberBase.PowerOfTwo b -> {
-        int power = b.power();
+        var power = b.power();
         if (scale < Integer.MIN_VALUE / power) {
           throw onOverflow();
         }
@@ -242,14 +242,14 @@ final class NumberBuilder {
   /** Converts the built number's exponent to base 2. */
   private void convertToBinaryExponent(int radix, int arbitraryExponent) {
     exponent = 0;
-    int radixWidth       = Integer.SIZE - Integer.numberOfLeadingZeros(radix);
-    int safeWidth        = Long.SIZE - radixWidth;
-    int overflowingWidth = safeWidth + 1;
-    for (int i = 0; i < arbitraryExponent; i++) {
-      long oldSignificand = significand;
-      int  oldExponent    = exponent;
+    var radixWidth       = Integer.SIZE - Integer.numberOfLeadingZeros(radix);
+    var safeWidth        = Long.SIZE - radixWidth;
+    var overflowingWidth = safeWidth + 1;
+    for (var i = 0; i < arbitraryExponent; i++) {
+      var oldSignificand = significand;
+      var oldExponent    = exponent;
       rescale(overflowingWidth);
-      boolean overflows =
+      var overflows =
         Long.compareUnsigned(significand, Long.divideUnsigned(-1, radix)) > 0;
       if (overflows) {
         significand = oldSignificand;
@@ -258,10 +258,10 @@ final class NumberBuilder {
       }
       significand *= radix;
     }
-    for (int i = 0; i < -arbitraryExponent; i++) {
+    for (var i = 0; i < -arbitraryExponent; i++) {
       rescale(Long.SIZE);
-      long truncated   = Long.divideUnsigned(significand, radix);
-      long middlePoint = truncated * radix + radix / 2;
+      var truncated   = Long.divideUnsigned(significand, radix);
+      var middlePoint = truncated * radix + radix / 2;
       round(middlePoint, truncated, Long.SIZE);
     }
   }
@@ -269,12 +269,12 @@ final class NumberBuilder {
   /** Rescales a number. Rounds to even when precision is lost. Throws
    * {@link ArithmeticException} if the exponent overflows. */
   private void rescale(int targetWidth) {
-    int width = Long.SIZE - Long.numberOfLeadingZeros(significand);
+    var width = Long.SIZE - Long.numberOfLeadingZeros(significand);
     if (width == 0) {
       exponent = 0;
       return;
     }
-    int change = targetWidth - width;
+    var change = targetWidth - width;
     if (change == 0) {
       return;
     }
@@ -290,22 +290,22 @@ final class NumberBuilder {
       throw onExponentOverflow();
     }
     exponent -= change;
-    long truncated   = significand >>> -change;
-    long middlePoint = (truncated << 1) + 1 << -change - 1;
+    var truncated   = significand >>> -change;
+    var middlePoint = (truncated << 1) + 1 << -change - 1;
     round(middlePoint, truncated, targetWidth);
   }
 
   /** Rounds the built number if necessary. Throws {@link ArithmeticException}
    * if the exponent overflows. */
   private void round(long middlePoint, long truncated, int targetWidth) {
-    boolean shouldRoundDown =
+    var shouldRoundDown =
       Long.compareUnsigned(significand, middlePoint) < 0
         || significand == middlePoint && (truncated & 1) == 0;
     significand = truncated;
     if (shouldRoundDown) {
       return;
     }
-    long maxSignificand = (1L << targetWidth + 1) - 1;
+    var maxSignificand = (1L << targetWidth + 1) - 1;
     if (Long.compareUnsigned(significand, maxSignificand) != 0) {
       significand++;
       return;
@@ -313,7 +313,7 @@ final class NumberBuilder {
     if (exponent == Integer.MAX_VALUE) {
       throw onExponentOverflow();
     }
-    long roundedUpMaxSignificand = 1L << targetWidth - 1;
+    var roundedUpMaxSignificand = 1L << targetWidth - 1;
     significand = roundedUpMaxSignificand;
     exponent++;
   }
