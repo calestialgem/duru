@@ -13,7 +13,7 @@ import duru.lectics.Token;
 public final class Parser {
   /** Parses a source file. Returns the declarations in the file. */
   public static ParsedSource parse(LexedSource source) {
-    Parser parser = new Parser(source);
+    var parser = new Parser(source);
     return parser.parse();
   }
 
@@ -31,10 +31,9 @@ public final class Parser {
   /** Parses the source file. */
   private ParsedSource parse() {
     current = 0;
-    List<Node.Declaration> declarations = new ArrayList<Node.Declaration>();
+    var declarations = new ArrayList<Node.Declaration>();
     while (current != source.tokens().size()) {
-      Node.Declaration declaration =
-        expect(this::parseDeclaration, "top level declaration");
+      var declaration = expect(this::parseDeclaration, "top level declaration");
       declarations.add(declaration);
     }
     return new ParsedSource(source, declarations);
@@ -50,15 +49,15 @@ public final class Parser {
     if (parseToken(Token.Entrypoint.class).isEmpty()) {
       return Optional.empty();
     }
-    Node.Statement  body       =
+    var body       =
       expect(this::parseBlock, "body of the entrypoint declaration");
-    Node.Entrypoint entrypoint = new Node.Entrypoint(body);
+    var entrypoint = new Node.Entrypoint(body);
     return Optional.of(entrypoint);
   }
 
   /** Parses a definition. */
   private Optional<Node.Definition> parseDefinition() {
-    Optional<Token.Public> modifier = parseToken(Token.Public.class);
+    var modifier = parseToken(Token.Public.class);
     if (modifier.isPresent()) {
       return Optional
         .of(
@@ -82,9 +81,9 @@ public final class Parser {
     if (parseToken(Token.Using.class).isEmpty()) {
       return Optional.empty();
     }
-    Node.Mention               used  =
+    var used  =
       expect(this::parseMention, "mention to used of the alias definition");
-    Optional<Token.Identifier> alias = Optional.empty();
+    var alias = Optional.<Token.Identifier>empty();
     if (parseToken(Token.As.class).isPresent()) {
       alias =
         Optional
@@ -96,7 +95,7 @@ public final class Parser {
     expectToken(
       Token.Semicolon.class,
       "terminator `;` of the alias definition");
-    Node.Using using = new Node.Using(modifier, used, alias);
+    var using = new Node.Using(modifier, used, alias);
     return Optional.of(using);
   }
 
@@ -105,31 +104,30 @@ public final class Parser {
     if (parseToken(Token.Proc.class).isEmpty()) {
       return Optional.empty();
     }
-    Token.Identifier identifier =
+    var identifier =
       expectToken(
         Token.Identifier.class,
         "identifier of the procedure declaration");
     expectToken(
       Token.OpeningParenthesis.class,
       "parameter list opener `(` of the procedure declaration");
-    List<Node.Parameter> parameters = separatedOf(this::parseParameter);
+    var parameters = separatedOf(this::parseParameter);
     expectToken(
       Token.ClosingParenthesis.class,
       "parameter list closer `)` of the procedure declaration");
-    Node.Statement body =
-      expect(this::parseBlock, "body of the procedure declaration");
-    Node.Proc      proc = new Node.Proc(modifier, identifier, parameters, body);
+    var body = expect(this::parseBlock, "body of the procedure declaration");
+    var proc = new Node.Proc(modifier, identifier, parameters, body);
     return Optional.of(proc);
   }
 
   /** Parses a parameter. */
   private Optional<Node.Parameter> parseParameter() {
-    Optional<Token.Identifier> identifier = parseToken(Token.Identifier.class);
+    var identifier = parseToken(Token.Identifier.class);
     if (identifier.isEmpty()) {
       return Optional.empty();
     }
-    boolean        reference = parseToken(Token.Ampersand.class).isPresent();
-    Node.Parameter parameter = new Node.Parameter(identifier.get(), reference);
+    var reference = parseToken(Token.Ampersand.class).isPresent();
+    var parameter = new Node.Parameter(identifier.get(), reference);
     return Optional.of(parameter);
   }
 
@@ -138,19 +136,19 @@ public final class Parser {
     if (parseToken(Token.Const.class).isEmpty()) {
       return Optional.empty();
     }
-    Token.Identifier identifier =
+    var identifier =
       expectToken(
         Token.Identifier.class,
         "identifier of the constant declaration");
     expectToken(
       Token.Equal.class,
       "value separator `=` of the constant declaration");
-    Node.Expression initialValue =
+    var initialValue =
       expect(this::parseExpression, "value of the constant declaration");
     expectToken(
       Token.Semicolon.class,
       "terminator `;` of the constant declaration");
-    Node.Const var = new Node.Const(modifier, identifier, initialValue);
+    var var = new Node.Const(modifier, identifier, initialValue);
     return Optional.of(var);
   }
 
@@ -161,13 +159,13 @@ public final class Parser {
     if (parseToken(Token.Var.class).isEmpty()) {
       return Optional.empty();
     }
-    Token.Identifier          identifier   =
+    var identifier   =
       expectToken(
         Token.Identifier.class,
         "identifier of the global variable declaration");
-    Optional<Node.Expression> initialValue = Optional.empty();
+    var initialValue = Optional.<Node.Expression>empty();
     if (parseToken(Token.Equal.class).isPresent()) {
-      Node.Expression givenInitialValue =
+      var givenInitialValue =
         expect(
           this::parseExpression,
           "initial value of the global variable declaration");
@@ -176,8 +174,8 @@ public final class Parser {
     expectToken(
       Token.Semicolon.class,
       "terminator `;` of the global variable declaration");
-    Node.GlobalVar var = new Node.GlobalVar(modifier, identifier, initialValue);
-    return Optional.of(var);
+    var global = new Node.GlobalVar(modifier, identifier, initialValue);
+    return Optional.of(global);
   }
 
   /** Parses a statement. */
@@ -195,15 +193,15 @@ public final class Parser {
 
   /** Parses a block. */
   private Optional<Node.Block> parseBlock() {
-    int first = current;
+    var first = current;
     if (parseToken(Token.OpeningBrace.class).isEmpty()) {
       return Optional.empty();
     }
-    List<Node.Statement> body = repeatsOf(this::parseStatement);
+    var body = repeatsOf(this::parseStatement);
     expectToken(
       Token.ClosingBrace.class,
       "inner statement list closer `}` of the block statement");
-    Node.Block block = new Node.Block(first, body);
+    var block = new Node.Block(first, body);
     return Optional.of(block);
   }
 
@@ -212,12 +210,12 @@ public final class Parser {
     if (parseToken(Token.If.class).isEmpty()) {
       return Optional.empty();
     }
-    List<Node.LocalVar>      variables   = repeatsOf(this::parseLocalVar);
-    Node.Expression          condition   =
+    var variables   = repeatsOf(this::parseLocalVar);
+    var condition   =
       expect(this::parseExpression, "condition of the if statement");
-    Node.Statement           trueBranch  =
+    var trueBranch  =
       expect(this::parseBlock, "true branch of the if statement");
-    Optional<Node.Statement> falseBranch = Optional.empty();
+    var falseBranch = Optional.<Node.Statement>empty();
     if (parseToken(Token.Else.class).isPresent()) {
       falseBranch =
         Optional
@@ -226,25 +224,25 @@ public final class Parser {
               () -> firstOf(this::parseBlock, this::parseIf),
               "false branch of the if statement"));
     }
-    Node.If ifStatement =
+    var ifStatement =
       new Node.If(variables, condition, trueBranch, falseBranch);
     return Optional.of(ifStatement);
   }
 
   /** Parses a while statement. */
   private Optional<Node.While> parseWhile() {
-    int                        first = current;
-    Optional<Token.Identifier> label = parseToken(Token.Identifier.class);
+    var first = current;
+    var label = parseToken(Token.Identifier.class);
     if (label.isPresent() && parseToken(Token.Colon.class).isEmpty()
       || parseToken(Token.While.class).isEmpty())
     {
       current = first;
       return Optional.empty();
     }
-    List<Node.LocalVar>      variables   = repeatsOf(this::parseLocalVar);
-    Node.Expression          condition   =
+    var variables   = repeatsOf(this::parseLocalVar);
+    var condition   =
       expect(this::parseExpression, "condition of the while statement");
-    Optional<Node.Statement> interleaved = Optional.empty();
+    var interleaved = Optional.<Node.Statement>empty();
     if (parseToken(Token.Semicolon.class).isPresent()) {
       interleaved =
         Optional
@@ -253,9 +251,9 @@ public final class Parser {
               this::parseUnterminatedAffect,
               "interleaved of the while statement"));
     }
-    Node.Statement           loop       =
+    var loop       =
       expect(this::parseStatement, "loop of the while statement");
-    Optional<Node.Statement> zeroBranch = Optional.empty();
+    var zeroBranch = Optional.<Node.Statement>empty();
     if (parseToken(Token.Else.class).isPresent()) {
       zeroBranch =
         Optional
@@ -264,7 +262,7 @@ public final class Parser {
               () -> firstOf(this::parseBlock, this::parseIf),
               "zero branch of the while statement"));
     }
-    Node.While whileStatement =
+    var whileStatement =
       new Node.While(
         label,
         variables,
@@ -277,41 +275,41 @@ public final class Parser {
 
   /** Parses a break statement. */
   private Optional<Node.Break> parseBreak() {
-    int first = current;
+    var first = current;
     if (parseToken(Token.Break.class).isEmpty()) {
       return Optional.empty();
     }
-    Optional<Token.Identifier> label = parseToken(Token.Identifier.class);
+    var label = parseToken(Token.Identifier.class);
     expectToken(Token.Semicolon.class, "terminator `;` of the break statement");
-    Node.Break breakStatement = new Node.Break(first, label);
+    var breakStatement = new Node.Break(first, label);
     return Optional.of(breakStatement);
   }
 
   /** Parses a continue statement. */
   private Optional<Node.Continue> parseContinue() {
-    int first = current;
+    var first = current;
     if (parseToken(Token.Continue.class).isEmpty()) {
       return Optional.empty();
     }
-    Optional<Token.Identifier> label = parseToken(Token.Identifier.class);
+    var label = parseToken(Token.Identifier.class);
     expectToken(
       Token.Semicolon.class,
       "terminator `;` of the continue statement");
-    Node.Continue continueStatement = new Node.Continue(first, label);
+    var continueStatement = new Node.Continue(first, label);
     return Optional.of(continueStatement);
   }
 
   /** Parses a return statement. */
   private Optional<Node.Return> parseReturn() {
-    int first = current;
+    var first = current;
     if (parseToken(Token.Return.class).isEmpty()) {
       return Optional.empty();
     }
-    Optional<Node.Expression> value = parseExpression();
+    var value = parseExpression();
     expectToken(
       Token.Semicolon.class,
       "terminator `;` of the return statement");
-    Node.Return returnStatement = new Node.Return(first, value);
+    var returnStatement = new Node.Return(first, value);
     return Optional.of(returnStatement);
   }
 
@@ -320,13 +318,13 @@ public final class Parser {
     if (parseToken(Token.Var.class).isEmpty()) {
       return Optional.empty();
     }
-    Token.Identifier          identifier   =
+    var identifier   =
       expectToken(
         Token.Identifier.class,
         "identifier of the local variable declaration");
-    Optional<Node.Expression> initialValue = Optional.empty();
+    var initialValue = Optional.<Node.Expression>empty();
     if (parseToken(Token.Equal.class).isPresent()) {
-      Node.Expression givenInitialValue =
+      var givenInitialValue =
         expect(
           this::parseExpression,
           "initial value of the local variable declaration");
@@ -335,13 +333,13 @@ public final class Parser {
     expectToken(
       Token.Semicolon.class,
       "terminator `;` of the local variable declaration");
-    Node.LocalVar var = new Node.LocalVar(identifier, initialValue);
-    return Optional.of(var);
+    var local = new Node.LocalVar(identifier, initialValue);
+    return Optional.of(local);
   }
 
   /** Parses an affect statement. */
   private Optional<Node.Affect> parseAffect() {
-    Optional<Node.Affect> affect = parseUnterminatedAffect();
+    var affect = parseUnterminatedAffect();
     if (affect.isPresent()) {
       expectToken(
         Token.Semicolon.class,
@@ -369,15 +367,15 @@ public final class Parser {
 
   /** Parses an affect statement without a terminator. */
   private Optional<Node.Affect> parseUnterminatedAffect() {
-    Optional<Node.Expression> expression = parseExpression();
+    var expression = parseExpression();
     if (expression.isEmpty()) {
       return Optional.empty();
     }
-    Node.Affect affect = new Node.Discard(expression.get());
+    var affect = (Node.Affect) new Node.Discard(expression.get());
     if (expression.get() instanceof Node.SymbolAccess target) {
-      Optional<AssignmentParser> assignmentParser = parseAssignmentOperator();
+      var assignmentParser = parseAssignmentOperator();
       if (assignmentParser.isPresent()) {
-        Node.Expression source =
+        var source =
           expect(
             this::parseExpression,
             "source of the %s statement"
@@ -602,17 +600,17 @@ public final class Parser {
     Supplier<Optional<OperandType>> operandParserFunction,
     BinaryOperationParser<PrecedenceType>... binaryOperationParsers)
   {
-    Optional<OperandType> firstOperand = operandParserFunction.get();
+    var firstOperand = operandParserFunction.get();
     if (firstOperand.isEmpty()) {
       return Optional.empty();
     }
-    PrecedenceType result = firstOperand.get();
+    var result = (PrecedenceType) firstOperand.get();
     leftToRightSamePrecedenceOperatorParsing: while (true) {
-      for (BinaryOperationParser<PrecedenceType> binaryOperationParser : binaryOperationParsers) {
+      for (var binaryOperationParser : binaryOperationParsers) {
         if (parseToken(binaryOperationParser.operatorClass()).isEmpty()) {
           continue;
         }
-        OperandType rightOperand =
+        var rightOperand =
           expect(
             operandParserFunction,
             "right operand of %s expression"
@@ -655,9 +653,9 @@ public final class Parser {
     Supplier<Optional<OperandType>> operandParserFunction,
     UnaryOperationParser<PrecedenceType>... unaryOperationParsers)
   {
-    List<UnaryOperationParser<PrecedenceType>> stack = new ArrayList<>();
+    var stack = new ArrayList<UnaryOperationParser<PrecedenceType>>();
     leftToRightSamePrecedenceOperatorParsing: while (true) {
-      for (UnaryOperationParser<PrecedenceType> unaryOperationParser : unaryOperationParsers) {
+      for (var unaryOperationParser : unaryOperationParsers) {
         if (parseToken(unaryOperationParser.operatorClass()).isEmpty()) {
           continue;
         }
@@ -669,12 +667,12 @@ public final class Parser {
     if (stack.isEmpty()) {
       return operandParserFunction.get().map(Function.identity());
     }
-    PrecedenceType result =
-      expect(
+    var result =
+      (PrecedenceType) expect(
         operandParserFunction,
         "operand of %s expression"
           .formatted(stack.get(stack.size() - 1).name()));
-    for (int i = stack.size(); i != 0; i--) {
+    for (var i = stack.size(); i != 0; i--) {
       result = stack.get(i - 1).initializer().apply(result);
     }
     return Optional.of(result);
@@ -692,18 +690,14 @@ public final class Parser {
     if (precedence0.isEmpty()) {
       return precedence0;
     }
-    Node.Precedence00 result = precedence0.get();
-    while (true) {
-      if (parseToken(Token.Dot.class).isEmpty()) {
-        break;
-      }
-      Token.Identifier member =
+    var result = precedence0.get();
+    while (parseToken(Token.Dot.class).isPresent()) {
+      var member =
         expectToken(
           Token.Identifier.class,
           "member name in the member access expression");
       if (parseToken(Token.OpeningParenthesis.class).isPresent()) {
-        List<Node.Expression> remainingArguments =
-          separatedOf(this::parseExpression);
+        var remainingArguments = separatedOf(this::parseExpression);
         expectToken(
           Token.ClosingParenthesis.class,
           "remaining argument list closer `)` of the member call expression");
@@ -720,26 +714,26 @@ public final class Parser {
     if (parseToken(Token.OpeningParenthesis.class).isEmpty()) {
       return Optional.empty();
     }
-    Node.Expression grouped =
+    var grouped =
       expect(
         this::parseExpression,
         "grouped expression of the grouping expression");
     expectToken(
       Token.ClosingParenthesis.class,
       "closer `)` of the grouping expression");
-    Node.Grouping grouping = new Node.Grouping(grouped);
+    var grouping = new Node.Grouping(grouped);
     return Optional.of(grouping);
   }
 
   /** Parses a symbol based. */
   private Optional<Node.SymbolBased> parseSymbolBased() {
-    Optional<Node.Mention> mention = parseMention();
+    var mention = parseMention();
     if (mention.isEmpty()) {
       return Optional.empty();
     }
-    Node.SymbolBased symbolBased = new Node.SymbolAccess(mention.get());
+    var symbolBased = (Node.SymbolBased) new Node.SymbolAccess(mention.get());
     if (parseToken(Token.OpeningParenthesis.class).isPresent()) {
-      List<Node.Expression> arguments = separatedOf(this::parseExpression);
+      var arguments = separatedOf(this::parseExpression);
       expectToken(
         Token.ClosingParenthesis.class,
         "argument list closer `)` of the call expression");
@@ -750,59 +744,43 @@ public final class Parser {
 
   /** Parses a natural constant. */
   private Optional<Node.NaturalConstant> parseNaturalConstant() {
-    Optional<Token.NaturalConstant> token =
-      parseToken(Token.NaturalConstant.class);
-    if (token.isEmpty()) {
-      return Optional.empty();
-    }
-    Node.NaturalConstant numberConstant = new Node.NaturalConstant(token.get());
-    return Optional.of(numberConstant);
+    return parseToken(Token.NaturalConstant.class)
+      .map(Node.NaturalConstant::new);
   }
 
   /** Parses a real constant. */
   private Optional<Node.RealConstant> parseRealConstant() {
-    Optional<Token.RealConstant> token = parseToken(Token.RealConstant.class);
-    if (token.isEmpty()) {
-      return Optional.empty();
-    }
-    Node.RealConstant numberConstant = new Node.RealConstant(token.get());
-    return Optional.of(numberConstant);
+    return parseToken(Token.RealConstant.class).map(Node.RealConstant::new);
   }
 
   /** Parses a string constant. */
   private Optional<Node.StringConstant> parseStringConstant() {
-    Optional<Token.StringConstant> token =
-      parseToken(Token.StringConstant.class);
-    if (token.isEmpty()) {
-      return Optional.empty();
-    }
-    Node.StringConstant stringConstant = new Node.StringConstant(token.get());
-    return Optional.of(stringConstant);
+    return parseToken(Token.StringConstant.class).map(Node.StringConstant::new);
   }
 
   /** Parses a mention. */
   private Optional<Node.Mention> parseMention() {
-    Optional<Token.Identifier> scope = parseScope();
+    var scope = parseScope();
     if (scope.isPresent()) {
-      Token.Identifier identifier =
+      var identifier =
         expectToken(
           Token.Identifier.class,
           "identifier of the qualified mention");
-      Node.Mention     mention    = new Node.Mention(scope, identifier);
+      var mention    = new Node.Mention(scope, identifier);
       return Optional.of(mention);
     }
-    Optional<Token.Identifier> identifier = parseToken(Token.Identifier.class);
+    var identifier = parseToken(Token.Identifier.class);
     if (identifier.isEmpty()) {
       return Optional.empty();
     }
-    Node.Mention mention = new Node.Mention(scope, identifier.get());
+    var mention = new Node.Mention(scope, identifier.get());
     return Optional.of(mention);
   }
 
   /** Parses a scope, which is the name of a source fallowed by `::`. */
   private Optional<Token.Identifier> parseScope() {
-    int                        first = current;
-    Optional<Token.Identifier> scope = parseToken(Token.Identifier.class);
+    var first = current;
+    var scope = parseToken(Token.Identifier.class);
     if (scope.isEmpty()) {
       return Optional.empty();
     }
@@ -819,9 +797,9 @@ public final class Parser {
   private <ConstructType> List<ConstructType> separatedOf(
     Supplier<Optional<ConstructType>> parserFunction)
   {
-    List<ConstructType> constructs = new ArrayList<>();
+    var constructs = new ArrayList<ConstructType>();
     while (true) {
-      Optional<ConstructType> construct = parserFunction.get();
+      var construct = parserFunction.get();
       if (construct.isEmpty()) {
         break;
       }
@@ -838,9 +816,9 @@ public final class Parser {
   private <ConstructType> List<ConstructType> repeatsOf(
     Supplier<Optional<ConstructType>> parserFunction)
   {
-    List<ConstructType> constructs = new ArrayList<>();
+    var constructs = new ArrayList<ConstructType>();
     while (true) {
-      Optional<ConstructType> construct = parserFunction.get();
+      var construct = parserFunction.get();
       if (construct.isEmpty()) {
         break;
       }
@@ -855,8 +833,8 @@ public final class Parser {
   private <ConstructType> Optional<ConstructType> firstOf(
     Supplier<Optional<? extends ConstructType>>... parserFunctions)
   {
-    for (Supplier<Optional<? extends ConstructType>> parserFunction : parserFunctions) {
-      Optional<? extends ConstructType> construct = parserFunction.get();
+    for (var parserFunction : parserFunctions) {
+      var construct = parserFunction.get();
       if (construct.isPresent()) {
         return Optional.of(construct.get());
       }
@@ -881,7 +859,7 @@ public final class Parser {
     if (current == source.tokens().size()) {
       return Optional.empty();
     }
-    Token token = source.tokens().get(current);
+    var token = source.tokens().get(current);
     if (!tokenClass.isInstance(token)) {
       return Optional.empty();
     }
@@ -895,12 +873,12 @@ public final class Parser {
     Supplier<Optional<ConstructType>> parseFunction,
     String constructExplanation)
   {
-    Optional<ConstructType> construct = parseFunction.get();
+    var construct = parseFunction.get();
     if (construct.isPresent()) {
       return construct.get();
     }
     if (current == source.tokens().size()) {
-      Token reportedToken = source.tokens().get(current - 1);
+      var reportedToken = source.tokens().getLast();
       throw source
         .subject(reportedToken)
         .diagnose(
@@ -910,7 +888,7 @@ public final class Parser {
           reportedToken.explanation())
         .toException();
     }
-    Token reportedToken = source.tokens().get(current);
+    var reportedToken = source.tokens().get(current);
     throw source
       .subject(reportedToken)
       .diagnose(
