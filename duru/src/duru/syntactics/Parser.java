@@ -6,37 +6,37 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import duru.lectics.LexedSource;
+import duru.lectics.Lectics;
 import duru.lectics.Token;
 
 /** Transforms tokens to a list of declarations. */
 public final class Parser {
   /** Parses a source file. Returns the declarations in the file. */
-  public static ParsedSource parse(LexedSource source) {
+  public static Syntactics parse(Lectics source) {
     var parser = new Parser(source);
     return parser.parse();
   }
 
   /** Source file that is parsed. */
-  private LexedSource source;
+  private Lectics source;
 
   /** Index of the currently parsed token. */
   private int current;
 
   /** Constructor. */
-  private Parser(LexedSource source) {
+  private Parser(Lectics source) {
     this.source = source;
   }
 
   /** Parses the source file. */
-  private ParsedSource parse() {
+  private Syntactics parse() {
     current = 0;
     var declarations = new ArrayList<Node.Declaration>();
     while (current != source.tokens().size()) {
       var declaration = expect(this::parseDeclaration, "top level declaration");
       declarations.add(declaration);
     }
-    return new ParsedSource(source, declarations);
+    return new Syntactics(source, declarations);
   }
 
   /** Parses a declaration. */

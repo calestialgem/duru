@@ -12,14 +12,14 @@ import duru.lectics.Lexer;
 import duru.source.Loader;
 import duru.source.Source;
 import duru.syntactics.Node;
-import duru.syntactics.ParsedSource;
+import duru.syntactics.Syntactics;
 import duru.syntactics.Parser;
 
 /** First pass of the semantic analysis. Records down all the declarations in a
  * package. */
 public final class Resolver {
   /** Resolves a package. */
-  public static ResolvedPackage resolve(Path sources, Path artifacts) {
+  public static Resolution resolve(Path sources, Path artifacts) {
     var resolver = new Resolver(sources, artifacts);
     return resolver.resolve();
   }
@@ -37,7 +37,7 @@ public final class Resolver {
   private Map<String, Node.Definition> globals;
 
   /** Source files the declarations came from. */
-  private Map<Node.Declaration, ParsedSource> origins;
+  private Map<Node.Declaration, Syntactics> origins;
 
   /** Constructor. */
   private Resolver(Path sources, Path artifacts) {
@@ -46,7 +46,7 @@ public final class Resolver {
   }
 
   /** Resolves the package. */
-  private ResolvedPackage resolve() {
+  private Resolution resolve() {
     entrypoint = Optional.empty();
     globals    = new HashMap<>();
     origins    = new HashMap<>();
@@ -62,7 +62,7 @@ public final class Resolver {
         .diagnose("failure", "Could not list the directory's entries!")
         .toException(cause);
     }
-    return new ResolvedPackage(entrypoint, globals, origins);
+    return new Resolution(entrypoint, globals, origins);
   }
 
   /** Resolves a source file. */

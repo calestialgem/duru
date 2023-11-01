@@ -6,9 +6,9 @@ import duru.diagnostic.Subject;
 import duru.source.Source;
 
 /** Lexical representation of a source file. */
-public record LexedSource(Source source, List<Token> tokens) {
+public record Lectics(Source source, List<Token> tokens) {
   /** Constructs. */
-  public LexedSource {
+  public Lectics {
     tokens = List.copyOf(tokens);
   }
 

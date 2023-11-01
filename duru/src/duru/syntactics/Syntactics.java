@@ -3,16 +3,13 @@ package duru.syntactics;
 import java.util.List;
 
 import duru.diagnostic.Subject;
-import duru.lectics.LexedSource;
+import duru.lectics.Lectics;
 import duru.lectics.Token;
 
 /** Syntactical representation of a source file. */
-public record ParsedSource(
-  LexedSource source,
-  List<Node.Declaration> declarations)
-{
+public record Syntactics(Lectics source, List<Node.Declaration> declarations) {
   /** Constructs. */
-  public ParsedSource {
+  public Syntactics {
     declarations = List.copyOf(declarations);
   }
 

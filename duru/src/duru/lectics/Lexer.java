@@ -10,7 +10,7 @@ import duru.source.Source;
 /** Transforms a source file to a list of tokens. */
 public final class Lexer {
   /** Lexes a source file.. */
-  public static LexedSource lex(Source source) {
+  public static Lectics lex(Source source) {
     var lexer = new Lexer(source);
     return lexer.lex();
   }
@@ -36,7 +36,7 @@ public final class Lexer {
   }
 
   /** Lexes the source file. */
-  private LexedSource lex() {
+  private Lectics lex() {
     tokens  = new ArrayList<>();
     current = 0;
     while (hasCharacter()) {
@@ -278,7 +278,7 @@ public final class Lexer {
         }
       }
     }
-    return new LexedSource(source, tokens);
+    return new Lectics(source, tokens);
   }
 
   /** Takes a digit or throws. */
