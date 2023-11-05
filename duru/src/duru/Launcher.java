@@ -1,5 +1,7 @@
 package duru;
 
+import java.nio.file.Path;
+
 /**
  * Holds the main function of the tool.
  */
@@ -10,7 +12,7 @@ final class Launcher {
    * @param arguments Arguments that were passed from the command line.
    */
   public static void main(String[] arguments) {
-    System.out.println("Hello, World!");
+    Initializer.initialize(Path.of("initTest"), "initTest");
   }
 
   /**
