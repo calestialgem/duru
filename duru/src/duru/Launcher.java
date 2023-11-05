@@ -12,7 +12,7 @@ final class Launcher {
    * @param arguments Arguments that were passed from the command line.
    */
   public static void main(String[] arguments) {
-    Initializer.initialize(Path.of("initTest"), "initTest");
+    Initializer.initialize(Path.of("initTest"));
   }
 
   /**

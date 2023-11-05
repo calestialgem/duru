@@ -9,6 +9,16 @@ import java.nio.file.Path;
  */
 final class Initializer {
   /**
+   * Calls {@link #initialize(Path, String)} with the name of the directory as
+   * the project name.
+   *
+   * @param directory Directory where the project will be initialized at.
+   */
+  public static void initialize(Path directory) {
+    initialize(directory, directory.getFileName().toString());
+  }
+
+  /**
    * Initializes a project in the given directory. Initialization is setting up
    * a new project in a directory.
    *
