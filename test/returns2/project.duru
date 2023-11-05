@@ -1,5 +1,0 @@
-## Test project that just returns `2` as the exit code.
-project returns2 {
-    ## Executable of the project in the base package.
-    executable returns2;
-}

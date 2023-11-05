@@ -5,7 +5,7 @@
       "name": "Launch Java Program",
       "request": "launch",
       "projectName": "duru",
-      "mainClass": "duru/duru.launcher.Launcher",
+      "mainClass": "duru/duru.Launcher",
       "args": []
     }
   ]

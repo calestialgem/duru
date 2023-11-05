@@ -1,4 +1,0 @@
-## Entrypoint of the executable that just returns `2`.
-entrypoint {
-    duru.exit(2);
-}
