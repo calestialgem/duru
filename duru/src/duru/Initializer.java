@@ -8,6 +8,6 @@ final class Initializer {
   }
 
   public static void initialize(Path directory, String name) {
-    throw new MissingImplementationException();
+    throw Exceptions.unimplemented();
   }
 }
