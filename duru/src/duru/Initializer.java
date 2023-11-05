@@ -26,15 +26,6 @@ final class Initializer {
    * @param name      Name of the initialized project.
    */
   public static void initialize(Path directory, String name) {
-    createConfiguration(directory, name);
-    createMainSource(directory);
-  }
-
-  private static void createConfiguration(Path directory, String name) {
-    throw new MissingImplementationException();
-  }
-
-  private static void createMainSource(Path directory) {
     throw new MissingImplementationException();
   }
 }
