@@ -1,34 +1,33 @@
 package duru.configuration;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-final class Lexer {
-  private String contents;
+import duru.diagnostic.Subject;
 
-  private final List<Token> tokens;
+final class Lexer {
+  static List<Token> lex(Path file, String contents) {
+    var lexer = new Lexer(file, contents);
+    return lexer.lex();
+  }
+
+  private final Path file;
+
+  private final String contents;
+
+  private List<Token> tokens;
 
   private int index;
 
-  private Lexer(String contents, List<Token> tokens, int index) {
+  private Lexer(Path file, String contents) {
+    this.file     = file;
     this.contents = contents;
-    this.tokens   = tokens;
-    this.index    = index;
   }
 
-  static Lexer create() {
-    return new Lexer(null, new ArrayList<>(), 0);
-  }
-
-  List<Token> lex(String contents) throws ConfigurationParseException {
-    this.contents = contents;
-    tokens.clear();
-    index = 0;
-    lex();
-    return List.copyOf(tokens);
-  }
-
-  private void lex() throws ConfigurationParseException {
+  private List<Token> lex() {
+    tokens = new ArrayList<>();
+    index  = 0;
     while (hasCharacter()) {
       var start   = index;
       var initial = getCharacter();
@@ -59,15 +58,18 @@ final class Lexer {
             tokens.add(switch (word) {
               case "project" -> new Token.Project(start);
               case "executable" -> new Token.Executable(start);
-              default -> new Token.Identifier(start, word.length());
+              default -> new Token.Identifier(start, word);
             });
             break;
           }
-          throw ConfigurationParseException
-            .create(contents, start, 1, "Unknown character `%c`!", initial);
+          throw Subject
+            .of(file, contents, start, index)
+            .diagnose("error", "Unknown character `%c`!", initial)
+            .toException();
         }
       }
     }
+    return tokens;
   }
 
   private boolean hasCharacter() {

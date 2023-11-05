@@ -1,5 +1,7 @@
 package duru.lectics;
 
+import duru.FloatingPointFormatter;
+
 /** Longest sequence of characters that make up a meaningful word. */
 public sealed interface Token {
   /** Keyword `entrypoint`. */

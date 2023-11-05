@@ -1,54 +1,44 @@
 package duru.configuration;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-final class Parser {
-  private String contents;
+import duru.Namespace;
+import duru.diagnostic.Subject;
 
-  private List<Token> tokens;
+final class Parser {
+  static Configuration parse(Path file, String contents, List<Token> tokens) {
+    var parser = new Parser(file, contents, tokens);
+    return parser.parse();
+  }
+
+  private final Path file;
+
+  private final String contents;
+
+  private final List<Token> tokens;
 
   private String name;
 
-  private final List<PackageName> executables;
+  private List<Reference> executables;
 
   private int index;
 
-  private Parser(
-    String contents,
-    List<Token> tokens,
-    String name,
-    List<PackageName> executables,
-    int index)
-  {
-    this.contents    = contents;
-    this.tokens      = tokens;
-    this.name        = name;
-    this.executables = executables;
-    this.index       = index;
-  }
-
-  static Parser create() {
-    return new Parser(null, null, null, new ArrayList<>(), 0);
-  }
-
-  Configuration parse(String contents, List<Token> tokens)
-    throws ConfigurationParseException
-  {
+  private Parser(Path file, String contents, List<Token> tokens) {
+    this.file     = file;
     this.contents = contents;
-    this.tokens   = List.copyOf(tokens);
-    executables.clear();
-    index = 0;
-    parse();
-    return new Configuration(name, executables);
+    this.tokens   = tokens;
   }
 
-  private void parse() throws ConfigurationParseException {
+  private Configuration parse() {
+    executables = new ArrayList<>();
+    index       = 0;
     expectToken(Token.Project.class, "project definition");
     name =
       expectToken(Token.Identifier.class, "name of the project definition")
-        .text(contents);
+        .word();
     expectToken(
       Token.OpeningBrace.class,
       "opening `{` of the project definition");
@@ -68,29 +58,31 @@ final class Parser {
         "closing `}` of the project definition");
       break;
     }
+    return new Configuration(name, executables);
   }
 
-  private Optional<PackageName> parsePackageName()
-    throws ConfigurationParseException
-  {
-    var name = parseToken(Token.Identifier.class);
+  private Optional<Reference> parsePackageName() {
+    var start = index;
+    var name  = parseToken(Token.Identifier.class);
     if (name.isEmpty()) {
       return Optional.empty();
     }
-    var scopes = new ArrayList<String>();
-    scopes.add(name.get().text(contents));
+    var buffer = new StringBuilder();
+    buffer.append(name.get().word());
     while (parseToken(Token.Dot.class).isPresent()) {
-      scopes
-        .add(
-          expectToken(Token.Identifier.class, "name of the package")
-            .text(contents));
+      buffer.append('.');
+      buffer
+        .append(
+          expectToken(Token.Identifier.class, "name of the package").word());
     }
-    return Optional.of(new PackageName(scopes));
+    return Optional
+      .of(
+        new Reference(
+          Subject.of(file, contents, start, index),
+          new Namespace(buffer.toString())));
   }
 
-  private <T extends Token> T expectToken(Class<T> klass, String explanation)
-    throws ConfigurationParseException
-  {
+  private <T extends Token> T expectToken(Class<T> klass, String explanation) {
     return expect(() -> parseToken(klass), explanation);
   }
 
@@ -107,9 +99,7 @@ final class Parser {
     return Optional.of((T) token);
   }
 
-  private <T> T expect(ParseFunction<T> parseFunction, String explanation)
-    throws ConfigurationParseException
-  {
+  private <T> T expect(ParseFunction<T> parseFunction, String explanation) {
     var result = parseFunction.parse();
     if (result.isPresent()) {
       return result.get();
@@ -117,31 +107,28 @@ final class Parser {
     if (index == tokens.size()) {
       if (index != 0) {
         var previous = tokens.getLast();
-        throw ConfigurationParseException
-          .create(
-            contents,
-            previous.start(),
-            previous.length(),
+        throw Subject
+          .of(file, contents, previous.start(), previous.end())
+          .diagnose(
+            "error",
             "Expected %s at the end of the file, after %s!",
             explanation,
-            previous.explain(contents));
+            previous.explain())
+          .toException();
       }
-      throw ConfigurationParseException
-        .create(
-          contents,
-          0,
-          0,
-          "Expected %s instead of an empty file!",
-          explanation);
+      throw Subject
+        .of(file)
+        .diagnose("error", "Expected %s instead of an empty file!", explanation)
+        .toException();
     }
     var current = tokens.get(index);
-    throw ConfigurationParseException
-      .create(
-        contents,
-        current.start(),
-        current.length(),
+    throw Subject
+      .of(file, contents, current.start(), current.end())
+      .diagnose(
+        "error",
         "Expected %s instead of %s!",
         explanation,
-        current.explain(contents));
+        current.explain())
+      .toException();
   }
 }

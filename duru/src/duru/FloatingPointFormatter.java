@@ -1,4 +1,4 @@
-package duru.lectics;
+package duru;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
