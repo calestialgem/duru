@@ -6,9 +6,9 @@ final class Initializer {
   private static final String CONFIGURATION_NAME = "project.duru";
 
   public static Result<Void> initialize(NormalPath directory) {
-    return Identifier
-      .of(directory.value().getFileName().toString())
-      .then(name -> initialize(directory, name));
+    return Result
+      .perform(() -> Identifier.of(directory.value().getFileName().toString()))
+      .perform(name -> initialize(directory, name));
   }
 
   public static Result<Void> initialize(NormalPath directory, Identifier name) {

@@ -1,6 +1,7 @@
 package duru;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 sealed interface Result<V> {
   record Success<V>(V value) implements Result<V> {
@@ -10,7 +11,7 @@ sealed interface Result<V> {
     }
 
     @Override
-    public <U> Result<U> then(Function<V, Result<U>> procedure) {
+    public <U> Result<U> perform(Function<V, Result<U>> procedure) {
       return procedure.apply(value);
     }
   }
@@ -23,7 +24,7 @@ sealed interface Result<V> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> Result<U> then(Function<Object, Result<U>> procedure) {
+    public <U> Result<U> perform(Function<Object, Result<U>> procedure) {
       return (Result<U>) this;
     }
   }
@@ -37,6 +38,10 @@ sealed interface Result<V> {
     return (Result<V>) new Failure(format.formatted(arguments));
   }
 
+  static <V> Result<V> perform(Supplier<Result<V>> procedure) {
+    return procedure.get();
+  }
+
   V orThrow();
-  <U> Result<U> then(Function<V, Result<U>> procedure);
+  <U> Result<U> perform(Function<V, Result<U>> procedure);
 }

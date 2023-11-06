@@ -28,7 +28,9 @@ final class Persistance {
 
   public static Result<Void> recreate(NormalPath directory) {
     if (Files.exists(directory.value())) {
-      return delete(directory).then(v -> create(directory));
+      return Result
+        .perform(() -> delete(directory))
+        .perform(v -> create(directory));
     }
     return create(directory);
   }
