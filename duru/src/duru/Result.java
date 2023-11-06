@@ -2,45 +2,41 @@ package duru;
 
 import java.util.function.Function;
 
-sealed interface Result<V, E> {
-  record Success<V>(V value) implements Result<V, Object> {
+sealed interface Result<V> {
+  record Success<V>(V value) implements Result<V> {
     @Override
     public V orThrow() {
       return value;
     }
 
     @Override
-    public <U> Result<U, Object> then(
-      Function<V, Result<U, Object>> procedure)
-    {
+    public <U> Result<U> then(Function<V, Result<U>> procedure) {
       return procedure.apply(value);
     }
   }
 
-  record Failure<E>(E error) implements Result<Object, E> {
+  record Failure(String error) implements Result<Object> {
     @Override
     public Object orThrow() {
-      throw new UnsupportedOperationException(
-        "Result is a failure with error `%s`!".formatted(error));
+      throw new RuntimeException(error);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> Result<U, E> then(Function<Object, Result<U, E>> procedure) {
-      return (Result<U, E>) this;
+    public <U> Result<U> then(Function<Object, Result<U>> procedure) {
+      return (Result<U>) this;
     }
   }
 
-  @SuppressWarnings("unchecked")
-  static <V, E> Result<V, E> success(V value) {
-    return (Result<V, E>) new Success<>(value);
+  static <V> Result<V> success(V value) {
+    return new Success<>(value);
   }
 
   @SuppressWarnings("unchecked")
-  static <V, E> Result<V, E> failure(E error) {
-    return (Result<V, E>) new Failure<>(error);
+  static <V> Result<V> failure(String format, Object... arguments) {
+    return (Result<V>) new Failure(format.formatted(arguments));
   }
 
   V orThrow();
-  <U> Result<U, E> then(Function<V, Result<U, E>> procedure);
+  <U> Result<U> then(Function<V, Result<U>> procedure);
 }
