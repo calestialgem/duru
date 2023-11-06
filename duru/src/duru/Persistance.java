@@ -23,6 +23,17 @@ final class Persistance {
   }
 
   public static Result<Void> recreate(NormalPath directory) {
+    if (Files.exists(directory.value())) {
+      return delete(directory).then(v -> create(directory));
+    }
+    return create(directory);
+  }
+
+  public static Result<Void> create(NormalPath directory) {
+    return Result.failure("Unimplemented!");
+  }
+
+  public static Result<Void> delete(NormalPath directory) {
     return Result.failure("Unimplemented!");
   }
 
