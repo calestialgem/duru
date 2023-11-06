@@ -21,6 +21,12 @@ final class Initializer {
             configuration);
       }
     }
-    return Result.failure("Unimplemented!");
+    return Persistance.store(directory.resolve(CONFIGURATION_NAME), """
+# Project's configuration goes here.
+project %s {
+  # Here is the list of executables packages.
+  executable %s;
+}
+""", name, name);
   }
 }

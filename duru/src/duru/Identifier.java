@@ -34,4 +34,9 @@ record Identifier(String value) {
   private static boolean isWord(int character) {
     return Character.isLetterOrDigit(character) || character == '_';
   }
+
+  @Override
+  public String toString() {
+    return value;
+  }
 }
