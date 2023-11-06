@@ -1,0 +1,5 @@
+# Project's configuration goes here.
+project initTest {
+  # Here is the list of executables packages.
+  executable initTest;
+}
