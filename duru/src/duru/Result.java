@@ -1,10 +1,19 @@
 package duru;
 
+import java.util.function.Function;
+
 sealed interface Result<V, E> {
   record Success<V>(V value) implements Result<V, Object> {
     @Override
     public V orThrow() {
       return value;
+    }
+
+    @Override
+    public <U> Result<U, Object> then(
+      Function<V, Result<U, Object>> procedure)
+    {
+      return procedure.apply(value);
     }
   }
 
@@ -13,6 +22,12 @@ sealed interface Result<V, E> {
     public Object orThrow() {
       throw new UnsupportedOperationException(
         "Result is a failure with error `%s`!".formatted(error));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <U> Result<U, E> then(Function<Object, Result<U, E>> procedure) {
+      return (Result<U, E>) this;
     }
   }
 
@@ -27,4 +42,5 @@ sealed interface Result<V, E> {
   }
 
   V orThrow();
+  <U> Result<U, E> then(Function<V, Result<U, E>> procedure);
 }
