@@ -4,11 +4,14 @@ import java.nio.file.Path;
 
 final class Launcher {
   public static void main(String[] arguments) {
+    testInitialization().orThrow();
+  }
+
+  private static Result<Void> testInitialization() {
     var initTestDirectory = NormalPath.of(Path.of("initTest"));
-    Result
+    return Result
       .perform(() -> Persistance.recreate(initTestDirectory))
-      .perform(v -> Initializer.initialize(initTestDirectory))
-      .orThrow();
+      .perform(v -> Initializer.initialize(initTestDirectory));
   }
 
   private Launcher() {}
