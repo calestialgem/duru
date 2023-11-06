@@ -30,7 +30,17 @@ final class Persistance {
   }
 
   public static Result<Void> create(NormalPath directory) {
-    return Result.failure("Unimplemented!");
+    try {
+      Files.createDirectory(directory.value());
+      return Result.success(null);
+    }
+    catch (IOException cause) {
+      return Result
+        .failure(
+          "Cannot create `%s`; %s!",
+          directory,
+          cause.getClass().getSimpleName());
+    }
   }
 
   public static Result<Void> delete(NormalPath directory) {
