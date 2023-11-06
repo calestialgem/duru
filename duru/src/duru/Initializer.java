@@ -4,6 +4,8 @@ import java.nio.file.Files;
 
 final class Initializer {
   private static final String CONFIGURATION_NAME = "project.duru";
+  private static final String SOURCES_NAME       = "src";
+  private static final String MAIN_FILE_NAME     = "main.duru";
 
   public static Result<Void> initialize(NormalPath directory) {
     return Result
@@ -21,10 +23,18 @@ final class Initializer {
             configuration);
       }
     }
-    return Persistance.store(directory.resolve(CONFIGURATION_NAME), """
+    var sources = directory.resolve(SOURCES_NAME);
+    return Result
+      .perform(() -> Persistance.store(directory.resolve(CONFIGURATION_NAME), """
 project %s {
   executable %s;
 }
-""", name, name);
+""", name, name))
+      .perform(v -> Persistance.create(sources))
+      .perform(v -> Persistance.store(sources.resolve(MAIN_FILE_NAME), """
+entrypoint {
+  duru.print("Hello, World!\\n");
+}
+"""));
   }
 }
