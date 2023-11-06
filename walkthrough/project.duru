@@ -1,0 +1,5 @@
+# Demonstrates the features of the Duru Programming Language.
+project walkthrough {
+  # Simplest program; just returns `2` to the platform.
+  executable walkthrough.returns2;
+}
