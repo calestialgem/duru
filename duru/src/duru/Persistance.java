@@ -22,5 +22,9 @@ final class Persistance {
     }
   }
 
+  public static Result<Void> recreate(NormalPath directory) {
+    return Result.failure("Unimplemented!");
+  }
+
   private Persistance() {}
 }
