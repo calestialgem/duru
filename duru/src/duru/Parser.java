@@ -1,7 +1,7 @@
 package duru;
 
 final class Parser {
-  public static Result<Syntactics> parse(Lectic.Source lectics) {
+  public static Result<Syntactic.Source> parse(Lectic.Source lectics) {
     throw Exceptions.unimplemented();
   }
 
