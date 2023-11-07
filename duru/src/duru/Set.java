@@ -1,6 +1,11 @@
 package duru;
 
-record Set<M>(List<M> members, int[] mapping) implements Iterable<M> {
+import java.util.Iterator;
+
+import duru.collections.list.IntList;
+import duru.collections.list.List;
+
+record Set<M>(List<M> members, IntList mapping) implements Iterable<M> {
   public int length() {
     return members.length();
   }
@@ -9,7 +14,7 @@ record Set<M>(List<M> members, int[] mapping) implements Iterable<M> {
     var start = member.hashCode() % length();
     for (var i = 0; i != length(); i++) {
       var search = start + i;
-      var index  = mapping[search % length()];
+      var index  = mapping.getAsInt(search % length());
       var mapped = members.get(index);
       if (mapped.equals(member))
         return true;
@@ -18,7 +23,7 @@ record Set<M>(List<M> members, int[] mapping) implements Iterable<M> {
   }
 
   @Override
-  public ListIterator<M> iterator() {
+  public Iterator<M> iterator() {
     return members.iterator();
   }
 }
