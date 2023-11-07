@@ -1,7 +1,6 @@
 package duru;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 record List<E>(E[] elements) implements Iterable<E> {
   @SafeVarargs
@@ -18,7 +17,7 @@ record List<E>(E[] elements) implements Iterable<E> {
   }
 
   @Override
-  public Iterator<E> iterator() {
+  public ListIterator<E> iterator() {
     return new ListIterator<>(this);
   }
 }
