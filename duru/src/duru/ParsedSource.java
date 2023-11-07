@@ -2,11 +2,11 @@ package duru;
 
 import java.util.List;
 
-record ParsedSource(LexedSource previous, List<Node.Declaration> declarations) {
+record ParsedSource(Lectics lectics, List<Node.Declaration> declarations) {
   public static ParsedSource of(
-    LexedSource previous,
+    Lectics lectics,
     List<Node.Declaration> declarations)
   {
-    return new ParsedSource(previous, List.copyOf(declarations));
+    return new ParsedSource(lectics, List.copyOf(declarations));
   }
 }
