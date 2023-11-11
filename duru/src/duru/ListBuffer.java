@@ -22,6 +22,10 @@ final class ListBuffer<E> implements ListLike<E> {
     return elements[index];
   }
 
+  public void set(int index, E element) {
+    elements[index] = element;
+  }
+
   public void add(E element) {
     reserve(1);
     elements[length] = element;
@@ -34,8 +38,8 @@ final class ListBuffer<E> implements ListLike<E> {
     length += amount;
   }
 
-  public void set(int index, E element) {
-    elements[index] = element;
+  public void remove(int index) {
+    System.arraycopy(elements, index + 1, elements, index, length - index - 1);
   }
 
   public void clear() {
