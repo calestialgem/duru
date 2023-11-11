@@ -28,8 +28,18 @@ final class ListBuffer<E> implements ListLike<E> {
     length++;
   }
 
+  public void add(E element, int amount) {
+    reserve(amount);
+    Arrays.fill(elements, length, length + amount, element);
+    length += amount;
+  }
+
   public void set(int index, E element) {
     elements[index] = element;
+  }
+
+  public void clear() {
+    length = 0;
   }
 
   private void reserve(int amount) {
