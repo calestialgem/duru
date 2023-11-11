@@ -28,4 +28,24 @@ final class SetBuffer<M> implements SetLike<M> {
     }
     return false;
   }
+
+  public boolean add(M member) {
+    var expectedBucket = member.hashCode();
+    for (var i = 0; i < buckets.length(); i++) {
+      var bucket = (expectedBucket + i) % buckets.length();
+      var index  = buckets.get(bucket);
+      if (index == -1) {
+        buckets.set(bucket, members.length());
+        members.add(member);
+        return true;
+      }
+      var mapped = members.get(index);
+      if (mapped.equals(member))
+        return false;
+    }
+    // TODO: Rehash.
+    return false;
+  }
+
+  public boolean remove(M member) {}
 }
