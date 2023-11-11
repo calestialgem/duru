@@ -22,23 +22,46 @@ public final class IntListBuffer implements ListBuffer<Integer>, IntListLike {
   }
 
   @Override
-  public void push(Integer element) {
-    pushAsInt(element);
+  public void set(int index, Integer element) {
+    setAsInt(index, element);
   }
 
-  public void pushAsInt(int element) {
+  public void setAsInt(int index, int element) {
+    elements[index] = element;
+  }
+
+  @Override
+  public void add(Integer element) {
+    addAsInt(element);
+  }
+
+  public void addAsInt(int element) {
     reserve(1);
     elements[length] = element;
     length++;
   }
 
   @Override
-  public Integer pop() {
-    return popAsInt();
+  public void addAll(ListLike<Integer> list) {
+    switch (list) {
+      case IntListLike i -> addAllAsInt(i);
+      default -> {
+        reserve(list.length());
+        for (var e : list) {
+          add(e);
+        }
+      }
+    }
   }
 
-  public int popAsInt() {
-    return elements[--length];
+  public void addAllAsInt(IntListLike list) {
+    reserve(list.length());
+    switch (list) {
+      case IntList l ->
+        System.arraycopy(l.elements(), 0, elements, length, l.length());
+      case IntListBuffer b ->
+        System.arraycopy(b.elements, 0, elements, length, b.length);
+    }
   }
 
   @Override

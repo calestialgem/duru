@@ -1,3 +1,7 @@
 package duru.collections.list;
 
-public interface List<E> extends ListLike<E> {}
+public sealed interface List<E> extends ListLike<E>
+  permits
+  ObjectList,
+  IntList
+{}

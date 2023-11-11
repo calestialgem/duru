@@ -1,6 +1,12 @@
 package duru.collections.list;
 
-public interface ListLike<E> extends Iterable<E> {
+public sealed interface ListLike<E> extends Iterable<E>
+  permits
+  List,
+  ListBuffer,
+  ObjectListLike,
+  IntListLike
+{
   int length();
   E get(int index);
 }

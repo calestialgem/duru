@@ -1,6 +1,10 @@
 package duru.collections.list;
 
-public interface IntListLike extends ListLike<Integer> {
+public sealed interface IntListLike extends ListLike<Integer>
+  permits
+  IntList,
+  IntListBuffer
+{
   @Override
   default IntListIterator iterator() {
     return new IntListIterator(this);

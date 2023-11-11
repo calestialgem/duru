@@ -27,15 +27,31 @@ public final class ObjectListBuffer<E>
   }
 
   @Override
-  public void push(E element) {
+  public void set(int index, E element) {
+    elements[index] = element;
+  }
+
+  @Override
+  public void add(E element) {
     reserve(1);
     elements[length] = element;
     length++;
   }
 
   @Override
-  public E pop() {
-    return elements[--length];
+  public void addAll(ListLike<E> list) {
+    reserve(list.length());
+    switch (list) {
+      case ObjectList l ->
+        System.arraycopy(l.elements(), 0, elements, length, l.length());
+      case ObjectListBuffer b ->
+        System.arraycopy(b.elements, 0, elements, length, b.length());
+      default -> {
+        for (var e : list) {
+          add(e);
+        }
+      }
+    }
   }
 
   @Override
