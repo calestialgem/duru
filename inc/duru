@@ -105,18 +105,17 @@ namespace duru {
 // =============================================================================
 
 namespace duru {
-  // String is a linear collection of zero or more [Character]s.
-  struct String {};
+  // Linear collection of zero or more [Character]s.
+  struct String {
+    // [std::byte]s that make up the [String], encoded in UTF-8.
+    List<std::byte> bytes;
+  };
 
-  // A character is a linear collection of one or more [Codepoint]s.
+  // Linear collection of one or more [Codepoint]s.
   struct Character {};
 
-  // A codepoint is a linear collection of one or more [Byte]s, encoded using
-  // UTF-8.
+  // Linear collection of one or more [std::byte]s, encoded using UTF-8.
   struct Codepoint {};
-
-  // Strongly typed version of [char].
-  struct Byte {};
 }
 
 // =============================================================================
