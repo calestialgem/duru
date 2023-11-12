@@ -2,7 +2,8 @@
 
 #include <duru/containers.hxx>
 
-duru::Result<duru::Unit, duru::Unit> duru::initialize(
-    duru::String directory, duru::String name) noexcept {
-  return {};
+namespace duru {
+  Result<Unit, Unit> initialize(String directory, String name) noexcept {
+    return {};
+  }
 }
