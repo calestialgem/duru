@@ -16,6 +16,13 @@ pub fn main() !void {
     try initializeWorkspace(arena.allocator(), workspace);
 }
 
+test "initialization" {
+    const name = "inittest";
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    try @import("initializer.zig").initialize(gpa.allocator(), name, name);
+}
+
 fn initializeWorkspace(allocator: std.mem.Allocator, workspace_directory: fs.Dir) !void {
     var name = try workspace_directory.realpathAlloc(allocator, ".");
     var i = name.len;
