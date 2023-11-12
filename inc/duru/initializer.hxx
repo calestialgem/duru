@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <duru/containers.hxx>
 #include <duru/text.hxx>
 
 namespace duru {
@@ -15,5 +16,5 @@ namespace duru {
   // Initialization is creating the necessary configuration to setup a project
   // in the given directory. Also, creates a simple source file for debugging
   // the setup.
-  int initialize(String directory, String name);
+  Result<Unit, Unit> initialize(String directory, String name) noexcept;
 }

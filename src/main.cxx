@@ -3,5 +3,5 @@
 
 int main() {
   std::printf("Hello, World!\n");
-  return duru::initialize({}, {});
+  (void)duru::initialize({}, {});
 }

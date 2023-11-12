@@ -39,6 +39,7 @@ AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
 AttributeMacros: []
 BinPackArguments: false
 BinPackParameters: false
@@ -93,6 +94,7 @@ SeparateDefinitionBlocks: Always
 SortIncludes: CaseSensitive
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
 SpaceAroundPointerQualifiers: Default
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeCaseColon: false
