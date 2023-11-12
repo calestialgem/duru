@@ -74,7 +74,8 @@ namespace duru {
 
   // Returns the member of a [Tuple] at a compile-time known index.
   template<std::size_t index, typename Member>
-  constexpr Member& get(TupleMemberHolder<index, Member>& tuple) noexcept {
+  [[nodiscard]] constexpr Member& get(
+      TupleMemberHolder<index, Member>& tuple) noexcept {
     return tuple.member;
   }
 
