@@ -1,8 +1,7 @@
-#include "duru.hxx"
+#include <cstdio>
+#include <duru/initializer.hxx>
 
-#include <cstdlib>
-
-int main() noexcept {
-  duru::launch(duru::NominalSubject{"compiler"});
-  return EXIT_SUCCESS;
+int main() {
+  std::printf("Hello, World!\n");
+  return duru::initialize({}, {});
 }
