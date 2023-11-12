@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <duru/initializer.hxx>
+#include <duru>
 
 int main() {
   std::printf("Hello, World!\n");
