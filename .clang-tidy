@@ -1,1 +1,1 @@
-Checks: "*,-llvmlibc-restrict-system-libc-headers,-llvmlibc-implementation-in-namespace,-llvmlibc-callee-namespace,-modernize-use-trailing-return-type,-llvm-namespace-comment,-google-readability-namespace-comments,-altera-struct-pack-align"
+Checks: "*,-llvmlibc-implementation-in-namespace,-modernize-use-trailing-return-type,-llvm-namespace-comment,-google-readability-namespace-comments,-bugprone-easily-swappable-parameters,-misc-unused-parameters,-llvmlibc-restrict-system-libc-headers,-llvmlibc-callee-namespace,-cppcoreguidelines-pro-type-vararg,-hicpp-vararg"
