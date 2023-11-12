@@ -11,30 +11,6 @@
 // =============================================================================
 
 namespace duru {
-  // Returns the maximum of a single number, which is itself.
-  //
-  // Used for pattern matching on a template pack of numbers.
-  [[nodiscard]] constexpr auto max(auto number) noexcept { return number; }
-
-  // Returns the maximum of the given numbers using `operator<`.
-  [[nodiscard]] constexpr auto max(
-      auto firstNumber, auto... remainingNumbers) noexcept {
-    auto maxOfRemaining = max(remainingNumbers...);
-    if (firstNumber < maxOfRemaining) { return maxOfRemaining; }
-    return firstNumber;
-  }
-
-  // Returns the sum of a single number, which is itself.
-  //
-  // Used for pattern matching on a template pack of numbers.
-  [[nodiscard]] constexpr auto sum(auto number) noexcept { return number; }
-
-  // Returns the sum of the given numbers using `operator+`.
-  [[nodiscard]] constexpr auto sum(
-      auto firstNumber, auto... remainingNumbers) noexcept {
-    return firstNumber + sum(remainingNumbers...);
-  }
-
   // Holds a [Tuple] member at a particular index.
   //
   // Used for keeping tract of which index holds which member in a [Tuple].
@@ -77,6 +53,19 @@ namespace duru {
   [[nodiscard]] constexpr Member& get(
       TupleMemberHolder<index, Member>& tuple) noexcept {
     return tuple.member;
+  }
+
+  // Returns the maximum of a single number, which is itself.
+  //
+  // Used for pattern matching on a template pack of numbers.
+  [[nodiscard]] constexpr auto max(auto number) noexcept { return number; }
+
+  // Returns the maximum of the given numbers using `operator<`.
+  [[nodiscard]] constexpr auto max(
+      auto firstNumber, auto... remainingNumbers) noexcept {
+    auto maxOfRemaining = max(remainingNumbers...);
+    if (firstNumber < maxOfRemaining) { return maxOfRemaining; }
+    return firstNumber;
   }
 
   // Contains one type out of all alternative ones; a tagged union.
