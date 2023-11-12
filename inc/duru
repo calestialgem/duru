@@ -84,6 +84,20 @@ namespace duru {
   // Useful for holding the outcome of a subroutine.
   template<typename Value, typename Error>
   struct [[nodiscard]] Result : Variant<Value, Error> {};
+
+  // Ordered collection of zero or more elements.
+  template<typename Element>
+  struct List {
+    // Dynamic array holding [capacity] amount of elements. First [length]
+    // amount of elements are initialized. Can be null iff [capacity] is `0`.
+    Element* elements;
+
+    // Number of elements the [List] can hold.
+    std::size_t capacity;
+
+    // Number of elements in the [List].
+    std::size_t length;
+  };
 }
 
 // =============================================================================
