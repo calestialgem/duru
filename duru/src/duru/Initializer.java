@@ -16,9 +16,11 @@ public final class Initializer {
     for (var i = directory; i != null; i = i.getParent()) {
       var config = i.resolve("project.duru");
       if (Files.exists(config)) {
-        throw new RuntimeException(
-          "%s: error: Cannot initialize inside another project, which is configured at `%s`!"
-            .formatted(directory, config));
+        throw Exceptions
+          .error(
+            directory,
+            "Cannot initialize inside another project, which is configured at `%s`!",
+            config);
       }
     }
   }
@@ -27,25 +29,34 @@ public final class Initializer {
     for (var i = 0; i != name.length(); i = name.offsetByCodePoints(i, 1)) {
       var character = name.codePointAt(i);
       if (!Character.isLetterOrDigit(character))
-        throw new RuntimeException(
-          "error: Name `%s` has a non-letter or digit character `%c` at %d!"
-            .formatted(name, character, i));
+        throw Exceptions
+          .error(
+            "unknown",
+            "Name `%s` has a non-letter or digit character `%c` at %d!",
+            name,
+            character,
+            i);
     }
     if (name.length() == 0)
-      throw new RuntimeException("error: Name is empty!");
+      throw Exceptions.error("unknown", "Name is empty!");
     var initial = name.codePointAt(0);
     if (!Character.isLetter(initial))
-      throw new RuntimeException(
-        "error: Name `%s` starts with a non-letter character `%c`!"
-          .formatted(name, initial));
+      throw Exceptions
+        .error(
+          "unknown",
+          "Name `%s` starts with a non-letter character `%c`!",
+          name,
+          initial);
     switch (name) {
       case "project", "executable" ->
-        throw new RuntimeException(
-          "error: Name `%s` is a reserved word for project configuration!"
-            .formatted(name));
+        throw Exceptions
+          .error(
+            "unknown",
+            "error: Name `%s` is a reserved word for project configuration!",
+            name);
       case "void" ->
-        throw new RuntimeException(
-          "error: Name `%s` is a reserved word!".formatted(name));
+        throw Exceptions
+          .error("unknown", "error: Name `%s` is a reserved word!", name);
       default -> {}
     }
   }

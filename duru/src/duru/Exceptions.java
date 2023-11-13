@@ -19,5 +19,14 @@ public final class Exceptions {
       cause);
   }
 
+  public static RuntimeException error(
+    Object subject,
+    String format,
+    Object... arguments)
+  {
+    return new RuntimeException(
+      "%s: error: %s".formatted(subject, format.formatted(arguments)));
+  }
+
   private Exceptions() {}
 }
