@@ -5,7 +5,7 @@ import java.nio.file.Path;
 
 public final class Exceptions {
   public static RuntimeException unimplemented() {
-    throw new RuntimeException("fatal error: Unimplemented!");
+    return new RuntimeException("fatal error: Unimplemented!");
   }
 
   public static RuntimeException io(
