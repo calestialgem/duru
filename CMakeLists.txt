@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(duru CXX)
-add_executable(${PROJECT_NAME}
-  src/main.cxx
-)
-target_include_directories(${PROJECT_NAME} PUBLIC inc)
+add_executable(${PROJECT_NAME} duru.cxx)
 set_target_properties(${PROJECT_NAME} PROPERTIES
   CXX_STANDARD 20
   CXX_STANDARD_REQUIRED on
