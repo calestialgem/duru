@@ -1,1 +1,1 @@
-Checks: "*,-llvmlibc-restrict-system-libc-headers,-llvmlibc-implementation-in-namespace,-llvmlibc-callee-namespace,-modernize-use-trailing-return-type"
+Checks: "*,-llvmlibc-restrict-system-libc-headers,-llvmlibc-implementation-in-namespace,-llvmlibc-callee-namespace,-modernize-use-trailing-return-type,-llvm-namespace-comment,-bugprone-easily-swappable-parameters,-misc-unused-parameters,-google-readability-namespace-comments"
