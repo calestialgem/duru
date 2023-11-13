@@ -1,6 +1,0 @@
-# Entrypoint of the program that returns `2`.
-#
-# An exit code can be provided to the platform using [duru.exit] procedure.
-entrypoint {
-  duru.exit(2);
-}
