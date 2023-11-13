@@ -10,7 +10,6 @@ public final class Configurer {
   }
 
   private final Path                           file;
-  private Optional<Configuration.Identifier>   name;
   private ListBuffer<Configuration.Executable> executables;
   private String                               text;
   private int                                  index;
@@ -21,7 +20,6 @@ public final class Configurer {
 
   private Configuration.Project configure() {
     text        = Persistance.read(file);
-    name        = Optional.empty();
     executables = ListBuffer.create();
     index       = 0;
     skipWhitespaceAndComments();
@@ -31,7 +29,21 @@ public final class Configurer {
     }
     index += "project".length();
     skipWhitespaceAndComments();
-    var end = index;
+    if (!hasCharacter() || !Character.isLetter(getCharacter())) {
+      throw Diagnostic
+        .error(
+          "expected project name instead of `%c` at %d",
+          getCharacter(),
+          index);
+    }
+    var nameBegin = index;
+    advance();
+    while (hasCharacter() && Character.isLetterOrDigit(getCharacter())) {
+      advance();
+    }
+    var nameText = text.substring(nameBegin, index);
+    var name     = new Configuration.Identifier(nameBegin, nameText);
+    var end      = index;
     skipWhitespaceAndComments();
     if (hasCharacter()) {
       throw Diagnostic
@@ -40,11 +52,7 @@ public final class Configurer {
           getCharacter(),
           index);
     }
-    return new Configuration.Project(
-      begin,
-      end,
-      name.get(),
-      executables.toList());
+    return new Configuration.Project(begin, end, name, executables.toList());
   }
 
   private void skipWhitespaceAndComments() {
