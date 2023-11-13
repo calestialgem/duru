@@ -47,7 +47,12 @@ public final class Persistance {
   }
 
   private static void create(Path directory) {
-    throw Exceptions.unimplemented();
+    try {
+      Files.createDirectory(directory);
+    }
+    catch (IOException cause) {
+      throw Exceptions.io(cause, directory, "Could not create a directory!");
+    }
   }
 
   public static void enter(Path directory) {
