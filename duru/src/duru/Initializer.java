@@ -55,7 +55,7 @@ public final class Initializer {
           .error(
             "name `%s` is a reserved word for project configuration",
             name);
-      case "void" ->
+      case "proc", "throws" ->
         throw Diagnostic.error("name `%s` is a reserved word", name);
       default -> {}
     }
@@ -73,7 +73,7 @@ public final class Initializer {
     var sources = directory.resolve("src");
     Persistance.create(sources);
     Persistance.write(sources.resolve("main.duru"), """
-        void main() {
+        proc main() throws {
           duru.print("Hello, World!\\n");
         }
         """);
