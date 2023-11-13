@@ -21,6 +21,15 @@ public final class Persistance {
     }
   }
 
+  public static String read(Path file) {
+    try {
+      return Files.readString(file);
+    }
+    catch (IOException cause) {
+      throw Diagnostic.failure(cause, "could not read from file `%s`", file);
+    }
+  }
+
   public static void recreate(Path directory) {
     if (Files.exists(directory))
       delete(directory);
