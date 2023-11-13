@@ -24,10 +24,40 @@ public final class Configurer {
     name        = Optional.empty();
     executables = ListBuffer.create();
     index       = 0;
+    skipWhitespaceAndComments();
+    var begin = index;
     return new Configuration.Project(
-      -1,
+      begin,
       index,
       name.get(),
       executables.toList());
+  }
+
+  private void skipWhitespaceAndComments() {
+    while (hasCharacter()) {
+      if (Character.isWhitespace(getCharacter())) {
+        advance();
+        continue;
+      }
+      if (getCharacter() == '#') {
+        advance();
+        while (hasCharacter() && getCharacter() != '\n')
+          advance();
+        advance();
+      }
+      break;
+    }
+  }
+
+  private int advance() {
+    return index = text.offsetByCodePoints(index, 1);
+  }
+
+  private int getCharacter() {
+    return text.codePointAt(index);
+  }
+
+  private boolean hasCharacter() {
+    return index != text.length();
   }
 }
