@@ -3,6 +3,10 @@ package duru;
 import java.util.Arrays;
 
 public final class List<Element> {
+  public static <Element> List<Element> copyOf(Element[] elements, int length) {
+    return new List<>(Arrays.copyOf(elements, length));
+  }
+
   private final Element[] elements;
 
   private List(Element[] elements) {
