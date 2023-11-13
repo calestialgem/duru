@@ -26,9 +26,23 @@ public final class Configurer {
     index       = 0;
     skipWhitespaceAndComments();
     var begin = index;
+    if (!text.startsWith("project", index)) {
+      throw Diagnostic.error("expected project configuration at %d", index);
+    }
+    index += "project".length();
+    skipWhitespaceAndComments();
+    var end = index;
+    skipWhitespaceAndComments();
+    if (hasCharacter()) {
+      throw Diagnostic
+        .error(
+          "expected end of file instead of `%c` at %d",
+          getCharacter(),
+          index);
+    }
     return new Configuration.Project(
       begin,
-      index,
+      end,
       name.get(),
       executables.toList());
   }
