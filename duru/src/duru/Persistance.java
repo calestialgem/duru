@@ -17,7 +17,7 @@ public final class Persistance {
       Files.writeString(file, text);
     }
     catch (IOException cause) {
-      throw Exceptions.io(cause, file, "Could not write to the file!");
+      throw Diagnostic.failure(cause, "could not write to file `%s`", file);
     }
   }
 
@@ -55,7 +55,8 @@ public final class Persistance {
       });
     }
     catch (IOException cause) {
-      throw Exceptions.io(cause, directory, "Could not delete the directory!");
+      throw Diagnostic
+        .failure(cause, "could not delete directory `%s`", directory);
     }
   }
 
@@ -64,7 +65,8 @@ public final class Persistance {
       Files.createDirectory(directory);
     }
     catch (IOException cause) {
-      throw Exceptions.io(cause, directory, "Could not create a directory!");
+      throw Diagnostic
+        .failure(cause, "could not create directory `%s`", directory);
     }
   }
 

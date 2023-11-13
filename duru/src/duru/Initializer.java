@@ -5,58 +5,58 @@ import java.nio.file.Path;
 
 public final class Initializer {
   public static void initialize(Path directory) {
-    checkAvailability(directory);
-    var name = directory.getFileName().toString();
-    checkIdentifier(directory, name);
-    createConfig(directory, name);
-    createMainSource(directory);
+    try {
+      checkAvailability(directory);
+      var name = directory.getFileName().toString();
+      checkIdentifier(name);
+      createConfig(directory, name);
+      createMainSource(directory);
+    }
+    catch (Diagnostic diagnostic) {
+      throw diagnostic.from(directory);
+    }
   }
 
   private static void checkAvailability(Path directory) {
     for (var i = directory; i != null; i = i.getParent()) {
       var config = i.resolve("project.duru");
       if (Files.exists(config)) {
-        throw Exceptions
+        throw Diagnostic
           .error(
-            directory,
-            "Cannot initialize inside another project, which is configured at `%s`!",
+            "cannot initialize inside another project, which is configured at `%s`",
             config);
       }
     }
   }
 
-  private static void checkIdentifier(Object subject, String name) {
+  private static void checkIdentifier(String name) {
     for (var i = 0; i != name.length(); i = name.offsetByCodePoints(i, 1)) {
       var character = name.codePointAt(i);
       if (!Character.isLetterOrDigit(character))
-        throw Exceptions
+        throw Diagnostic
           .error(
-            subject,
-            "Name `%s` has a non-letter or digit character `%c` at %d!",
+            "name `%s` has a non-letter or digit character `%c` at %d",
             name,
             character,
             i);
     }
     if (name.length() == 0)
-      throw Exceptions.error(subject, "Name is empty!");
+      throw Diagnostic.error("Name is empty!");
     var initial = name.codePointAt(0);
     if (!Character.isLetter(initial))
-      throw Exceptions
+      throw Diagnostic
         .error(
-          subject,
-          "Name `%s` starts with a non-letter character `%c`!",
+          "name `%s` starts with a non-letter character `%c`",
           name,
           initial);
     switch (name) {
       case "project", "executable" ->
-        throw Exceptions
+        throw Diagnostic
           .error(
-            subject,
-            "error: Name `%s` is a reserved word for project configuration!",
+            "name `%s` is a reserved word for project configuration",
             name);
       case "void" ->
-        throw Exceptions
-          .error(subject, "error: Name `%s` is a reserved word!", name);
+        throw Diagnostic.error("name `%s` is a reserved word", name);
       default -> {}
     }
   }
