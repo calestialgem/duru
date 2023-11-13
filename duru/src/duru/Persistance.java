@@ -42,10 +42,7 @@ public final class Persistance {
       });
     }
     catch (IOException cause) {
-      throw new RuntimeException(
-        "%s: failure: Could not delete the directory!"
-          .formatted(directory.toAbsolutePath().normalize()),
-        cause);
+      throw Exceptions.io(cause, directory, "Could not delete the directory!");
     }
   }
 
