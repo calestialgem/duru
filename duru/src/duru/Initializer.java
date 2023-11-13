@@ -6,6 +6,8 @@ import java.nio.file.Path;
 public final class Initializer {
   public static void initialize(Path directory) {
     checkAvailability(directory);
+    var name = directory.getFileName().toString();
+    checkIdentifier(name);
     throw Exceptions.unimplemented();
   }
 
@@ -18,6 +20,10 @@ public final class Initializer {
             .formatted(directory, config));
       }
     }
+  }
+
+  private static void checkIdentifier(String name) {
+    throw Exceptions.unimplemented();
   }
 
   private Initializer() {}
