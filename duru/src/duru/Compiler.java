@@ -9,7 +9,7 @@ public final class Compiler {
     var artifacts     = directory.resolve("art");
     Persistance.create(artifacts);
     Persistance.write(artifacts.resolve(Configuration.name), configuration);
-    throw Diagnostic.failure("Unimplemented!");
+    throw Diagnostic.failure("unimplemented");
   }
 
   private Compiler() {}

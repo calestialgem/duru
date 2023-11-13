@@ -2,7 +2,7 @@ package duru;
 
 public final class Builder {
   public static void build(Semantic.Target target) {
-    throw Diagnostic.failure("Unimplemented!");
+    throw Diagnostic.failure("unimplemented");
   }
 
   private Builder() {}
