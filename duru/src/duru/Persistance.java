@@ -13,7 +13,12 @@ public final class Persistance {
   }
 
   public static void write(Path file, String text) {
-    throw Exceptions.unimplemented();
+    try {
+      Files.writeString(file, text);
+    }
+    catch (IOException cause) {
+      throw Exceptions.io(cause, file, "Could not write to the file!");
+    }
   }
 
   public static void recreate(Path directory) {
