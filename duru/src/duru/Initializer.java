@@ -8,7 +8,8 @@ public final class Initializer {
     checkAvailability(directory);
     var name = directory.getFileName().toString();
     checkIdentifier(name);
-    throw Exceptions.unimplemented();
+    createConfig(directory, name);
+    createMainSource(directory);
   }
 
   private static void checkAvailability(Path directory) {
@@ -47,6 +48,24 @@ public final class Initializer {
           "error: Name `%s` is a reserved word!".formatted(name));
       default -> {}
     }
+  }
+
+  private static void createConfig(Path directory, String name) {
+    Persistance.write(directory.resolve("project.duru"), """
+        project %s {
+          executable %s;
+        }
+        """.formatted(name, name));
+  }
+
+  private static void createMainSource(Path directory) {
+    var sources = directory.resolve("src");
+    Persistance.create(sources);
+    Persistance.write(sources.resolve("main.duru"), """
+        void main() {
+          duru.print("Hello, World!\\n");
+        }
+        """);
   }
 
   private Initializer() {}

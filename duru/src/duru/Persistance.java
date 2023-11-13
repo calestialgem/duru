@@ -12,6 +12,10 @@ public final class Persistance {
     return Path.of(text).toAbsolutePath().normalize();
   }
 
+  public static void write(Path file, String text) {
+    throw Exceptions.unimplemented();
+  }
+
   public static void recreate(Path directory) {
     if (Files.exists(directory))
       delete(directory);
@@ -50,7 +54,7 @@ public final class Persistance {
     }
   }
 
-  private static void create(Path directory) {
+  public static void create(Path directory) {
     try {
       Files.createDirectory(directory);
     }
