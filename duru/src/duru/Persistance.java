@@ -11,15 +11,15 @@ public final class Persistance {
   }
 
   private static void delete(Path directory) {
-    throw new RuntimeException("Unimplemented!");
+    throw Exceptions.unimplemented();
   }
 
   private static void create(Path directory) {
-    throw new RuntimeException("Unimplemented!");
+    throw Exceptions.unimplemented();
   }
 
   public static void enter(Path directory) {
-    throw new RuntimeException("Unimplemented!");
+    throw Exceptions.unimplemented();
   }
 
   private Persistance() {}
