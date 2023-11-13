@@ -10,8 +10,7 @@ final class Launcher {
   private static void testInitialization() {
     var testDirectory = Path.of("inittest");
     Persistance.recreate(testDirectory);
-    Persistance.enter(testDirectory);
-    Initializer.initialize();
+    Initializer.initialize(testDirectory);
   }
 
   private Launcher() {}

@@ -55,9 +55,5 @@ public final class Persistance {
     }
   }
 
-  public static void enter(Path directory) {
-    throw Exceptions.unimplemented();
-  }
-
   private Persistance() {}
 }
