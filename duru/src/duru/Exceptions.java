@@ -15,10 +15,7 @@ public final class Exceptions {
     Object... arguments)
   {
     return new RuntimeException(
-      "%s: failure: %s"
-        .formatted(
-          subject.toAbsolutePath().normalize(),
-          format.formatted(arguments)),
+      "%s: failure: %s".formatted(subject, format.formatted(arguments)),
       cause);
   }
 

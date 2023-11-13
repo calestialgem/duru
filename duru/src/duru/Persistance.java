@@ -8,6 +8,10 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public final class Persistance {
+  public static Path path(String text) {
+    return Path.of(text).toAbsolutePath().normalize();
+  }
+
   public static void recreate(Path directory) {
     if (Files.exists(directory))
       delete(directory);
