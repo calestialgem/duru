@@ -7,7 +7,7 @@ public final class Initializer {
   public static void initialize(Path directory) {
     checkAvailability(directory);
     var name = directory.getFileName().toString();
-    checkIdentifier(name);
+    checkIdentifier(directory, name);
     createConfig(directory, name);
     createMainSource(directory);
   }
@@ -25,25 +25,25 @@ public final class Initializer {
     }
   }
 
-  private static void checkIdentifier(String name) {
+  private static void checkIdentifier(Object subject, String name) {
     for (var i = 0; i != name.length(); i = name.offsetByCodePoints(i, 1)) {
       var character = name.codePointAt(i);
       if (!Character.isLetterOrDigit(character))
         throw Exceptions
           .error(
-            "unknown",
+            subject,
             "Name `%s` has a non-letter or digit character `%c` at %d!",
             name,
             character,
             i);
     }
     if (name.length() == 0)
-      throw Exceptions.error("unknown", "Name is empty!");
+      throw Exceptions.error(subject, "Name is empty!");
     var initial = name.codePointAt(0);
     if (!Character.isLetter(initial))
       throw Exceptions
         .error(
-          "unknown",
+          subject,
           "Name `%s` starts with a non-letter character `%c`!",
           name,
           initial);
@@ -51,12 +51,12 @@ public final class Initializer {
       case "project", "executable" ->
         throw Exceptions
           .error(
-            "unknown",
+            subject,
             "error: Name `%s` is a reserved word for project configuration!",
             name);
       case "void" ->
         throw Exceptions
-          .error("unknown", "error: Name `%s` is a reserved word!", name);
+          .error(subject, "error: Name `%s` is a reserved word!", name);
       default -> {}
     }
   }
