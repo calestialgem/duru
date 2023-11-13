@@ -13,6 +13,10 @@ public final class Diagnostic extends RuntimeException {
     return new Diagnostic(cause, "failure", format, arguments);
   }
 
+  public static Diagnostic failure(String format, Object... arguments) {
+    return new Diagnostic("failure", format, arguments);
+  }
+
   private Diagnostic(
     Throwable cause,
     String title,
