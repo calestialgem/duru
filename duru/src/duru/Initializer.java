@@ -5,6 +5,11 @@ import java.nio.file.Path;
 
 public final class Initializer {
   public static void initialize(Path directory) {
+    checkAvailability(directory);
+    throw Exceptions.unimplemented();
+  }
+
+  private static void checkAvailability(Path directory) {
     for (var i = directory; i != null; i = i.getParent()) {
       var config = i.resolve("project.duru");
       if (Files.exists(config)) {
@@ -13,7 +18,6 @@ public final class Initializer {
             .formatted(directory, config));
       }
     }
-    throw Exceptions.unimplemented();
   }
 
   private Initializer() {}
