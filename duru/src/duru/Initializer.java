@@ -19,7 +19,7 @@ public final class Initializer {
 
   private static void checkAvailability(Path directory) {
     for (var i = directory; i != null; i = i.getParent()) {
-      var config = i.resolve("project.duru");
+      var config = i.resolve(Configuration.name);
       if (Files.exists(config)) {
         throw Diagnostic
           .error(
@@ -62,7 +62,7 @@ public final class Initializer {
   }
 
   private static void createConfig(Path directory, String name) {
-    Persistance.write(directory.resolve("project.duru"), """
+    Persistance.write(directory.resolve(Configuration.name), """
         project %s {
           executable %s;
         }
