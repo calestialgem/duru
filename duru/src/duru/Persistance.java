@@ -12,9 +12,9 @@ public final class Persistance {
     return Path.of(text).toAbsolutePath().normalize();
   }
 
-  public static void write(Path file, String text) {
+  public static void write(Path file, Object text) {
     try {
-      Files.writeString(file, text);
+      Files.writeString(file, text.toString());
     }
     catch (IOException cause) {
       throw Diagnostic.failure(cause, "could not write to file `%s`", file);
