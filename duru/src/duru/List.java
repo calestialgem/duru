@@ -27,4 +27,12 @@ public final class List<Element> {
   public String toString() {
     return Arrays.toString(elements);
   }
+
+  public Element first() {
+    return elements[0];
+  }
+
+  public Element last() {
+    return elements[elements.length - 1];
+  }
 }
