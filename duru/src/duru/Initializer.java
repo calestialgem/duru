@@ -16,7 +16,7 @@ public final class Initializer {
       var config = i.resolve("project.duru");
       if (Files.exists(config)) {
         throw new RuntimeException(
-          "%s: error: Could not initialize inside another project, which is configured at `%s`!"
+          "%s: error: Cannot initialize inside another project, which is configured at `%s`!"
             .formatted(directory, config));
       }
     }
