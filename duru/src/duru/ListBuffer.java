@@ -1,5 +1,7 @@
 package duru;
 
+import java.util.Arrays;
+
 public final class ListBuffer<Element> {
   @SuppressWarnings("unchecked")
   public static <Element> ListBuffer<Element> create() {
@@ -16,5 +18,22 @@ public final class ListBuffer<Element> {
 
   public List<Element> toList() {
     return List.copyOf(elements, length);
+  }
+
+  public void add(Element element) {
+    reserve(1);
+    elements[length] = element;
+    length++;
+
+  }
+
+  private void reserve(int amount) {
+    var space  = elements.length - length;
+    var growth = amount - space;
+    if (growth <= 0)
+      return;
+    if (growth < elements.length)
+      growth = elements.length;
+    elements = Arrays.copyOf(elements, elements.length + growth);
   }
 }
