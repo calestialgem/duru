@@ -54,7 +54,15 @@ public final class Persistance {
   }
 
   private static void create(Path directory) {
-    throw Subject.get().diagnose("failure", "unimplemented").exception();
+    try {
+      Files.createDirectory(directory);
+    }
+    catch (IOException cause) {
+      throw Subject
+        .get()
+        .diagnose("failure", "could not create `%s`", directory)
+        .exception(cause);
+    }
   }
 
   private Persistance() {}
