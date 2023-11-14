@@ -2,11 +2,21 @@ package duru;
 
 public final class Text {
   public static boolean isReserved(String name) {
-    return false;
+    switch (name) {
+      case "void":
+        return true;
+      default:
+        return false;
+    }
   }
 
   public static boolean isReservedForConfiguration(String name) {
-    return false;
+    switch (name) {
+      case "module", "executable":
+        return true;
+      default:
+        return false;
+    }
   }
 
   public static boolean isIdentifierBody(int codepoint) {
