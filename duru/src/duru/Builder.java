@@ -1,7 +1,7 @@
 package duru;
 
 public final class Builder {
-  public static void build(Semantic.Module module) {
+  public static void build(Semantic.Target target) {
     throw Subject.get().diagnose("failure", "unimplemented").exception();
   }
 

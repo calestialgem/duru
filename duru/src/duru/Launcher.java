@@ -7,8 +7,8 @@ final class Launcher {
     Subject.add(directory);
     Persistance.recreate(directory);
     Initializer.initialize(directory);
-    var semantics = Compiler.compile(directory);
-    Builder.build(semantics);
+    var target = Compiler.compile(directory);
+    Builder.build(target);
     Subject.remove();
     Subject.remove();
   }
