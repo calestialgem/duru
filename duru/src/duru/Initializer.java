@@ -10,6 +10,7 @@ public final class Initializer {
   }
 
   private final Path directory;
+  private String     name;
 
   private Initializer(Path directory) {
     this.directory = directory;
@@ -17,7 +18,10 @@ public final class Initializer {
 
   private void initialize() {
     checkAvailability();
-    throw Subject.get().diagnose("failure", "unimplemented").exception();
+    name = directory.getFileName().toString();
+    checkName();
+    createConfiguration();
+    createMainSource();
   }
 
   private void checkAvailability() {
@@ -32,5 +36,17 @@ public final class Initializer {
             configuration)
           .exception();
     }
+  }
+
+  private void checkName() {
+    throw Subject.get().diagnose("failure", "unimplemented").exception();
+  }
+
+  private void createConfiguration() {
+    throw Subject.get().diagnose("failure", "unimplemented").exception();
+  }
+
+  private void createMainSource() {
+    throw Subject.get().diagnose("failure", "unimplemented").exception();
   }
 }
