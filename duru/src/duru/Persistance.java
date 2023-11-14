@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public final class Persistance {
   public static Path path(String path) {
-    throw Subject.get().diagnose("failure", "unimplemented").exception();
+    return Path.of(path).toAbsolutePath().normalize();
   }
 
   public static void recreate(Path directory) {
