@@ -30,6 +30,18 @@ public final class Persistance {
     create(directory);
   }
 
+  public static void create(Path directory) {
+    try {
+      Files.createDirectory(directory);
+    }
+    catch (IOException cause) {
+      throw Subject
+        .get()
+        .diagnose("failure", "could not create `%s`", directory)
+        .exception(cause);
+    }
+  }
+
   private static void delete(Path directory) {
     try {
       Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
@@ -61,18 +73,6 @@ public final class Persistance {
       throw Subject
         .get()
         .diagnose("failure", "could not delete `%s`", directory)
-        .exception(cause);
-    }
-  }
-
-  private static void create(Path directory) {
-    try {
-      Files.createDirectory(directory);
-    }
-    catch (IOException cause) {
-      throw Subject
-        .get()
-        .diagnose("failure", "could not create `%s`", directory)
         .exception(cause);
     }
   }

@@ -1,0 +1,3 @@
+void main() {
+  duru.print("Hello, World!\n");
+}

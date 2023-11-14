@@ -86,6 +86,12 @@ public final class Initializer {
   }
 
   private void createMainSource() {
-    throw Subject.get().diagnose("failure", "unimplemented").exception();
+    var sources = directory.resolve("src");
+    Persistance.create(sources);
+    Persistance.store(sources.resolve("main.duru"), """
+void main() {
+  duru.print("Hello, World!\\n");
+}
+""");
   }
 }
