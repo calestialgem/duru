@@ -1,23 +1,22 @@
 package duru;
 
-import java.nio.file.Path;
-
 public final class ConfigurationParser {
-  public static Configuration.Project parse(Path file) {
-    var parser = new ConfigurationParser(file);
+  public static Syntactics parse(Lectics lectics) {
+    var parser = new ConfigurationParser(lectics);
     return parser.parse();
   }
 
-  private final Path file;
+  private final Lectics   lectics;
+  private ListBuffer<Tag> nodes;
+  private int             index;
 
-  private ConfigurationParser(Path file) {
-    this.file = file;
+  private ConfigurationParser(Lectics lectics) {
+    this.lectics = lectics;
   }
 
-  private Configuration.Project parse() {
-    var text    = Persistance.read(file);
-    var lectics = ConfigurationLexer.lex(text);
-    System.err.println(lectics);
+  private Syntactics parse() {
+    nodes = ListBuffer.create();
+    index = 0;
     throw Diagnostic.error("unimplemented");
   }
 }
