@@ -1,6 +1,6 @@
 package duru;
 
-public enum TokenType {
+public enum Token {
   openingBrace,
   closingBrace,
   semicolon,

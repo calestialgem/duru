@@ -6,18 +6,18 @@ public final class ConfigurationLexer {
     return lexer.lex();
   }
 
-  private final String          text;
-  private ListBuffer<TokenType> types;
-  private ListBuffer<Location>  locations;
-  private int                   index;
-  private int                   begin;
+  private final String         text;
+  private ListBuffer<Token>    tokens;
+  private ListBuffer<Location> locations;
+  private int                  index;
+  private int                  begin;
 
   private ConfigurationLexer(String text) {
     this.text = text;
   }
 
   private Lectics lex() {
-    types     = ListBuffer.create();
+    tokens    = ListBuffer.create();
     locations = ListBuffer.create();
     index     = 0;
     while (hasCharacter()) {
@@ -61,18 +61,18 @@ public final class ConfigurationLexer {
           if (blockComments != 0)
             throw Diagnostic.error("incomplete block comment at %d", begin);
         }
-        case '{' -> tokenize(TokenType.openingBrace);
-        case '}' -> tokenize(TokenType.closingBrace);
-        case ';' -> tokenize(TokenType.semicolon);
+        case '{' -> tokenize(Token.openingBrace);
+        case '}' -> tokenize(Token.closingBrace);
+        case ';' -> tokenize(Token.semicolon);
         default -> {
           if (Character.isLetter(initial)) {
             while (hasCharacter() && Character.isLetterOrDigit(getCharacter()))
               advance();
             var word = text.substring(begin, index);
             switch (word) {
-              case "project" -> tokenize(TokenType.projectKeyword);
-              case "executable" -> tokenize(TokenType.executableKeyword);
-              default -> tokenize(TokenType.identifier);
+              case "project" -> tokenize(Token.projectKeyword);
+              case "executable" -> tokenize(Token.executableKeyword);
+              default -> tokenize(Token.identifier);
             }
             break;
           }
@@ -85,11 +85,11 @@ public final class ConfigurationLexer {
         }
       }
     }
-    return new Lectics(text, types.toList(), locations.toList());
+    return new Lectics(text, tokens.toList(), locations.toList());
   }
 
-  private void tokenize(TokenType type) {
-    types.add(type);
+  private void tokenize(Token type) {
+    tokens.add(type);
     locations.add(new Location(begin, index));
   }
 

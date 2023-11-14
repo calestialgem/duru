@@ -2,6 +2,6 @@ package duru;
 
 public record Lectics(
   String text,
-  List<TokenType> types,
+  List<Token> tokens,
   List<Location> locations)
 {}
