@@ -1,23 +1,25 @@
 package duru;
 
 public final class ConfigurationLexer {
-  public static List<Token> lex(String text) {
+  public static Lectics lex(String text) {
     var lexer = new ConfigurationLexer(text);
     return lexer.lex();
   }
 
-  private final String      text;
-  private ListBuffer<Token> tokens;
-  private int               index;
-  private int               begin;
+  private final String          text;
+  private ListBuffer<TokenType> types;
+  private ListBuffer<Location>  locations;
+  private int                   index;
+  private int                   begin;
 
   private ConfigurationLexer(String text) {
     this.text = text;
   }
 
-  private List<Token> lex() {
-    tokens = ListBuffer.create();
-    index  = 0;
+  private Lectics lex() {
+    types     = ListBuffer.create();
+    locations = ListBuffer.create();
+    index     = 0;
     while (hasCharacter()) {
       begin = index;
       var initial = getCharacter();
@@ -83,11 +85,12 @@ public final class ConfigurationLexer {
         }
       }
     }
-    return tokens.toList();
+    return new Lectics(text, types.toList(), locations.toList());
   }
 
   private void tokenize(TokenType type) {
-    tokens.add(new Token(begin, index, type));
+    types.add(type);
+    locations.add(new Location(begin, index));
   }
 
   private int advance() {
