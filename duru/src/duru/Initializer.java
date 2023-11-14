@@ -78,7 +78,11 @@ public final class Initializer {
   }
 
   private void createConfiguration() {
-    throw Subject.get().diagnose("failure", "unimplemented").exception();
+    Persistance.store(directory.resolve("module.duru"), """
+        module %s {
+          executable %s;
+        }
+        """.formatted(name, name));
   }
 
   private void createMainSource() {

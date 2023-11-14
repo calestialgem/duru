@@ -12,6 +12,18 @@ public final class Persistance {
     return Path.of(path).toAbsolutePath().normalize();
   }
 
+  public static void store(Path file, Object text) {
+    try {
+      Files.writeString(file, text.toString());
+    }
+    catch (IOException cause) {
+      throw Subject
+        .get()
+        .diagnose("failure", "could not write to `%s`", file)
+        .exception(cause);
+    }
+  }
+
   public static void recreate(Path directory) {
     if (Files.exists(directory))
       delete(directory);
