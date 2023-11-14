@@ -7,7 +7,7 @@ public final class ConfigurationLexer {
   }
 
   private final String         text;
-  private ListBuffer<Token>    tokens;
+  private ListBuffer<Tag>      tokens;
   private ListBuffer<Location> locations;
   private int                  index;
   private int                  begin;
@@ -61,18 +61,18 @@ public final class ConfigurationLexer {
           if (blockComments != 0)
             throw Diagnostic.error("incomplete block comment at %d", begin);
         }
-        case '{' -> tokenize(Token.openingBrace);
-        case '}' -> tokenize(Token.closingBrace);
-        case ';' -> tokenize(Token.semicolon);
+        case '{' -> tokenize(Tag.openingBrace);
+        case '}' -> tokenize(Tag.closingBrace);
+        case ';' -> tokenize(Tag.semicolon);
         default -> {
           if (Character.isLetter(initial)) {
             while (hasCharacter() && Character.isLetterOrDigit(getCharacter()))
               advance();
             var word = text.substring(begin, index);
             switch (word) {
-              case "project" -> tokenize(Token.projectKeyword);
-              case "executable" -> tokenize(Token.executableKeyword);
-              default -> tokenize(Token.identifier);
+              case "project" -> tokenize(Tag.project);
+              case "executable" -> tokenize(Tag.executable);
+              default -> tokenize(Tag.identifier);
             }
             break;
           }
@@ -88,7 +88,7 @@ public final class ConfigurationLexer {
     return new Lectics(text, tokens.toList(), locations.toList());
   }
 
-  private void tokenize(Token type) {
+  private void tokenize(Tag type) {
     tokens.add(type);
     locations.add(new Location(begin, index));
   }
