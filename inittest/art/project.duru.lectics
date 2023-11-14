@@ -1,4 +1,0 @@
-Lectics[text=project inittest {
-  executable inittest;
-}
-, tokens=[project, identifier, openingBrace, executable, identifier, semicolon, closingBrace], locations=[Location[begin=0, end=7], Location[begin=8, end=16], Location[begin=17, end=18], Location[begin=21, end=31], Location[begin=32, end=40], Location[begin=40, end=41], Location[begin=42, end=43]]]

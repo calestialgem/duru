@@ -1,3 +1,0 @@
-project inittest {
-  executable inittest;
-}
