@@ -1,0 +1,18 @@
+public void print(comptime_string text) {
+  int32 result = print_string_to_stream(text, get_error_stream());
+  if result < 0 {
+    exit(result);
+  }
+}
+
+struct Stream { void* placeholder; }
+
+Stream* get_stream(nat32 index) = "__acrt_iob_func";
+
+int32 print_string_to_stream(byte* string, Stream* stream) = "fputs";
+
+Stream* get_error_stream() {
+  return get_stream(2);
+}
+
+noreturn exit(int32 code) = "exit";

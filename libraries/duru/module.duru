@@ -1,0 +1,3 @@
+module duru {
+  exports duru;
+}
