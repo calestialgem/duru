@@ -9,15 +9,20 @@ public sealed interface Semantic {
     Set<String> executables) implements Semantic
   {}
 
-  record Package(String name, Map<String, Symbol> symbols)
-    implements Semantic
+  record Package(
+    boolean isExecutable,
+    String name,
+    Map<String, Symbol> symbols,
+    Set<String> publics) implements Semantic
   {}
 
   sealed interface Symbol extends Semantic {
+    boolean isPublic();
     String name();
   }
 
   record Function(
+    boolean isPublic,
     Type returnType,
     String name,
     Map<String, Type> parameters,
