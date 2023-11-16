@@ -89,7 +89,7 @@ module %s {
     var sources = directory.resolve("src");
     Persistance.create(sources);
     Persistance.store(sources.resolve("main.duru"), """
-void main() {
+proc main() {
   duru.print("Hello, World!\\n");
 }
 """);
