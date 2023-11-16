@@ -34,10 +34,12 @@ public final class ListBuffer<Element> {
   private void reserve(int amount) {
     var space  = elements.length - length;
     var growth = amount - space;
-    if (growth <= 0)
+    if (growth <= 0) {
       return;
-    if (growth < elements.length)
+    }
+    if (growth < elements.length) {
       growth = elements.length;
+    }
     elements = Arrays.copyOf(elements, elements.length + growth);
   }
 }

@@ -25,8 +25,9 @@ public final class Persistance {
   }
 
   public static void recreate(Path directory) {
-    if (Files.exists(directory))
+    if (Files.exists(directory)) {
       delete(directory);
+    }
     create(directory);
   }
 

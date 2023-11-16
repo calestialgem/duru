@@ -27,7 +27,7 @@ public final class Initializer {
   private void checkAvailability() {
     for (var i = directory; i != null; i = i.getParent()) {
       var configuration = i.resolve("module.duru");
-      if (Files.exists(configuration))
+      if (Files.exists(configuration)) {
         throw Subject
           .get()
           .diagnose(
@@ -35,6 +35,7 @@ public final class Initializer {
             "initializing in module defined by `%s`",
             configuration)
           .exception();
+      }
     }
   }
 
@@ -53,21 +54,23 @@ public final class Initializer {
           .exception();
       }
     }
-    if (name.length() == 0)
+    if (name.length() == 0) {
       throw Subject.get().diagnose("error", "empty name").exception();
+    }
     var initial = name.codePointAt(0);
-    if (!Text.isIdentifierInitial(initial))
+    if (!Text.isIdentifierInitial(initial)) {
       throw Subject
         .get()
         .diagnose("error", "invalid initial `%c` of name `%s`", initial, name)
         .exception();
+    }
     if (Text.isReserved(name)) {
       throw Subject
         .get()
         .diagnose("error", "name `%s` is a keyword", name)
         .exception();
     }
-    if (Text.isReservedForConfiguration(name))
+    if (Text.isReservedForConfiguration(name)) {
       throw Subject
         .get()
         .diagnose(
@@ -75,6 +78,7 @@ public final class Initializer {
           "name `%s` is a keyword for module configuration",
           name)
         .exception();
+    }
   }
 
   private void createConfiguration() {
