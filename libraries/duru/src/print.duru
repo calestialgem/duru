@@ -1,18 +1,19 @@
-public void print(byte* string) {
-  int result = print_string_to_stream(string, get_error_stream());
+public proc print(string *Byte) {
+  var result = print_string_to_stream(string, get_error_stream());
   if result < 0 {
     exit(result);
   }
 }
 
-struct stream;
+struct Stream;
 
-stream* get_stream(uint index) = "__acrt_iob_func";
+proc get_stream(index Natural32) *Stream = "__acrt_iob_func";
 
-int print_string_to_stream(byte* string, stream* destination) = "fputs";
+proc print_string_to_stream(string *Byte, destination *Stream) Integer32
+  = "fputs";
 
-stream* get_error_stream() {
+proc get_error_stream() *Stream {
   return get_stream(2);
 }
 
-noreturn exit(int code) = "exit";
+proc exit(code Integer32) Noreturn = "exit";

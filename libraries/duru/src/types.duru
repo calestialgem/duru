@@ -1,5 +1,0 @@
-// Provides implementation-defined types.
-
-typedef uint8 byte
-typedef int32 int;
-typedef uint32 uint;
