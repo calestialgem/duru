@@ -15,8 +15,8 @@ public final class ConfigurationResolver {
   }
 
   private Configuration resolve() {
-    executables = SetBuffer.<String>create();
-    libraries   = SetBuffer.<String>create();
+    executables = SetBuffer.create();
+    libraries   = SetBuffer.create();
     for (var declaration : node.declarations()) {
       switch (declaration) {
         case ConfigurationNode.Executable executable -> {
