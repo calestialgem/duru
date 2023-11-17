@@ -19,6 +19,14 @@ public final class List<Element> {
     this.elements = elements;
   }
 
+  public int length() {
+    return elements.length;
+  }
+
+  public Element get(int index) {
+    return elements[index];
+  }
+
   @Override
   public int hashCode() {
     return Arrays.deepHashCode(elements);
