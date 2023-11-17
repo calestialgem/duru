@@ -2,7 +2,7 @@ package duru;
 
 import java.util.Arrays;
 
-public final class List<Element> {
+public final class List<Element> implements Collection<Element> {
   @SafeVarargs
   public static <Element> List<Element> of(Element... elements) {
     return of(elements.length, elements);
@@ -19,10 +19,12 @@ public final class List<Element> {
     this.elements = elements;
   }
 
+  @Override
   public int length() {
     return elements.length;
   }
 
+  @Override
   public Element get(int index) {
     return elements[index];
   }
