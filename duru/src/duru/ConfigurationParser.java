@@ -85,7 +85,7 @@ public final class ConfigurationParser {
     if (name.isEmpty())
       return Optional.absent();
     var subspaces = ListBuffer.<ConfigurationToken.Identifier>create();
-    subspaces.add(name.get());
+    subspaces.add(name.getLast());
     while (!parse(ConfigurationToken.Dot.class).isEmpty()) {
       var subspace =
         expect(
@@ -120,7 +120,7 @@ public final class ConfigurationParser {
   {
     var value = parserFunction.get();
     if (!value.isEmpty())
-      return value.get();
+      return value.getLast();
     throw Subject.error("expected %s", explanation);
   }
 

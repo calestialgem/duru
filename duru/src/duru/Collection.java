@@ -10,7 +10,7 @@ public interface Collection<Element> extends Iterable<Element> {
     return get(0);
   }
 
-  default Element get() {
+  default Element getLast() {
     return get(length() - 1);
   }
 
