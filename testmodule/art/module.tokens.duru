@@ -1,1 +1,22 @@
-duru.List@78c03f1f
+[Module[location=Location[source=Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=module testmodule {
+  executable testmodule;
+}
+], begin=0, end=6]], Identifier[location=Location[source=Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=module testmodule {
+  executable testmodule;
+}
+], begin=7, end=17], text=testmodule], OpeningBrace[location=Location[source=Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=module testmodule {
+  executable testmodule;
+}
+], begin=18, end=19]], Executable[location=Location[source=Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=module testmodule {
+  executable testmodule;
+}
+], begin=22, end=32]], Identifier[location=Location[source=Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=module testmodule {
+  executable testmodule;
+}
+], begin=33, end=43], text=testmodule], Semicolon[location=Location[source=Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=module testmodule {
+  executable testmodule;
+}
+], begin=43, end=44]], ClosingBrace[location=Location[source=Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=module testmodule {
+  executable testmodule;
+}
+], begin=45, end=46]]]
