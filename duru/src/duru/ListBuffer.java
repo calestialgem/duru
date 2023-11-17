@@ -31,6 +31,10 @@ public final class ListBuffer<Element> {
     return elements[length];
   }
 
+  public List<Element> toList() {
+    return List.of(length, elements);
+  }
+
   private void reserve(int amount) {
     var space  = elements.length - length;
     var growth = amount - space;
