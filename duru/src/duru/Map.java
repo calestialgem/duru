@@ -17,6 +17,32 @@ public record Map<Key, Value>(
     return new Entry<>(keys.get(index), values.get(index));
   }
 
+  public boolean contains(Key key) {
+    var hash = key.hashCode();
+    for (var i = 0; i < buckets.length(); i++) {
+      var bucket = (hash + i) % buckets.length();
+      var index  = buckets.get(bucket);
+      if (index == -1)
+        return false;
+      if (key.equals(keys.get(index)))
+        return true;
+    }
+    return false;
+  }
+
+  public Optional<Value> get(Key key) {
+    var hash = key.hashCode();
+    for (var i = 0; i < buckets.length(); i++) {
+      var bucket = (hash + i) % buckets.length();
+      var index  = buckets.get(bucket);
+      if (index == -1)
+        return Optional.absent();
+      if (key.equals(keys.get(index)))
+        return Optional.present(values.get(index));
+    }
+    return Optional.absent();
+  }
+
   @Override
   public String toString() {
     var string = new StringBuilder();
