@@ -15,7 +15,7 @@ public sealed interface ConfigurationNode {
     implements PackageDeclaration
   {}
 
-  record Exports(Location location, PackageName name)
+  record Library(Location location, PackageName name)
     implements PackageDeclaration
   {}
 

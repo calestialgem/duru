@@ -1,3 +1,3 @@
 module duru {
-  exports duru;
+  library duru;
 }

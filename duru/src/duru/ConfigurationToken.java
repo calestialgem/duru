@@ -13,7 +13,7 @@ public sealed interface ConfigurationToken {
 
   record Executable(Location location) implements ConfigurationToken {}
 
-  record Exports(Location location) implements ConfigurationToken {}
+  record Library(Location location) implements ConfigurationToken {}
 
   record Identifier(Location location, String text)
     implements ConfigurationToken

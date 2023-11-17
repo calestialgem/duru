@@ -70,8 +70,8 @@ public final class ConfigurationLexer {
                 tokens.add(new ConfigurationToken.Module(location()));
               case "executable" ->
                 tokens.add(new ConfigurationToken.Executable(location()));
-              case "exports" ->
-                tokens.add(new ConfigurationToken.Exports(location()));
+              case "library" ->
+                tokens.add(new ConfigurationToken.Library(location()));
               default ->
                 tokens.add(new ConfigurationToken.Identifier(location(), text));
             }
