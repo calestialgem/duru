@@ -1,5 +1,7 @@
 package duru;
 
+import java.util.Arrays;
+
 public final class List<Element>
   implements
   ListLike<Element>,
@@ -44,15 +46,16 @@ public final class List<Element>
 
   @Override
   public boolean equals(Object other) {
-    if (this == other)
+    if (this == other) {
       return true;
-    if (!(other instanceof List otherList))
+    }
+    if (!(other instanceof List otherList) || length() != otherList.length()) {
       return false;
-    if (length() != otherList.length())
-      return false;
+    }
     for (var i = 0; i < length(); i++) {
-      if (get(i).equals(otherList.get(i)))
+      if (get(i).equals(otherList.get(i))) {
         return false;
+      }
     }
     return true;
   }
