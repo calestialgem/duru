@@ -7,8 +7,8 @@ public record Subject(String name) {
     subjects = ListBuffer.create();
   }
 
-  public static Subject get() {
-    return subjects.get();
+  public static Subject getLast() {
+    return subjects.getLast();
   }
 
   public static void add(Object name) {
@@ -19,8 +19,8 @@ public record Subject(String name) {
     subjects.add(subject);
   }
 
-  public static Subject remove() {
-    return subjects.remove();
+  public static Subject removeLast() {
+    return subjects.removeLast();
   }
 
   public static RuntimeException failure(
@@ -28,7 +28,7 @@ public record Subject(String name) {
     String format,
     Object... arguments)
   {
-    return get().diagnose("failure", format, arguments).exception(cause);
+    return getLast().diagnose("failure", format, arguments).exception(cause);
   }
 
   public static RuntimeException unimplemented() {
@@ -36,11 +36,11 @@ public record Subject(String name) {
   }
 
   public static RuntimeException failure(String format, Object... arguments) {
-    return get().diagnose("failure", format, arguments).exception();
+    return getLast().diagnose("failure", format, arguments).exception();
   }
 
   public static RuntimeException error(String format, Object... arguments) {
-    return get().diagnose("error", format, arguments).exception();
+    return getLast().diagnose("error", format, arguments).exception();
   }
 
   public Diagnostic diagnose(String title, String format, Object... arguments) {

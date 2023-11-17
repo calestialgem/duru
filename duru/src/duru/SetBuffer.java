@@ -1,6 +1,6 @@
 package duru;
 
-public final class SetBuffer<Member> {
+public final class SetBuffer<Member> implements CollectionLike<Member> {
   public static <Member> SetBuffer<Member> create() {
     return new SetBuffer<>(ListBuffer.create(), ListBuffer.create());
   }
@@ -11,6 +11,16 @@ public final class SetBuffer<Member> {
   private SetBuffer(ListBuffer<Member> members, ListBuffer<Integer> buckets) {
     this.members = members;
     this.buckets = buckets;
+  }
+
+  @Override
+  public int length() {
+    return members.length();
+  }
+
+  @Override
+  public Member get(int index) {
+    return members.get(index);
   }
 
   public Set<Member> toSet() {

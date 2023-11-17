@@ -1,6 +1,11 @@
 package duru;
 
-public final class MapBuffer<Key, Value> {
+import duru.Map.Entry;
+
+public final class MapBuffer<Key, Value>
+  implements
+  CollectionLike<Entry<Key, Value>>
+{
   public static <Key, Value> MapBuffer<Key, Value> create() {
     return new MapBuffer<>(
       ListBuffer.create(),
@@ -20,6 +25,16 @@ public final class MapBuffer<Key, Value> {
     this.keys    = keys;
     this.values  = values;
     this.buckets = buckets;
+  }
+
+  @Override
+  public int length() {
+    return keys.length();
+  }
+
+  @Override
+  public Entry<Key, Value> get(int index) {
+    return new Entry<>(keys.get(index), values.get(index));
   }
 
   public Map<Key, Value> toMap() {

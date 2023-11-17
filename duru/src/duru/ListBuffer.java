@@ -2,7 +2,7 @@ package duru;
 
 import java.util.Arrays;
 
-public final class ListBuffer<Element> {
+public final class ListBuffer<Element> implements CollectionLike<Element> {
   @SuppressWarnings("unchecked")
   public static <Element> ListBuffer<Element> create() {
     return new ListBuffer<>((Element[]) new Object[0], 0);
@@ -16,20 +16,18 @@ public final class ListBuffer<Element> {
     this.length   = length;
   }
 
-  public List<Element> toList() {
-    return new List<>(Arrays.copyOf(elements, length));
-  }
-
+  @Override
   public int length() {
     return length;
   }
 
-  public Element get() {
-    return get(length - 1);
-  }
-
+  @Override
   public Element get(int index) {
     return elements[index];
+  }
+
+  public List<Element> toList() {
+    return new List<>(Arrays.copyOf(elements, length));
   }
 
   public void set(int index, Element element) {
@@ -48,7 +46,7 @@ public final class ListBuffer<Element> {
     length += amount;
   }
 
-  public Element remove() {
+  public Element removeLast() {
     return remove(length - 1);
   }
 

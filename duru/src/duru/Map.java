@@ -1,9 +1,11 @@
 package duru;
 
+import duru.Map.Entry;
+
 public record Map<Key, Value>(
   List<Key> keys,
   List<Value> values,
-  List<Integer> buckets) implements Collection<Map.Entry<Key, Value>>
+  List<Integer> buckets) implements Collection<Entry<Key, Value>>
 {
   public record Entry<Key, Value>(Key key, Value value) {}
 

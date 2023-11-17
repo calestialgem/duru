@@ -9,8 +9,8 @@ final class Launcher {
     Initializer.initialize(directory);
     var target = Compiler.compile(directory);
     Builder.build(target);
-    Subject.remove();
-    Subject.remove();
+    Subject.removeLast();
+    Subject.removeLast();
   }
 
   private Launcher() {}
