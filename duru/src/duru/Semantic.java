@@ -1,7 +1,7 @@
 package duru;
 
 public sealed interface Semantic {
-  record Target(Module main, Map<String, Module> dependencies) {}
+  record Target(String main, Map<String, Module> dependencies) {}
 
   record Module(
     String name,
