@@ -32,7 +32,7 @@ public record Subject(String name) {
   }
 
   public static RuntimeException unimplemented() {
-    return failure("unimplemented");
+    return failure("unimplemented `%s`", new Throwable().getStackTrace()[1]);
   }
 
   public static RuntimeException failure(String format, Object... arguments) {
