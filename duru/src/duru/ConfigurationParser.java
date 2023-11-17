@@ -81,15 +81,13 @@ public final class ConfigurationParser {
 
   private Optional<ConfigurationNode.PackageName> parsePackageName() {
     var begin = index;
-    if (!(parse(
-      ConfigurationToken.Identifier.class) instanceof Present(var subspace)))
-    {
+    var name  = parse(ConfigurationToken.Identifier.class);
+    if (name.isEmpty())
       return Optional.absent();
-    }
     var subspaces = ListBuffer.<ConfigurationToken.Identifier>create();
-    subspaces.add(subspace);
+    subspaces.add(name.get());
     while (!parse(ConfigurationToken.Dot.class).isEmpty()) {
-      subspace =
+      var subspace =
         expect(
           ConfigurationToken.Identifier.class,
           "subspace of the package name");
@@ -120,8 +118,9 @@ public final class ConfigurationParser {
     Supplier<Optional<Value>> parserFunction,
     String explanation)
   {
-    if (parserFunction.get() instanceof Present(var value))
-      return value;
+    var value = parserFunction.get();
+    if (!value.isEmpty())
+      return value.get();
     throw Subject.error("expected %s", explanation);
   }
 
@@ -139,12 +138,14 @@ public final class ConfigurationParser {
   }
 
   @SafeVarargs
+  @SuppressWarnings("unchecked")
   private <Value> Optional<Value> or(
     Supplier<Optional<? extends Value>>... parserFunctions)
   {
     for (var parserFunction : parserFunctions) {
-      if (parserFunction.get() instanceof Present(var value))
-        return Optional.present(value);
+      var value = parserFunction.get();
+      if (!value.isEmpty())
+        return (Optional<Value>) value;
     }
     return Optional.absent();
   }
