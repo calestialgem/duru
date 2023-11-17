@@ -1,7 +1,5 @@
 package duru;
 
-import java.util.Objects;
-
 public record Optional<Value>(Value value) implements Collection<Value> {
   public static <Value> Optional<Value> present(Value value) {
     return new Optional<>(value);
@@ -22,21 +20,13 @@ public record Optional<Value>(Value value) implements Collection<Value> {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hashCode(value);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other)
-      return true;
-    if (!(other instanceof Optional otherOptional))
-      return false;
-    return Objects.equals(value, otherOptional.value);
-  }
-
-  @Override
   public String toString() {
-    return Objects.toString(value);
+    var string = new StringBuilder();
+    string.append('[');
+    if (!isEmpty()) {
+      string.append(getFirst());
+    }
+    string.append(']');
+    return string.toString();
   }
 }
