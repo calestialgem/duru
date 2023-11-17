@@ -1,7 +1,5 @@
 package duru;
 
-import java.util.Arrays;
-
 public record List<Element>(Element[] elements) implements Collection<Element> {
   @Override
   public int length() {
@@ -14,21 +12,18 @@ public record List<Element>(Element[] elements) implements Collection<Element> {
   }
 
   @Override
-  public int hashCode() {
-    return Arrays.deepHashCode(elements);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other)
-      return true;
-    if (!(other instanceof List otherList))
-      return false;
-    return Arrays.deepEquals(elements, otherList.elements);
-  }
-
-  @Override
   public String toString() {
-    return Arrays.toString(elements);
+    var string = new StringBuilder();
+    string.append('[');
+    if (!isEmpty()) {
+      string.append(getFirst());
+      for (var i = 1; i < length(); i++) {
+        string.append(',');
+        string.append(' ');
+        string.append(get(i));
+      }
+    }
+    string.append(']');
+    return string.toString();
   }
 }
