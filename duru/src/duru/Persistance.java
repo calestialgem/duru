@@ -17,10 +17,7 @@ public final class Persistance {
       Files.writeString(file, text.toString());
     }
     catch (IOException cause) {
-      throw Subject
-        .get()
-        .diagnose("failure", "could not write to `%s`", file)
-        .exception(cause);
+      throw Subject.failure(cause, "could not write to `%s`", file);
     }
   }
 
@@ -36,10 +33,7 @@ public final class Persistance {
       Files.createDirectory(directory);
     }
     catch (IOException cause) {
-      throw Subject
-        .get()
-        .diagnose("failure", "could not create `%s`", directory)
-        .exception(cause);
+      throw Subject.failure(cause, "could not create `%s`", directory);
     }
   }
 
@@ -71,10 +65,7 @@ public final class Persistance {
       });
     }
     catch (IOException cause) {
-      throw Subject
-        .get()
-        .diagnose("failure", "could not delete `%s`", directory)
-        .exception(cause);
+      throw Subject.failure(cause, "could not delete `%s`", directory);
     }
   }
 

@@ -23,6 +23,26 @@ public record Subject(String name) {
     return subjects.remove();
   }
 
+  public static RuntimeException failure(
+    Throwable cause,
+    String format,
+    Object... arguments)
+  {
+    return get().diagnose("failure", format, arguments).exception(cause);
+  }
+
+  public static RuntimeException unimplemented() {
+    return failure("unimplemented");
+  }
+
+  public static RuntimeException failure(String format, Object... arguments) {
+    return get().diagnose("failure", format, arguments).exception();
+  }
+
+  public static RuntimeException error(String format, Object... arguments) {
+    return get().diagnose("error", format, arguments).exception();
+  }
+
   public Diagnostic diagnose(String title, String format, Object... arguments) {
     return new Diagnostic(
       "%s: %s: %s".formatted(name, title, format.formatted(arguments)));

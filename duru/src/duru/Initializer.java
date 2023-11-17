@@ -29,12 +29,7 @@ public final class Initializer {
       var configuration = i.resolve("module.duru");
       if (Files.exists(configuration)) {
         throw Subject
-          .get()
-          .diagnose(
-            "error",
-            "initializing in module defined by `%s`",
-            configuration)
-          .exception();
+          .error("initializing in module defined by `%s`", configuration);
       }
     }
   }
@@ -44,40 +39,22 @@ public final class Initializer {
       var body = name.codePointAt(i);
       if (!Text.isIdentifierBody(body)) {
         throw Subject
-          .get()
-          .diagnose(
-            "error",
-            "invalid codepoint `%c` in name `%s` at %d",
-            body,
-            name,
-            i)
-          .exception();
+          .error("invalid codepoint `%c` in name `%s` at %d", body, name, i);
       }
     }
     if (name.length() == 0) {
-      throw Subject.get().diagnose("error", "empty name").exception();
+      throw Subject.error("empty name");
     }
     var initial = name.codePointAt(0);
     if (!Text.isIdentifierInitial(initial)) {
-      throw Subject
-        .get()
-        .diagnose("error", "invalid initial `%c` of name `%s`", initial, name)
-        .exception();
+      throw Subject.error("invalid initial `%c` of name `%s`", initial, name);
     }
     if (Text.isReserved(name)) {
-      throw Subject
-        .get()
-        .diagnose("error", "name `%s` is a keyword", name)
-        .exception();
+      throw Subject.error("name `%s` is a keyword", name);
     }
     if (Text.isReservedForConfiguration(name)) {
       throw Subject
-        .get()
-        .diagnose(
-          "error",
-          "name `%s` is a keyword for module configuration",
-          name)
-        .exception();
+        .error("name `%s` is a keyword for module configuration", name);
     }
   }
 
