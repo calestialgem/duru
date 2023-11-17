@@ -1,16 +1,27 @@
 package duru;
 
-public sealed interface Optional<Value> extends Collection<Value>
-  permits
-  Present,
-  Absent
-{
+public final class Optional<Value> implements Collection<Value> {
   public static <Value> Optional<Value> present(Value value) {
-    return new Present<>(value);
+    return new Optional<>(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <Value> Optional<Value> absent() {
-    return (Optional<Value>) new Absent();
+    return new Optional<>(null);
+  }
+
+  private final Value value;
+
+  private Optional(Value value) {
+    this.value = value;
+  }
+
+  @Override
+  public int length() {
+    return value == null ? 0 : 1;
+  }
+
+  @Override
+  public Value get(int index) {
+    return value;
   }
 }
