@@ -25,4 +25,20 @@ public record Set<Member>(List<Member> members, List<Integer> buckets)
     }
     return false;
   }
+
+  @Override
+  public String toString() {
+    var string = new StringBuilder();
+    string.append('{');
+    if (!isEmpty()) {
+      string.append(getFirst());
+      for (var i = 1; i < length(); i++) {
+        string.append(',');
+        string.append(' ');
+        string.append(get(i));
+      }
+    }
+    string.append('}');
+    return string.toString();
+  }
 }
