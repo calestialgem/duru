@@ -36,7 +36,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
   public boolean contains(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         return false;
@@ -52,7 +52,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
   public Optional<Value> get(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         return Optional.absent();
@@ -72,7 +72,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
   public boolean add(Key key, Value value) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         buckets.set(bucket, keys.length());
@@ -93,7 +93,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
   public boolean remove(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         return false;
@@ -115,7 +115,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
       var key  = keys.get(k);
       var hash = key.hashCode();
       for (var i = 0; i < buckets.length(); i++) {
-        var bucket = (hash + i) % buckets.length();
+        var bucket = Math.floorMod(hash + i, buckets.length());
         var index  = buckets.get(bucket);
         if (index == -1) {
           buckets.set(bucket, k);

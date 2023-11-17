@@ -27,7 +27,7 @@ public final class SetBuffer<Member> implements SetLike<Member> {
   public boolean contains(Member member) {
     var hash = member.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         return false;
@@ -47,7 +47,7 @@ public final class SetBuffer<Member> implements SetLike<Member> {
   public boolean add(Member member) {
     var hash = member.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         buckets.set(bucket, members.length());
@@ -66,7 +66,7 @@ public final class SetBuffer<Member> implements SetLike<Member> {
   public boolean remove(Member member) {
     var hash = member.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         return false;
@@ -87,7 +87,7 @@ public final class SetBuffer<Member> implements SetLike<Member> {
       var member = members.get(m);
       var hash   = member.hashCode();
       for (var i = 0; i < buckets.length(); i++) {
-        var bucket = (hash + i) % buckets.length();
+        var bucket = Math.floorMod(hash + i, buckets.length());
         var index  = buckets.get(bucket);
         if (index == -1) {
           buckets.set(bucket, m);

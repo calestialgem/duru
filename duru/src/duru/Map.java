@@ -20,7 +20,7 @@ public record Map<Key, Value>(
   public boolean contains(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         return false;
@@ -36,7 +36,7 @@ public record Map<Key, Value>(
   public Optional<Value> get(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
-      var bucket = (hash + i) % buckets.length();
+      var bucket = Math.floorMod(hash + i, buckets.length());
       var index  = buckets.get(bucket);
       if (index == -1) {
         return Optional.absent();
