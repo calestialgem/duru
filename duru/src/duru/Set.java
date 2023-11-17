@@ -19,10 +19,12 @@ public record Set<Member>(List<Member> members, List<Integer> buckets)
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = (hash + i) % buckets.length();
       var index  = buckets.get(bucket);
-      if (index == -1)
+      if (index == -1) {
         return false;
-      if (member.equals(members.get(index)))
+      }
+      if (member.equals(members.get(index))) {
         return true;
+      }
     }
     return false;
   }

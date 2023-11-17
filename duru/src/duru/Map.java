@@ -22,10 +22,12 @@ public record Map<Key, Value>(
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = (hash + i) % buckets.length();
       var index  = buckets.get(bucket);
-      if (index == -1)
+      if (index == -1) {
         return false;
-      if (key.equals(keys.get(index)))
+      }
+      if (key.equals(keys.get(index))) {
         return true;
+      }
     }
     return false;
   }
@@ -36,10 +38,12 @@ public record Map<Key, Value>(
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = (hash + i) % buckets.length();
       var index  = buckets.get(bucket);
-      if (index == -1)
+      if (index == -1) {
         return Optional.absent();
-      if (key.equals(keys.get(index)))
+      }
+      if (key.equals(keys.get(index))) {
         return Optional.present(values.get(index));
+      }
     }
     return Optional.absent();
   }

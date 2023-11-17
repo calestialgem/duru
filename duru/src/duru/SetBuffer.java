@@ -29,10 +29,12 @@ public final class SetBuffer<Member> implements SetLike<Member> {
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = (hash + i) % buckets.length();
       var index  = buckets.get(bucket);
-      if (index == -1)
+      if (index == -1) {
         return false;
-      if (member.equals(members.get(index)))
+      }
+      if (member.equals(members.get(index))) {
         return true;
+      }
     }
     return false;
   }
@@ -66,8 +68,9 @@ public final class SetBuffer<Member> implements SetLike<Member> {
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = (hash + i) % buckets.length();
       var index  = buckets.get(bucket);
-      if (index == -1)
+      if (index == -1) {
         return false;
+      }
       if (member.equals(members.get(index))) {
         members.remove(index);
         rehash();

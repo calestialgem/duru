@@ -28,8 +28,9 @@ public final class ConfigurationLexer {
         case '/' -> {
           if (hasCharacter() && getCharacter() == '/') {
             advance();
-            while (hasCharacter() && getCharacter() != '\n')
+            while (hasCharacter() && getCharacter() != '\n') {
               advance();
+            }
             break;
           }
           if (!hasCharacter() || getCharacter() != '*') {
@@ -43,8 +44,9 @@ public final class ConfigurationLexer {
             if (character == '*' && hasCharacter() && getCharacter() == '/') {
               advance();
               blockComments--;
-              if (blockComments == 0)
+              if (blockComments == 0) {
                 break;
+              }
             }
             if (character == '/' && hasCharacter() && getCharacter() == '*') {
               advance();

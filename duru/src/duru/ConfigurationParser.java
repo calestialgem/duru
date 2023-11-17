@@ -53,8 +53,9 @@ public final class ConfigurationParser {
 
   private Optional<ConfigurationNode.Executable> parseExecutable() {
     var begin = index;
-    if (parse(ConfigurationToken.Executable.class).isEmpty())
+    if (parse(ConfigurationToken.Executable.class).isEmpty()) {
       return Optional.absent();
+    }
     var name =
       expect(
         this::parsePackageName,
@@ -68,8 +69,9 @@ public final class ConfigurationParser {
 
   private Optional<ConfigurationNode.Library> parseLibrary() {
     var begin = index;
-    if (parse(ConfigurationToken.Library.class).isEmpty())
+    if (parse(ConfigurationToken.Library.class).isEmpty()) {
       return Optional.absent();
+    }
     var name =
       expect(this::parsePackageName, "name of the library package declaration");
     expect(
@@ -82,8 +84,9 @@ public final class ConfigurationParser {
   private Optional<ConfigurationNode.PackageName> parsePackageName() {
     var begin = index;
     var name  = parse(ConfigurationToken.Identifier.class);
-    if (name.isEmpty())
+    if (name.isEmpty()) {
       return Optional.absent();
+    }
     var subspaces = ListBuffer.<ConfigurationToken.Identifier>create();
     subspaces.add(name.getLast());
     while (!parse(ConfigurationToken.Dot.class).isEmpty()) {
@@ -119,8 +122,9 @@ public final class ConfigurationParser {
     String explanation)
   {
     var value = parserFunction.get();
-    if (!value.isEmpty())
+    if (!value.isEmpty()) {
       return value.getLast();
+    }
     throw Subject.error("expected %s", explanation);
   }
 
@@ -128,11 +132,13 @@ public final class ConfigurationParser {
   private <Token extends ConfigurationToken> Optional<Token> parse(
     Class<Token> tokenClass)
   {
-    if (index == tokens.length())
+    if (index == tokens.length()) {
       return Optional.absent();
+    }
     var token = tokens.get(index);
-    if (!tokenClass.isInstance(token))
+    if (!tokenClass.isInstance(token)) {
       return Optional.absent();
+    }
     index++;
     return Optional.present((Token) token);
   }
@@ -144,8 +150,9 @@ public final class ConfigurationParser {
   {
     for (var parserFunction : parserFunctions) {
       var value = parserFunction.get();
-      if (!value.isEmpty())
+      if (!value.isEmpty()) {
         return (Optional<Value>) value;
+      }
     }
     return Optional.absent();
   }

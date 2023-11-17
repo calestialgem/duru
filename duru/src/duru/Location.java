@@ -21,8 +21,9 @@ public record Location(Source source, int begin, int end) {
     string.append(line);
     string.append('.');
     string.append(column);
-    if (end - begin < 2)
+    if (end - begin < 2) {
       return string.toString();
+    }
     var beginLine = line;
     for (;
       index != end;
