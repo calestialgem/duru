@@ -27,7 +27,7 @@ public final class ListBuffer<Element> implements ListLike<Element> {
   }
 
   public List<Element> toList() {
-    return new List<>(Arrays.copyOf(elements, length));
+    return List.of(0, length, elements);
   }
 
   public void set(int index, Element element) {
