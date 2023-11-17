@@ -1,20 +1,11 @@
 package duru;
 
-public final class Map<Key, Value>
-  implements
-  Collection<Map.Entry<Key, Value>>
+public record Map<Key, Value>(
+  List<Key> keys,
+  List<Value> values,
+  List<Integer> buckets) implements Collection<Map.Entry<Key, Value>>
 {
   public record Entry<Key, Value>(Key key, Value value) {}
-
-  private final List<Key>     keys;
-  private final List<Value>   values;
-  private final List<Integer> buckets;
-
-  private Map(List<Key> keys, List<Value> values, List<Integer> buckets) {
-    this.keys    = keys;
-    this.values  = values;
-    this.buckets = buckets;
-  }
 
   @Override
   public int length() {
@@ -24,5 +15,27 @@ public final class Map<Key, Value>
   @Override
   public Entry<Key, Value> get(int index) {
     return new Entry<>(keys.get(index), values.get(index));
+  }
+
+  @Override
+  public String toString() {
+    var string = new StringBuilder();
+    string.append('{');
+    if (!keys.isEmpty()) {
+      string.append(keys.getFirst());
+      string.append(':');
+      string.append(' ');
+      string.append(values.getFirst());
+      for (var i = 1; i < keys.length(); i++) {
+        string.append(',');
+        string.append(' ');
+        string.append(keys.get(i));
+        string.append(':');
+        string.append(' ');
+        string.append(values.get(i));
+      }
+    }
+    string.append('}');
+    return string.toString();
   }
 }

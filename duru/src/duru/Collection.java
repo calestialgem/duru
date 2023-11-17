@@ -6,6 +6,10 @@ public interface Collection<Element> extends Iterable<Element> {
   int length();
   Element get(int index);
 
+  default Element getFirst() {
+    return get(0);
+  }
+
   default Element get() {
     return get(length() - 1);
   }
