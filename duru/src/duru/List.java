@@ -1,7 +1,5 @@
 package duru;
 
-import java.util.Arrays;
-
 public final class List<Element>
   implements
   ListLike<Element>,
