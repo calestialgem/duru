@@ -4,11 +4,19 @@ public sealed interface ConfigurationNode {
   record Module(
     Location location,
     ConfigurationToken.Identifier name,
-    List<Executable> executables) implements ConfigurationNode
+    List<PackageDeclaration> declarations) implements ConfigurationNode
   {}
 
+  sealed interface PackageDeclaration extends ConfigurationNode {
+    PackageName name();
+  }
+
   record Executable(Location location, PackageName name)
-    implements ConfigurationNode
+    implements PackageDeclaration
+  {}
+
+  record Exports(Location location, PackageName name)
+    implements PackageDeclaration
   {}
 
   record PackageName(

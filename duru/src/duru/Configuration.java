@@ -1,3 +1,7 @@
 package duru;
 
-public record Configuration(String name, Set<String> executables) {}
+public record Configuration(
+  String name,
+  Set<String> executables,
+  Set<String> exports)
+{}
