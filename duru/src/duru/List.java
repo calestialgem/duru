@@ -1,6 +1,8 @@
 package duru;
 
-public record List<Element>(Element[] elements) implements Collection<Element> {
+public record List<Element>(Element[] elements)
+  implements ListLike<Element>, Collection<Element>
+{
   @Override
   public int length() {
     return elements.length;

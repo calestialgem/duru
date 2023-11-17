@@ -2,7 +2,7 @@ package duru;
 
 import java.util.Arrays;
 
-public final class ListBuffer<Element> implements CollectionLike<Element> {
+public final class ListBuffer<Element> implements ListLike<Element> {
   @SuppressWarnings("unchecked")
   public static <Element> ListBuffer<Element> create() {
     return new ListBuffer<>((Element[]) new Object[0], 0);

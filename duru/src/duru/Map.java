@@ -1,14 +1,11 @@
 package duru;
 
-import duru.Map.Entry;
-
 public record Map<Key, Value>(
   List<Key> keys,
   List<Value> values,
-  List<Integer> buckets) implements Collection<Entry<Key, Value>>
+  List<Integer> buckets)
+  implements MapLike<Key, Value>, Collection<Entry<Key, Value>>
 {
-  public record Entry<Key, Value>(Key key, Value value) {}
-
   @Override
   public int length() {
     return keys.length();
@@ -19,6 +16,7 @@ public record Map<Key, Value>(
     return new Entry<>(keys.get(index), values.get(index));
   }
 
+  @Override
   public boolean contains(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
@@ -32,6 +30,7 @@ public record Map<Key, Value>(
     return false;
   }
 
+  @Override
   public Optional<Value> get(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {

@@ -1,6 +1,6 @@
 package duru;
 
-public final class SetBuffer<Member> implements CollectionLike<Member> {
+public final class SetBuffer<Member> implements SetLike<Member> {
   public static <Member> SetBuffer<Member> create() {
     return new SetBuffer<>(ListBuffer.create(), ListBuffer.create());
   }
@@ -23,11 +23,7 @@ public final class SetBuffer<Member> implements CollectionLike<Member> {
     return members.get(index);
   }
 
-  public Set<Member> toSet() {
-    rehash();
-    return new Set<>(members.toList(), buckets.toList());
-  }
-
+  @Override
   public boolean contains(Member member) {
     var hash = member.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
@@ -39,6 +35,11 @@ public final class SetBuffer<Member> implements CollectionLike<Member> {
         return true;
     }
     return false;
+  }
+
+  public Set<Member> toSet() {
+    rehash();
+    return new Set<>(members.toList(), buckets.toList());
   }
 
   public boolean add(Member member) {

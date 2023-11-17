@@ -1,11 +1,6 @@
 package duru;
 
-import duru.Map.Entry;
-
-public final class MapBuffer<Key, Value>
-  implements
-  CollectionLike<Entry<Key, Value>>
-{
+public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
   public static <Key, Value> MapBuffer<Key, Value> create() {
     return new MapBuffer<>(
       ListBuffer.create(),
@@ -37,11 +32,7 @@ public final class MapBuffer<Key, Value>
     return new Entry<>(keys.get(index), values.get(index));
   }
 
-  public Map<Key, Value> toMap() {
-    rehash();
-    return new Map<>(keys.toList(), values.toList(), buckets.toList());
-  }
-
+  @Override
   public boolean contains(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
@@ -55,6 +46,7 @@ public final class MapBuffer<Key, Value>
     return false;
   }
 
+  @Override
   public Optional<Value> get(Key key) {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
@@ -66,6 +58,11 @@ public final class MapBuffer<Key, Value>
         return Optional.present(values.get(index));
     }
     return Optional.absent();
+  }
+
+  public Map<Key, Value> toMap() {
+    rehash();
+    return new Map<>(keys.toList(), values.toList(), buckets.toList());
   }
 
   public boolean add(Key key, Value value) {

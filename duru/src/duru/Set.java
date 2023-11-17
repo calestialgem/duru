@@ -1,7 +1,7 @@
 package duru;
 
 public record Set<Member>(List<Member> members, List<Integer> buckets)
-  implements Collection<Member>
+  implements SetLike<Member>, Collection<Member>
 {
   @Override
   public int length() {
@@ -13,6 +13,7 @@ public record Set<Member>(List<Member> members, List<Integer> buckets)
     return members.get(index);
   }
 
+  @Override
   public boolean contains(Member member) {
     var hash = member.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
