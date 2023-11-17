@@ -17,7 +17,7 @@ public final class ListBuffer<Element> {
   }
 
   public List<Element> toList() {
-    return List.of(length, elements);
+    return new List<>(Arrays.copyOf(elements, length));
   }
 
   public int length() {
