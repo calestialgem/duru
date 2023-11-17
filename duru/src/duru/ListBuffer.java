@@ -16,8 +16,24 @@ public final class ListBuffer<Element> {
     this.length   = length;
   }
 
+  public List<Element> toList() {
+    return List.of(length, elements);
+  }
+
+  public int length() {
+    return length;
+  }
+
   public Element get() {
-    return elements[length - 1];
+    return get(length - 1);
+  }
+
+  public Element get(int index) {
+    return elements[index];
+  }
+
+  public void set(int index, Element element) {
+    elements[index] = element;
   }
 
   public void add(Element element) {
@@ -26,13 +42,25 @@ public final class ListBuffer<Element> {
     length++;
   }
 
-  public Element remove() {
-    length--;
-    return elements[length];
+  public void fill(Element element, int amount) {
+    reserve(amount);
+    Arrays.fill(elements, length, length + amount, element);
+    length += amount;
   }
 
-  public List<Element> toList() {
-    return List.of(length, elements);
+  public Element remove() {
+    return remove(length - 1);
+  }
+
+  public Element remove(int index) {
+    var element = elements[index];
+    length--;
+    System.arraycopy(elements, index + 1, elements, index, length - index);
+    return element;
+  }
+
+  public void clear() {
+    length = 0;
   }
 
   private void reserve(int amount) {
