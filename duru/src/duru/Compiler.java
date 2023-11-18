@@ -33,11 +33,6 @@ public final class Compiler {
 
   private Semantic.Module compileModule(Path directory) {
     var configuration = resolveConfiguration(directory.resolve("module.duru"));
-    var name          = directory.getFileName().toString();
-    if (!name.equals(configuration.name())) {
-      throw Subject
-        .error("module `%s` is configured as `%s`", name, configuration.name());
-    }
     throw Subject.unimplemented();
   }
 

@@ -10,7 +10,7 @@ public final class Text {
 
   public static boolean isReservedForConfiguration(String name) {
     return switch (name) {
-      case "module", "executable", "library" -> true;
+      case "executable", "library" -> true;
       default -> false;
     };
   }

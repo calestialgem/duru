@@ -1,1 +1,1 @@
-Configuration[name=testmodule, executables={testmodule}, libraries={}]
+Configuration[executables={testmodule}, libraries={}]

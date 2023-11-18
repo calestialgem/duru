@@ -3,7 +3,7 @@ package duru;
 import java.util.function.Supplier;
 
 public final class ConfigurationParser {
-  public static ConfigurationNode.Module parse(
+  public static List<ConfigurationNode.PackageDeclaration> parse(
     List<ConfigurationToken> tokens)
   {
     var parser = new ConfigurationParser(tokens);
@@ -17,34 +17,16 @@ public final class ConfigurationParser {
     this.tokens = tokens;
   }
 
-  private ConfigurationNode.Module parse() {
+  private List<ConfigurationNode.PackageDeclaration> parse() {
     index = 0;
-    expect(
-      ConfigurationToken.Module.class,
-      "keyword of the module declaration");
-    var name =
-      expect(
-        ConfigurationToken.Identifier.class,
-        "name of the module declaration");
-    expect(
-      ConfigurationToken.OpeningBrace.class,
-      "package list opener `{` of the module declaration");
     var declarations =
       ListBuffer.<ConfigurationNode.PackageDeclaration>create();
-    while (parse(ConfigurationToken.ClosingBrace.class).isEmpty()) {
+    while (index != tokens.length()) {
       var declaration =
-        expect(
-          this::parsePackageDeclaration,
-          "package declaration or the package list closer `}` of the module declaration");
+        expect(this::parsePackageDeclaration, "package declaration");
       declarations.add(declaration);
     }
-    if (index != tokens.length()) {
-      throw Subject.error("expected the end of the file");
-    }
-    return new ConfigurationNode.Module(
-      location(0),
-      name,
-      declarations.toList());
+    return declarations.toList();
   }
 
   private Optional<ConfigurationNode.PackageDeclaration> parsePackageDeclaration() {

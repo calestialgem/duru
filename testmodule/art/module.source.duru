@@ -1,4 +1,2 @@
-Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=module testmodule {
-  executable testmodule;
-}
+Source[path=C:\Users\Cem\duru\testmodule\module.duru, contents=executable testmodule;
 ]

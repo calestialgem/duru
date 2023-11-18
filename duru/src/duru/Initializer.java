@@ -60,10 +60,8 @@ public final class Initializer {
 
   private void createConfiguration() {
     Persistance.store(directory.resolve("module.duru"), """
-module %s {
-  executable %s;
-}
-""".formatted(name, name));
+executable %s;
+""".formatted(name));
   }
 
   private void createMainSource() {

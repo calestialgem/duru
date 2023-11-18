@@ -1,12 +1,6 @@
 package duru;
 
 public sealed interface ConfigurationNode {
-  record Module(
-    Location location,
-    ConfigurationToken.Identifier name,
-    List<PackageDeclaration> declarations) implements ConfigurationNode
-  {}
-
   sealed interface PackageDeclaration extends ConfigurationNode {
     PackageName name();
   }

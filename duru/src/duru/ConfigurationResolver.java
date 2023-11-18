@@ -1,23 +1,27 @@
 package duru;
 
 public final class ConfigurationResolver {
-  public static Configuration resolve(ConfigurationNode.Module node) {
-    var resolver = new ConfigurationResolver(node);
+  public static Configuration resolve(
+    List<ConfigurationNode.PackageDeclaration> declarations)
+  {
+    var resolver = new ConfigurationResolver(declarations);
     return resolver.resolve();
   }
 
-  private final ConfigurationNode.Module node;
-  private SetBuffer<String>              executables;
-  private SetBuffer<String>              libraries;
+  private final List<ConfigurationNode.PackageDeclaration> declarations;
+  private SetBuffer<String>                                executables;
+  private SetBuffer<String>                                libraries;
 
-  private ConfigurationResolver(ConfigurationNode.Module node) {
-    this.node = node;
+  private ConfigurationResolver(
+    List<ConfigurationNode.PackageDeclaration> declarations)
+  {
+    this.declarations = declarations;
   }
 
   private Configuration resolve() {
     executables = SetBuffer.create();
     libraries   = SetBuffer.create();
-    for (var declaration : node.declarations()) {
+    for (var declaration : declarations) {
       switch (declaration) {
         case ConfigurationNode.Executable executable -> {
           var text = text(executable.name());
@@ -31,10 +35,7 @@ public final class ConfigurationResolver {
         }
       }
     }
-    return new Configuration(
-      node.name().text(),
-      executables.toSet(),
-      libraries.toSet());
+    return new Configuration(executables.toSet(), libraries.toSet());
   }
 
   private String text(ConfigurationNode.PackageName name) {

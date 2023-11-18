@@ -57,8 +57,6 @@ public final class ConfigurationLexer {
             throw Subject.error("incomplete block comment");
           }
         }
-        case '{' -> tokens.add(new ConfigurationToken.OpeningBrace(location()));
-        case '}' -> tokens.add(new ConfigurationToken.ClosingBrace(location()));
         case ';' -> tokens.add(new ConfigurationToken.Semicolon(location()));
         case '.' -> tokens.add(new ConfigurationToken.Dot(location()));
         default -> {
@@ -68,8 +66,6 @@ public final class ConfigurationLexer {
             }
             var text = source.contents().substring(begin, index);
             switch (text) {
-              case "module" ->
-                tokens.add(new ConfigurationToken.Module(location()));
               case "executable" ->
                 tokens.add(new ConfigurationToken.Executable(location()));
               case "library" ->

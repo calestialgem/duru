@@ -1,1 +1,1 @@
-[Module[location=1.1-7], Identifier[location=1.8-18, text=testmodule], OpeningBrace[location=1.19], Executable[location=2.3-13], Identifier[location=2.14-24, text=testmodule], Semicolon[location=2.24], ClosingBrace[location=3.1]]
+[Executable[location=1.1-11], Identifier[location=1.12-22, text=testmodule], Semicolon[location=1.22]]
