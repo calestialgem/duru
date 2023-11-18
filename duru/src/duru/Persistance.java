@@ -30,6 +30,12 @@ public final class Persistance {
     }
   }
 
+  public static void ensure(Path directory) {
+    if (Files.exists(directory))
+      return;
+    create(directory);
+  }
+
   public static void recreate(Path directory) {
     if (Files.exists(directory)) {
       delete(directory);
