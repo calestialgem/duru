@@ -23,16 +23,16 @@ public final class Text {
     return isLetter(codepoint) || isUnderscore(codepoint);
   }
 
-  private static boolean isLetter(int codepoint) {
+  public static boolean isLetter(int codepoint) {
     return codepoint >= 'a' && codepoint <= 'z'
       || codepoint >= 'A' && codepoint <= 'Z';
   }
 
-  private static boolean isUnderscore(int codepoint) {
+  public static boolean isUnderscore(int codepoint) {
     return codepoint == '_';
   }
 
-  private static boolean isDigit(int codepoint) {
+  public static boolean isDigit(int codepoint) {
     return codepoint >= '0' && codepoint <= '9';
   }
 
