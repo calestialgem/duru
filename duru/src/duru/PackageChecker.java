@@ -46,7 +46,15 @@ public final class PackageChecker {
     };
   }
 
-  private Semantic.Symbol checkSymbol(String name) {
-    return SymbolChecker.check(resolution.declarations().get(name).getFirst());
+  private Semantic.Symbol checkSymbol(String symbolName) {
+    return SymbolChecker
+      .check(
+        this::accessSymbol,
+        name,
+        resolution.declarations().get(symbolName).getFirst());
+  }
+
+  private Semantic.Symbol accessSymbol(String symbolName) {
+    throw Subject.unimplemented();
   }
 }

@@ -53,6 +53,13 @@ public sealed interface Semantic {
     }
   }
 
+  record Boolean() implements Type, Builtin {
+    @Override
+    public String name() {
+      return "Boolean";
+    }
+  }
+
   record Natural32() implements Type, Builtin {
     @Override
     public String name() {
