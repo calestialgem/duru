@@ -8,10 +8,12 @@ public final class Compiler {
     return compiler.compile();
   }
 
-  private final Path                            directory;
-  private final Path                            libraries;
-  private String                                main;
-  private AcyclicCache<String, Semantic.Module> modules;
+  private final Path                                         directory;
+  private final Path                                         libraries;
+  private String                                             main;
+  private AcyclicCache<String, Semantic.Module>              modules;
+  private ListBuffer<String>                                 moduleNameStack;
+  private ListBuffer<AcyclicCache<String, Semantic.Package>> packageCacheStack;
 
   private Compiler(Path directory, Path libraries) {
     this.directory = directory;
@@ -19,8 +21,10 @@ public final class Compiler {
   }
 
   private Semantic.Target compile() {
-    main    = directory.getFileName().toString();
-    modules = AcyclicCache.create(this::compileModule);
+    main              = directory.getFileName().toString();
+    modules           = AcyclicCache.create(this::compileModule);
+    moduleNameStack   = ListBuffer.create();
+    packageCacheStack = ListBuffer.create();
     modules.get(main);
     return new Semantic.Target(main, modules.getAll());
   }
@@ -33,6 +37,63 @@ public final class Compiler {
 
   private Semantic.Module compileModule(Path directory) {
     var configuration = resolveConfiguration(directory.resolve("module.duru"));
+    moduleNameStack.add(directory.getFileName().toString());
+    var sources = directory.resolve("src");
+    packageCacheStack
+      .add(
+        AcyclicCache
+          .create(name -> compilePackage(packageDirectory(sources, name))));
+    for (var executable : configuration.executables()) {
+      var main =
+        packageCacheStack.getLast().get(executable).symbols().get("main");
+      if (main.isEmpty() || !(main.getFirst() instanceof Semantic.Proc proc)) {
+        throw Subject
+          .error(
+            "executable package `%s` does not have a main procedure",
+            executable);
+      }
+      if (!proc.parameters().isEmpty())
+        throw Subject
+          .error(
+            "executable package `%s` has a main procedure with parameters",
+            executable);
+      if (!proc.returnType().isEmpty())
+        throw Subject
+          .error(
+            "executable package `%s` has a main procedure with a return type",
+            executable);
+    }
+    for (var library : configuration.libraries()) {
+      var main = packageCacheStack.getLast().get(library).symbols().get("main");
+      if (!main.isEmpty() && main.getFirst() instanceof Semantic.Proc)
+        throw Subject
+          .error("library package `%s` has a main procedure", library);
+    }
+    return new Semantic.Module(
+      moduleNameStack.removeLast(),
+      packageCacheStack.removeLast().getAll(),
+      configuration.executables(),
+      configuration.libraries());
+  }
+
+  private Semantic.Package getPackage(String name) {
+    String module;
+    {
+      var index = name.indexOf('.');
+      if (index == -1) {
+        module = name;
+      }
+      else {
+        module = name.substring(index);
+      }
+    }
+    if (!module.equals(moduleNameStack.getLast())) {
+      return modules.get(module).packages().get(name).getFirst();
+    }
+    return packageCacheStack.getLast().get(name);
+  }
+
+  private Semantic.Package compilePackage(Path directory) {
     throw Subject.unimplemented();
   }
 
@@ -53,5 +114,21 @@ public final class Compiler {
   private void record(Path artifacts, Object name, Object record) {
     var path = artifacts.resolve("%s.duru".formatted(name));
     Persistance.store(path, record);
+  }
+
+  private Path packageDirectory(Path root, String name) {
+    var directory = root;
+    var index     = name.indexOf('.');
+    while (index != -1) {
+      var next = name.indexOf('.', index + 1);
+      if (next == -1) {
+        directory = directory.resolve(name.substring(index + 1));
+      }
+      else {
+        directory = directory.resolve(name.substring(index + 1, next));
+      }
+      index = next;
+    }
+    return directory;
   }
 }

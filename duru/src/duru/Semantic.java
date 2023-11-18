@@ -6,14 +6,12 @@ public sealed interface Semantic {
   record Module(
     String name,
     Map<String, Package> packages,
-    Set<String> executables) implements Semantic
+    Set<String> executables,
+    Set<String> libraries) implements Semantic
   {}
 
-  record Package(
-    boolean isExecutable,
-    String name,
-    Map<String, Symbol> symbols,
-    Set<String> publics) implements Semantic
+  record Package(String name, Map<String, Symbol> symbols, Set<String> publics)
+    implements Semantic
   {}
 
   sealed interface Symbol extends Semantic {
