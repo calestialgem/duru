@@ -23,7 +23,7 @@ public final class AcyclicCache<Key, Value> {
     this.current  = current;
   }
 
-  public Value map(Key key) {
+  public Value get(Key key) {
     var cached = cache.get(key);
     if (!cached.isEmpty())
       return cached.getFirst();
