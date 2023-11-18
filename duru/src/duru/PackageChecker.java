@@ -18,6 +18,7 @@ public final class PackageChecker {
   private final PackageType                     type;
   private final String                          name;
   private AcyclicCache<String, Semantic.Symbol> symbols;
+  private Resolution                            resolution;
 
   private PackageChecker(
     Path sources,
@@ -32,8 +33,8 @@ public final class PackageChecker {
   }
 
   private Semantic.Package check() {
-    symbols = AcyclicCache.create(this::checkSymbol);
-    var resolution = PackageResolver.resolve(sources, artifacts, name);
+    symbols    = AcyclicCache.create(this::checkSymbol);
+    resolution = PackageResolver.resolve(sources, artifacts, name);
     Persistance.record(artifacts, resolution, name, "resolution");
     for (var declaration : resolution.declarations().keys())
       symbols.get(declaration);
@@ -46,6 +47,6 @@ public final class PackageChecker {
   }
 
   private Semantic.Symbol checkSymbol(String name) {
-    throw Subject.unimplemented();
+    return SymbolChecker.check(resolution.declarations().get(name).getFirst());
   }
 }
