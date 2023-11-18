@@ -21,6 +21,16 @@ public final class Persistance {
     return Path.of(path).toAbsolutePath().normalize();
   }
 
+  public static void record(Path artifacts, Object record, Object... names) {
+    var string = new StringBuilder();
+    for (var name : names) {
+      string.append(name);
+      string.append('.');
+    }
+    string.append("duru");
+    store(artifacts.resolve(string.toString()), record);
+  }
+
   public static void store(Path file, Object text) {
     try {
       Files.writeString(file, text.toString());
