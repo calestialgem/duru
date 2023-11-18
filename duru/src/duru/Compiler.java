@@ -13,7 +13,9 @@ public final class Compiler {
   private String                                             main;
   private AcyclicCache<String, Semantic.Module>              modules;
   private ListBuffer<String>                                 moduleNameStack;
+  private ListBuffer<Path>                                   directoryStack;
   private ListBuffer<AcyclicCache<String, Semantic.Package>> packageCacheStack;
+  private ListBuffer<AcyclicCache<String, Semantic.Symbol>>  symbolCacheStack;
 
   private Compiler(Path directory, Path libraries) {
     this.directory = directory;
@@ -24,7 +26,9 @@ public final class Compiler {
     main              = directory.getFileName().toString();
     modules           = AcyclicCache.create(this::compileModule);
     moduleNameStack   = ListBuffer.create();
+    directoryStack    = ListBuffer.create();
     packageCacheStack = ListBuffer.create();
+    symbolCacheStack  = ListBuffer.create();
     modules.get(main);
     return new Semantic.Target(main, modules.getAll());
   }
@@ -36,13 +40,10 @@ public final class Compiler {
   }
 
   private Semantic.Module compileModule(Path directory) {
-    var configuration = resolveConfiguration(directory.resolve("module.duru"));
+    directoryStack.add(directory);
     moduleNameStack.add(directory.getFileName().toString());
-    var sources = directory.resolve("src");
-    packageCacheStack
-      .add(
-        AcyclicCache
-          .create(name -> compilePackage(packageDirectory(sources, name))));
+    packageCacheStack.add(AcyclicCache.create(this::compilePackage));
+    var configuration = resolveConfiguration(directory.resolve("module.duru"));
     for (var executable : configuration.executables()) {
       var main =
         packageCacheStack.getLast().get(executable).symbols().get("main");
@@ -69,50 +70,70 @@ public final class Compiler {
         throw Subject
           .error("library package `%s` has a main procedure", library);
     }
+    directoryStack.removeLast();
     return new Semantic.Module(
       moduleNameStack.removeLast(),
-      packageCacheStack.removeLast().getAll(),
-      configuration.executables(),
-      configuration.libraries());
+      packageCacheStack.removeLast().getAll());
   }
 
   private Semantic.Package getPackage(String name) {
-    String module;
+    String moduleName;
     {
       var index = name.indexOf('.');
       if (index == -1) {
-        module = name;
+        moduleName = name;
       }
       else {
-        module = name.substring(index);
+        moduleName = name.substring(index);
       }
     }
-    if (!module.equals(moduleNameStack.getLast())) {
-      return modules.get(module).packages().get(name).getFirst();
+    if (!moduleName.equals(moduleNameStack.getLast())) {
+      var package_ = modules.get(moduleName).packages().get(name);
+      if (package_.isEmpty())
+        throw Subject
+          .error("there is no package `%s` in module `%s`", name, moduleName);
+      if (!(package_.getFirst() instanceof Semantic.Library library))
+        throw Subject
+          .error(
+            "package `%s` in module `%s` is not a library",
+            name,
+            moduleName);
+      return library;
     }
     return packageCacheStack.getLast().get(name);
   }
 
-  private Semantic.Package compilePackage(Path directory) {
+  private Semantic.Package compilePackage(String name) {
+    var sources   = directoryStack.getLast().resolve("src");
+    var artifacts = directoryStack.getLast().resolve("art");
+    var directory = packageDirectory(sources, name);
+    symbolCacheStack.add(AcyclicCache.create(null));
+    for (var file : Persistance.list(directory)) {
+      var source       = new Source(file, Persistance.load(file));
+      var fullFilename = file.getFileName().toString();
+      var filename     =
+        fullFilename.substring(0, fullFilename.length() - ".duru".length());
+      record(artifacts, source, name, filename, "source");
+    }
     throw Subject.unimplemented();
   }
 
   private Configuration resolveConfiguration(Path path) {
-    var artifacts = path.getParent().resolve("art");
+    var artifacts = directoryStack.getLast().resolve("art");
     Persistance.ensure(artifacts);
     var source = new Source(path, Persistance.load(path));
-    record(artifacts, "module.source", source);
+    record(artifacts, source, "module", "source");
     var tokens = ConfigurationLexer.lex(source);
-    record(artifacts, "module.tokens", tokens);
+    record(artifacts, tokens, "module", "tokens");
     var node = ConfigurationParser.parse(tokens);
-    record(artifacts, "module.node", node);
+    record(artifacts, node, "module", "node");
     var resolution = ConfigurationResolver.resolve(node);
-    record(artifacts, "module.resolution", resolution);
+    record(artifacts, resolution, "module", "resolution");
     return resolution;
   }
 
-  private void record(Path artifacts, Object name, Object record) {
-    var path = artifacts.resolve("%s.duru".formatted(name));
+  private void record(Path artifacts, Object record, String... names) {
+    var path = artifacts.resolve("%s.duru".formatted(String.join(".", names)));
     Persistance.store(path, record);
   }
 

@@ -3,15 +3,23 @@ package duru;
 public sealed interface Semantic {
   record Target(String main, Map<String, Module> modules) {}
 
-  record Module(
-    String name,
-    Map<String, Package> packages,
-    Set<String> executables,
-    Set<String> libraries) implements Semantic
+  record Module(String name, Map<String, Package> packages)
+    implements Semantic
   {}
 
-  record Package(String name, Map<String, Symbol> symbols, Set<String> publics)
-    implements Semantic
+  sealed interface Package extends Semantic {
+    String name();
+    Map<String, Symbol> symbols();
+  }
+
+  record Executable(String name, Map<String, Symbol> symbols)
+    implements Package
+  {}
+
+  record Library(String name, Map<String, Symbol> symbols) implements Package {}
+
+  record Implementation(String name, Map<String, Symbol> symbols)
+    implements Package
   {}
 
   sealed interface Symbol extends Semantic {

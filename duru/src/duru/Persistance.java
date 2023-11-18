@@ -8,6 +8,15 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public final class Persistance {
+  public static List<Path> list(Path directory) {
+    try {
+      return List.of(Files.list(directory).toArray(Path[]::new));
+    }
+    catch (IOException cause) {
+      throw Subject.failure(cause, "cannot list entries of `%s`", directory);
+    }
+  }
+
   public static Path path(String path) {
     return Path.of(path).toAbsolutePath().normalize();
   }

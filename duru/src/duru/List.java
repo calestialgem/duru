@@ -5,6 +5,11 @@ public final class List<Element>
   ListLike<Element>,
   Collection<Element>
 {
+  @SafeVarargs
+  public static <Element> List<Element> of(Element... elements) {
+    return of(0, elements.length, elements);
+  }
+
   @SuppressWarnings("unchecked")
   public static <Element> List<Element> of(
     int offset,
