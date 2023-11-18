@@ -31,6 +31,8 @@ public sealed interface Token {
 
   record If(Location location) implements Token {}
 
+  record Else(Location location) implements Token {}
+
   record Return(Location location) implements Token {}
 
   record Identifier(Location location, String text) implements Token {}

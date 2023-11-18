@@ -135,6 +135,7 @@ public final class SourceLexer {
               case "struct" -> tokens.add(new Token.Struct(location()));
               case "var" -> tokens.add(new Token.Var(location()));
               case "if" -> tokens.add(new Token.If(location()));
+              case "else" -> tokens.add(new Token.Else(location()));
               case "return" -> tokens.add(new Token.Return(location()));
               default -> tokens.add(new Token.Identifier(location(), text));
             }

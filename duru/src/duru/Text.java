@@ -3,7 +3,7 @@ package duru;
 public final class Text {
   public static boolean isReserved(String name) {
     return switch (name) {
-      case "public", "proc", "struct", "var", "if", "return" -> true;
+      case "public", "proc", "struct", "var", "if", "else", "return" -> true;
       default -> false;
     };
   }
