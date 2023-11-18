@@ -79,7 +79,7 @@ public final class SourceLexer {
             if (character == '"')
               break;
             if (character != '\\') {
-              value.append(character);
+              value.appendCodePoint(character);
               continue;
             }
             if (!hasCharacter())
@@ -87,7 +87,7 @@ public final class SourceLexer {
             character = getCharacter();
             advance();
             switch (character) {
-              case '\\', '"' -> value.append(character);
+              case '\\', '"' -> value.appendCodePoint(character);
               case 't' -> value.append('\t');
               case 'r' -> value.append('\r');
               case 'n' -> value.append('\n');
