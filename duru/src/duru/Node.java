@@ -69,24 +69,35 @@ public sealed interface Node {
 
   sealed interface Expression extends Node {}
 
-  record LessThan(Location location, Exception left, Expression right)
-    implements Expression
+  sealed interface Precedence01 extends Expression {}
+
+  record LessThan(Location location, Precedence01 left, Precedence01 right)
+    implements Precedence01
   {}
+
+  sealed interface Precedence00 extends Precedence01 {}
+
+  record Access(Mention mention) implements Precedence00 {
+    @Override
+    public Location location() {
+      return mention.location();
+    }
+  }
 
   record Invocation(
     Location location,
     Mention procedure,
-    List<Expression> arguments) implements Expression
+    List<Expression> arguments) implements Precedence00
   {}
 
-  record NaturalConstant(Token.NaturalConstant value) implements Expression {
+  record NaturalConstant(Token.NaturalConstant value) implements Precedence00 {
     @Override
     public Location location() {
       return value.location();
     }
   }
 
-  record StringConstant(Token.StringConstant value) implements Expression {
+  record StringConstant(Token.StringConstant value) implements Precedence00 {
     @Override
     public Location location() {
       return value.location();
@@ -95,7 +106,7 @@ public sealed interface Node {
 
   record Mention(
     Location location,
-    Optional<Token.Identifier> packageName,
+    List<Token.Identifier> subspaces,
     Token.Identifier name) implements Node
   {}
 
