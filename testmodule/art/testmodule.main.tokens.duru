@@ -1,0 +1,2 @@
+[Proc[location=1.1-5], Identifier[location=1.6-10, text=main], OpeningParenthesis[location=1.10], ClosingParenthesis[location=1.11], OpeningBrace[location=1.13], Identifier[location=2.3-7, text=duru], Dot[location=2.7], Identifier[location=2.8-13, text=print], OpeningParenthesis[location=2.13], StringConstant[location=2.14-31, value=7210110810811144328711111410810033
+], ClosingParenthesis[location=2.31], Semicolon[location=2.32], ClosingBrace[location=3.1]]
