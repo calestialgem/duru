@@ -1,5 +1,6 @@
 package duru;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class SourceParser {
@@ -196,10 +197,7 @@ public final class SourceParser {
   }
 
   private Optional<Node.Expression> parseExpression() {
-    var lowerPrecedence = parsePrecedence01();
-    if (lowerPrecedence.isEmpty())
-      return Optional.absent();
-    return Optional.present(lowerPrecedence.getFirst());
+    return parsePrecedence01().transform(Function.identity());
   }
 
   private Optional<Node.Precedence01> parsePrecedence01() {
@@ -223,17 +221,13 @@ public final class SourceParser {
   }
 
   private Optional<Node.NaturalConstant> parseNaturalConstant() {
-    var value = parse(Token.NaturalConstant.class);
-    if (value.isEmpty())
-      return Optional.absent();
-    return Optional.present(new Node.NaturalConstant(value.getFirst()));
+    return parse(Token.NaturalConstant.class)
+      .transform(Node.NaturalConstant::new);
   }
 
   private Optional<Node.StringConstant> parseStringConstant() {
-    var value = parse(Token.StringConstant.class);
-    if (value.isEmpty())
-      return Optional.absent();
-    return Optional.present(new Node.StringConstant(value.getFirst()));
+    return parse(Token.StringConstant.class)
+      .transform(Node.StringConstant::new);
   }
 
   private Optional<Node.Precedence00> parseAccessOrInvocation() {
