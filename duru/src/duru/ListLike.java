@@ -1,3 +1,8 @@
 package duru;
 
-public interface ListLike<Element> extends CollectionLike<Element> {}
+import java.util.function.Function;
+
+public interface ListLike<Element> extends CollectionLike<Element> {
+  @Override
+  <U> ListLike<U> transform(Function<Element, U> transformer);
+}

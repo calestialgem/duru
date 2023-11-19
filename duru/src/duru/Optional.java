@@ -1,5 +1,7 @@
 package duru;
 
+import java.util.function.Function;
+
 public record Optional<Value>(Value value) implements Collection<Value> {
   public static <Value> Optional<Value> present(Value value) {
     return new Optional<>(value);
@@ -28,5 +30,12 @@ public record Optional<Value>(Value value) implements Collection<Value> {
     }
     string.append(']');
     return string.toString();
+  }
+
+  @Override
+  public <U> Optional<U> transform(Function<Value, U> transformer) {
+    if (isEmpty())
+      return absent();
+    return present(transformer.apply(value));
   }
 }

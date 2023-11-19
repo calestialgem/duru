@@ -1,5 +1,7 @@
 package duru;
 
+import java.util.function.Function;
+
 public record Set<Member>(List<Member> members, List<Integer> buckets)
   implements SetLike<Member>, Collection<Member>
 {
@@ -27,6 +29,11 @@ public record Set<Member>(List<Member> members, List<Integer> buckets)
       }
     }
     return false;
+  }
+
+  @Override
+  public <U> List<U> transform(Function<Member, U> transformer) {
+    return members.transform(transformer);
   }
 
   @Override

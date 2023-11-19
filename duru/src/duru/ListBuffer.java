@@ -1,6 +1,7 @@
 package duru;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 public final class ListBuffer<Element> implements ListLike<Element> {
   @SuppressWarnings("unchecked")
@@ -26,8 +27,22 @@ public final class ListBuffer<Element> implements ListLike<Element> {
     return elements[index];
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
+  public <U> ListBuffer<U> transform(Function<Element, U> transformer) {
+    var elements = (U[]) new Object[length];
+    for (var i = 0; i < length; i++) {
+      elements[i] = transformer.apply(get(i));
+    }
+    return new ListBuffer<>(elements, length);
+  }
+
   public List<Element> toList() {
     return List.of(0, length, elements);
+  }
+
+  public ListBuffer<Element> copy() {
+    return transform(Function.identity());
   }
 
   public void set(int index, Element element) {

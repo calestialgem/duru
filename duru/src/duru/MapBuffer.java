@@ -1,5 +1,8 @@
 package duru;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
   public static <Key, Value> MapBuffer<Key, Value> create() {
     return new MapBuffer<>(
@@ -64,9 +67,41 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
     return Optional.absent();
   }
 
+  @Override
+  public <U> MapBuffer<Key, U> transformValues(Function<Value, U> transformer) {
+    return new MapBuffer<>(
+      keys.copy(),
+      values.transform(transformer),
+      buckets.copy());
+  }
+
+  @Override
+  public <U> ListBuffer<U> transform(BiFunction<Key, Value, U> transformer) {
+    var list = ListBuffer.<U>create();
+    for (var i = 0; i < length(); i++) {
+      list.add(transformer.apply(keys.get(i), values.get(i)));
+    }
+    return list;
+  }
+
+  @Override
+  public <U> ListBuffer<U> transform(
+    Function<Entry<Key, Value>, U> transformer)
+  {
+    var list = ListBuffer.<U>create();
+    for (var entry : this) {
+      list.add(transformer.apply(entry));
+    }
+    return list;
+  }
+
   public Map<Key, Value> toMap() {
     rehash();
     return new Map<>(keys.toList(), values.toList(), buckets.toList());
+  }
+
+  public MapBuffer<Key, Value> copy() {
+    return new MapBuffer<>(keys.copy(), values.copy(), buckets.copy());
   }
 
   public boolean add(Key key, Value value) {

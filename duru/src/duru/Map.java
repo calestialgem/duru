@@ -1,5 +1,8 @@
 package duru;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 public record Map<Key, Value>(
   List<Key> keys,
   List<Value> values,
@@ -46,6 +49,29 @@ public record Map<Key, Value>(
       }
     }
     return Optional.absent();
+  }
+
+  @Override
+  public <U> Map<Key, U> transformValues(Function<Value, U> transformer) {
+    return new Map<>(keys, values.transform(transformer), buckets);
+  }
+
+  @Override
+  public <U> List<U> transform(BiFunction<Key, Value, U> transformer) {
+    var list = ListBuffer.<U>create();
+    for (var i = 0; i < length(); i++) {
+      list.add(transformer.apply(keys.get(i), values.get(i)));
+    }
+    return list.toList();
+  }
+
+  @Override
+  public <U> List<U> transform(Function<Entry<Key, Value>, U> transformer) {
+    var list = ListBuffer.<U>create();
+    for (var entry : this) {
+      list.add(transformer.apply(entry));
+    }
+    return list.toList();
   }
 
   @Override

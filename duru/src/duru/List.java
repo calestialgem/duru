@@ -1,5 +1,7 @@
 package duru;
 
+import java.util.function.Function;
+
 public final class List<Element>
   implements
   ListLike<Element>,
@@ -35,6 +37,16 @@ public final class List<Element>
   @Override
   public Element get(int index) {
     return elements[index];
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <U> List<U> transform(Function<Element, U> transformer) {
+    var elements = (U[]) new Object[length()];
+    for (var i = 0; i < length(); i++) {
+      elements[i] = transformer.apply(get(i));
+    }
+    return new List<>(elements);
   }
 
   @Override

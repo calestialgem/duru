@@ -1,5 +1,7 @@
 package duru;
 
+import java.util.function.Function;
+
 public final class SetBuffer<Member> implements SetLike<Member> {
   public static <Member> SetBuffer<Member> create() {
     return new SetBuffer<>(ListBuffer.create(), ListBuffer.create());
@@ -39,9 +41,18 @@ public final class SetBuffer<Member> implements SetLike<Member> {
     return false;
   }
 
+  @Override
+  public <U> ListBuffer<U> transform(Function<Member, U> transformer) {
+    return members.transform(transformer);
+  }
+
   public Set<Member> toSet() {
     rehash();
     return new Set<>(members.toList(), buckets.toList());
+  }
+
+  public SetBuffer<Member> copy() {
+    return new SetBuffer<>(members.copy(), buckets.copy());
   }
 
   public boolean add(Member member) {

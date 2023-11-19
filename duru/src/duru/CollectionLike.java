@@ -1,10 +1,12 @@
 package duru;
 
 import java.util.Iterator;
+import java.util.function.Function;
 
 public interface CollectionLike<Element> extends Iterable<Element> {
   int length();
   Element get(int index);
+  <U> CollectionLike<U> transform(Function<Element, U> transformer);
 
   default Element getFirst() {
     return get(0);
