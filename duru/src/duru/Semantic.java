@@ -45,12 +45,22 @@ public sealed interface Semantic {
 
   sealed interface Arithmetic extends Type {}
 
-  record Struct(boolean isPublic, String name) implements Type, Symbol {}
+  record Struct(boolean isPublic, String name) implements Type, Symbol {
+    @Override
+    public String toString() {
+      return name();
+    }
+  }
 
   record Byte() implements Arithmetic, Builtin {
     @Override
     public String identifier() {
       return "Byte";
+    }
+
+    @Override
+    public String toString() {
+      return name();
     }
   }
 
@@ -59,12 +69,22 @@ public sealed interface Semantic {
     public String identifier() {
       return "Boolean";
     }
+
+    @Override
+    public String toString() {
+      return name();
+    }
   }
 
   record Natural32() implements Arithmetic, Builtin {
     @Override
     public String identifier() {
       return "Natural32";
+    }
+
+    @Override
+    public String toString() {
+      return name();
     }
   }
 
@@ -73,12 +93,22 @@ public sealed interface Semantic {
     public String identifier() {
       return "Integer32";
     }
+
+    @Override
+    public String toString() {
+      return name();
+    }
   }
 
   record Unit() implements Type, Builtin {
     @Override
     public String identifier() {
       return "Unit";
+    }
+
+    @Override
+    public String toString() {
+      return name();
     }
   }
 
@@ -87,9 +117,19 @@ public sealed interface Semantic {
     public String identifier() {
       return "Noreturn";
     }
+
+    @Override
+    public String toString() {
+      return name();
+    }
   }
 
-  record Pointer(Type pointee) implements Type {}
+  record Pointer(Type pointee) implements Type {
+    @Override
+    public String toString() {
+      return "*%s".formatted(pointee);
+    }
+  }
 
   sealed interface Procedure extends Semantic {
     Map<String, Type> parameters();

@@ -2,15 +2,15 @@ package duru;
 
 final class Launcher {
   public static void main(String[] arguments) {
-    Subject.add("debug launcher");
+    var subject   = "debug launcher";
+    var debugger  = CompilerDebugger.active();
     var directory = Persistance.path("testmodule");
-    Subject.add(directory);
-    Persistance.recreate(directory);
+    Persistance.recreate(subject, directory);
     Initializer.initialize(directory);
-    var target = Checker.check(directory, Persistance.path("libraries"));
-    Builder.build(target);
-    Subject.removeLast();
-    Subject.removeLast();
+    var target =
+      Checker
+        .check(debugger, subject, directory, Persistance.path("libraries"));
+    Builder.build(subject, target);
   }
 
   private Launcher() {}

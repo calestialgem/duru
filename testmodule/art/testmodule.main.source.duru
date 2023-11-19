@@ -1,4 +1,1 @@
-Source[path=C:\Users\Cem\duru\testmodule\src\main.duru, contents=proc main() {
-  duru.print("Hello, World!\n");
-}
-]
+C:\Users\Cem\duru\testmodule\src\main.duru

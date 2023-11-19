@@ -8,12 +8,13 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public final class Persistance {
-  public static List<Path> list(Path directory) {
+  public static List<Path> list(Object subject, Path directory) {
     try {
       return List.of(Files.list(directory).toArray(Path[]::new));
     }
     catch (IOException cause) {
-      throw Subject.failure(cause, "cannot list entries of `%s`", directory);
+      throw Diagnostic
+        .failure(subject, cause, "cannot list entries of `%s`", directory);
     }
   }
 
@@ -21,57 +22,49 @@ public final class Persistance {
     return Path.of(path).toAbsolutePath().normalize();
   }
 
-  public static void record(Path artifacts, Object record, Object... names) {
-    var string = new StringBuilder();
-    for (var name : names) {
-      string.append(name);
-      string.append('.');
-    }
-    string.append("duru");
-    store(artifacts.resolve(string.toString()), record);
-  }
-
-  public static void store(Path file, Object text) {
+  public static void store(Object subject, Path file, Object text) {
     try {
       Files.writeString(file, text.toString());
     }
     catch (IOException cause) {
-      throw Subject.failure(cause, "could not write to `%s`", file);
+      throw Diagnostic.failure(subject, cause, "could not write to `%s`", file);
     }
   }
 
-  public static String load(Path file) {
+  public static String load(Object subject, Path file) {
     try {
       return Files.readString(file);
     }
     catch (IOException cause) {
-      throw Subject.failure(cause, "could not read from `%s`", file);
+      throw Diagnostic
+        .failure(subject, cause, "could not read from `%s`", file);
     }
   }
 
-  public static void ensure(Path directory) {
+  public static void ensure(Object subject, Path directory) {
     if (Files.exists(directory))
       return;
-    create(directory);
+    create(subject, directory);
   }
 
-  public static void recreate(Path directory) {
+  public static void recreate(Object subject, Path directory) {
     if (Files.exists(directory)) {
-      delete(directory);
+      delete(subject, directory);
     }
-    create(directory);
+    create(subject, directory);
   }
 
-  public static void create(Path directory) {
+  public static void create(Object subject, Path directory) {
     try {
       Files.createDirectory(directory);
     }
     catch (IOException cause) {
-      throw Subject.failure(cause, "could not create `%s`", directory);
+      throw Diagnostic
+        .failure(subject, cause, "could not create `%s`", directory);
     }
   }
 
-  private static void delete(Path directory) {
+  private static void delete(Object subject, Path directory) {
     try {
       Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
         @Override
@@ -99,7 +92,7 @@ public final class Persistance {
       });
     }
     catch (IOException cause) {
-      throw Subject.failure(cause, "could not delete `%s`", directory);
+      throw Diagnostic.failure(subject, cause, "could not delete `%s`", directory);
     }
   }
 

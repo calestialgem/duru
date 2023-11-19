@@ -1,3 +1,6 @@
 package duru;
 
-public record Configuration(Set<String> executables, Set<String> libraries) {}
+public record Configuration(
+  Map<String, Location> executables,
+  Map<String, Location> libraries)
+{}

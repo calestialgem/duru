@@ -1,1 +1,1 @@
-[Executable[location=1.1-11], Identifier[location=1.12-22, text=testmodule], Semicolon[location=1.22]]
+[keyword `executable`, identifier `testmodule`, punctuation `;`]

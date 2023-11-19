@@ -1,5 +1,7 @@
 package duru;
 
+import duru.Semantic.Type;
+
 public final class SymbolChecker {
   public static Semantic.Symbol check(
     Accessor<String, Semantic.Symbol> accessor,
@@ -47,7 +49,12 @@ public final class SymbolChecker {
     var body = checkStatement(node.body());
     if (!(returnType instanceof Semantic.Unit)
       && body.control() == Control.FLOWS)
-      throw Subject.error("procedure `%s` must return a value", symbolName);
+      throw Diagnostic
+        .error(
+          node.returnType().getFirst().location(),
+          "procedure `%s` must return a `%s`",
+          symbolName,
+          returnType);
     return new Semantic.Proc(
       node.isPublic(),
       symbolName,
@@ -75,8 +82,12 @@ public final class SymbolChecker {
     for (var parameter : nodes) {
       var name = parameter.name().text();
       if (parameters.contains(name))
-        throw Subject
-          .error("redeclaration of parameter `%s.%s`", symbolName, name);
+        throw Diagnostic
+          .error(
+            parameter.name().location(),
+            "redeclaration of parameter `%s.%s`",
+            symbolName,
+            name);
       var type = checkType(parameter.type());
       parameters.add(name, type);
       locals.add(name, type);
@@ -95,7 +106,8 @@ public final class SymbolChecker {
       case Node.Base base -> {
         var symbol = accessGlobal(base.name());
         if (!(symbol instanceof Semantic.Type type)) {
-          throw Subject.error("`%s` is not a type", symbol.name());
+          throw Diagnostic
+            .error(base.name().location(), "`%s` is not a type", symbol.name());
         }
         yield type;
       }
@@ -130,7 +142,11 @@ public final class SymbolChecker {
         var scope     = locals.length();
         var condition = checkExpression(if_.condition());
         if (!(condition.type() instanceof Semantic.Boolean))
-          throw Subject.error("if statement's condition must be a boolean");
+          throw Diagnostic
+            .error(
+              if_.condition().location(),
+              "if statement's condition must be `duru.Boolean` not `%s`",
+              condition.type());
         var trueBranchScope = locals.length();
         var trueBranch      = checkStatement(if_.trueBranch());
         locals.removeDownTo(trueBranchScope);
@@ -155,14 +171,23 @@ public final class SymbolChecker {
       }
       case Node.Return return_ -> {
         var value = return_.value().transform(this::checkExpression);
-        if (!value
-          .transform(CheckedExpression::type)
-          .getOrElse(Semantic.Unit::new)
-          .equals(returnType))
-          throw Subject
+        if (value.isEmpty() && !(returnType instanceof Semantic.Unit)) {
+          throw Diagnostic
             .error(
-              "procedure `%s`s return type does not match the return value",
-              symbolName);
+              return_.location(),
+              "procedure `%s` must return `%s`",
+              symbolName,
+              returnType);
+        }
+        if (!value.isEmpty() && !value.getFirst().type().equals(returnType)) {
+          throw Diagnostic
+            .error(
+              return_.value().getFirst().location(),
+              "procedure `%s` must return `%s` not `%s`",
+              symbolName,
+              returnType,
+              value.getFirst().type());
+        }
         yield new CheckedStatement(
           new Semantic.Return(value.transform(CheckedExpression::expression)),
           Control.RETURNS);
@@ -175,15 +200,22 @@ public final class SymbolChecker {
         if (!typeAnnotation.isEmpty()
           && !typeAnnotation.getFirst().equals(type))
         {
-          throw Subject
+          throw Diagnostic
             .error(
-              "variable `%s.%s`s type annotation does not match the initial value",
+              var.type().getFirst().location(),
+              "variable `%s.%s` is `%s` while initial value is `%s` ",
               symbolName,
-              name);
+              name,
+              typeAnnotation.getFirst(),
+              type);
         }
         if (type instanceof Semantic.Noreturn)
-          throw Subject
-            .error("variable `%s.%s`s type is noreturn", symbolName, name);
+          throw Diagnostic
+            .error(
+              var.name().location(),
+              "variable `%s.%s` is of type `duru.Noreturn`",
+              symbolName,
+              name);
         locals.add(name, type);
         yield new CheckedStatement(
           new Semantic.Var(name, type, initialValue.expression()),
@@ -198,13 +230,24 @@ public final class SymbolChecker {
         var left  = checkExpression(binary.left());
         var right = checkExpression(binary.right());
         if (!(left.type() instanceof Semantic.Arithmetic))
-          throw Subject
-            .error("binary operator's left operand is not arithmetic");
+          throw Diagnostic
+            .error(
+              binary.left().location(),
+              "binary operator's left operand must be `duru.Arithmetic` not `%s`",
+              left.type());
         if (!(right.type() instanceof Semantic.Arithmetic))
-          throw Subject
-            .error("binary operator's left operand is not arithmetic");
+          throw Diagnostic
+            .error(
+              binary.right().location(),
+              "binary operator's right operand must be `duru.Arithmetic` not `%s`",
+              right.type());
         if (!left.type().equals(right.type()))
-          throw Subject.error("binary operator's operands are not the same");
+          throw Diagnostic
+            .error(
+              binary.location(),
+              "binary operator's left operand is `%s` while right operand is `%s`",
+              left.type(),
+              right.type());
         yield new CheckedExpression(
           new Semantic.LessThan(left.expression(), right.expression()),
           left.type());
@@ -220,29 +263,37 @@ public final class SymbolChecker {
           }
         }
         accessGlobal(access.mention());
-        throw Subject.unimplemented();
+        throw Diagnostic.unimplemented(access.location());
       }
       case Node.Invocation invocation -> {
         var accessed = accessGlobal(invocation.procedure());
         if (!(accessed instanceof Semantic.Procedure procedure))
-          throw Subject
-            .error("invoked symbol `%s` is not a procedure", accessed.name());
-        if (invocation.arguments().length() != procedure.parameters().length())
-          throw Subject
+          throw Diagnostic
             .error(
+              invocation.procedure().location(),
+              "invoked symbol `%s` is not a procedure",
+              accessed.name());
+        if (invocation.arguments().length() != procedure.parameters().length())
+          throw Diagnostic
+            .error(
+              invocation.location(),
               "invoked procedure `%s` takes %d parameters but %d arguments were given",
               accessed.name(),
               procedure.parameters().length(),
               invocation.arguments().length());
         var arguments = ListBuffer.<Semantic.Expression>create();
         for (var i = 0; i < invocation.arguments().length(); i++) {
-          var argument = checkExpression(invocation.arguments().get(i));
-          if (!argument.type().equals(procedure.parameters().get(i).value()))
-            throw Subject
+          var argument  = checkExpression(invocation.arguments().get(i));
+          var parameter = procedure.parameters().values().get(i);
+          if (!argument.type().equals(parameter))
+            throw Diagnostic
               .error(
-                "passed argument's type does not match the parameter `%s.%s`",
+                invocation.arguments().get(i).location(),
+                "parameter `%s.%s` is `%s` while passed argument is `%s`",
                 accessed.name(),
-                procedure.parameters().get(i).key());
+                procedure.parameters().keys().get(i),
+                parameter,
+                argument.type());
           arguments.add(argument.expression());
         }
         yield new CheckedExpression(
@@ -252,7 +303,7 @@ public final class SymbolChecker {
       case Node.NaturalConstant naturalConstant -> {
         var value = naturalConstant.value().value();
         if (Long.compareUnsigned(value, -1) >= 0)
-          throw Subject.unimplemented();
+          throw Diagnostic.unimplemented(naturalConstant.location());
         yield new CheckedExpression(
           new Semantic.NaturalConstant(value),
           new Semantic.Natural32());
@@ -271,6 +322,6 @@ public final class SymbolChecker {
       string.append('.');
     }
     string.append(mention.name().text());
-    return accessor.access(string.toString());
+    return accessor.access(mention.location(), string.toString());
   }
 }

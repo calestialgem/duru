@@ -1,20 +1,20 @@
 package duru;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public final class AcyclicCache<Key, Value> {
   public static <Key, Value> AcyclicCache<Key, Value> create(
-    Function<Key, Value> function)
+    BiFunction<Object, Key, Value> function)
   {
     return new AcyclicCache<>(function, MapBuffer.create(), SetBuffer.create());
   }
 
-  private final Function<Key, Value>  function;
-  private final MapBuffer<Key, Value> cache;
-  private final SetBuffer<Key>        current;
+  private final BiFunction<Object, Key, Value> function;
+  private final MapBuffer<Key, Value>          cache;
+  private final SetBuffer<Key>                 current;
 
   private AcyclicCache(
-    Function<Key, Value> function,
+    BiFunction<Object, Key, Value> function,
     MapBuffer<Key, Value> cache,
     SetBuffer<Key> current)
   {
@@ -23,14 +23,14 @@ public final class AcyclicCache<Key, Value> {
     this.current  = current;
   }
 
-  public Value get(Key key) {
+  public Value get(Object subject, Key key) {
     var cached = cache.get(key);
     if (!cached.isEmpty())
       return cached.getFirst();
     if (current.contains(key))
-      throw Subject.error("cyclic dependencies `%s`", key);
+      throw Diagnostic.error(subject, "cyclic dependencies `%s`", key);
     current.add(key);
-    var value = function.apply(key);
+    var value = function.apply(subject, key);
     current.remove(key);
     cache.add(key, value);
     return value;

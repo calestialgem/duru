@@ -34,7 +34,7 @@ public final class SourceLexer {
             break;
           }
           if (!hasCharacter() || getCharacter() != '*') {
-            throw Subject.error("incomplete comment");
+            throw Diagnostic.error(location(), "incomplete comment");
           }
           advance();
           var blockComments = 1;
@@ -54,7 +54,7 @@ public final class SourceLexer {
             }
           }
           if (blockComments != 0) {
-            throw Subject.error("incomplete block comment");
+            throw Diagnostic.error(location(), "incomplete block comment");
           }
         }
         case '{' -> tokens.add(new Token.OpeningBrace(location()));
@@ -71,11 +71,12 @@ public final class SourceLexer {
           var value = new StringBuilder();
           while (true) {
             if (!hasCharacter())
-              throw Subject.error("incomplete string constant");
-            var character = getCharacter();
+              throw Diagnostic.error(location(), "incomplete string constant");
+            var escapeSequenceBegin = index;
+            var character           = getCharacter();
             advance();
             if (character == '\n')
-              throw Subject.error("incomplete string constant");
+              throw Diagnostic.error(location(), "incomplete string constant");
             if (character == '"')
               break;
             if (character != '\\') {
@@ -83,7 +84,7 @@ public final class SourceLexer {
               continue;
             }
             if (!hasCharacter())
-              throw Subject.error("incomplete escape sequence");
+              throw Diagnostic.error(location(), "incomplete escape sequence");
             character = getCharacter();
             advance();
             switch (character) {
@@ -92,7 +93,11 @@ public final class SourceLexer {
               case 'r' -> value.append('\r');
               case 'n' -> value.append('\n');
               default ->
-                throw Subject.error("unknown escape sequence `%c`", character);
+                throw Diagnostic
+                  .error(
+                    location(escapeSequenceBegin),
+                    "unknown escape sequence `%c`",
+                    character);
             }
           }
           tokens.add(new Token.StringConstant(location(), value.toString()));
@@ -102,10 +107,14 @@ public final class SourceLexer {
             var value = 0L;
             value += initial - '0';
             while (hasCharacter()) {
-              var character = getCharacter();
+              var separatorBegin = index;
+              var character      = getCharacter();
               if (Text.isUnderscore(character)) {
                 if (!hasCharacter() || !Text.isDigit(getCharacter())) {
-                  throw Subject.error("expected a digit");
+                  throw Diagnostic
+                    .error(
+                      location(separatorBegin),
+                      "expected digit after separator");
                 }
                 character = getCharacter();
               }
@@ -114,10 +123,10 @@ public final class SourceLexer {
               }
               var digit = character - '0';
               if (Long.compareUnsigned(value, Long.divideUnsigned(-1L, 10)) > 0)
-                throw Subject.error("huge number");
+                throw Diagnostic.error(location(), "huge number");
               value *= 10;
               if (Long.compareUnsigned(value, -1L - digit) > 0)
-                throw Subject.error("huge number");
+                throw Diagnostic.error(location(), "huge number");
               value += digit;
             }
             tokens.add(new Token.NaturalConstant(location(), value));
@@ -141,7 +150,7 @@ public final class SourceLexer {
             }
             break;
           }
-          throw Subject.error("unknown character `%c`", initial);
+          throw Diagnostic.error(location(), "unknown character `%c`", initial);
         }
       }
     }
@@ -149,6 +158,10 @@ public final class SourceLexer {
   }
 
   private Location location() {
+    return location(begin);
+  }
+
+  private Location location(int begin) {
     return new Location(source, begin, index);
   }
 

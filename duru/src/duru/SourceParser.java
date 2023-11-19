@@ -20,7 +20,7 @@ public final class SourceParser {
     index = 0;
     var declarations = ListBuffer.<Node.Declaration>create();
     while (index != tokens.length()) {
-      var declaration = expect(this::parseDeclaration, "symbol declaration");
+      var declaration = expect(this::parseDeclaration, "declaration");
       declarations.add(declaration);
     }
     return declarations.toList();
@@ -30,24 +30,15 @@ public final class SourceParser {
     var begin    = index;
     var isPublic = take(Token.Public.class);
     if (take(Token.Proc.class)) {
-      var name =
-        expect(Token.Identifier.class, "name of the procedure declaration");
-      expect(
-        Token.OpeningParenthesis.class,
-        "parameter list opener `(` of the procedure declaration");
+      var name = expect(Token.Identifier.class, "procedure name");
+      expect(Token.OpeningParenthesis.class, "`(` of parameter list");
       var parameters = parseSeparated(this::parseParameter);
-      expect(
-        Token.ClosingParenthesis.class,
-        "parameter list closer `)` of the procedure declaration");
+      expect(Token.ClosingParenthesis.class, "`)` of parameter list");
       var returnType = parseFormula();
       if (take(Token.Equal.class)) {
         var externalName =
-          expect(
-            this::parseStringConstant,
-            "external name of the procedure declaration");
-        expect(
-          Token.Semicolon.class,
-          "terminator `;` of the procedure declaration");
+          expect(this::parseStringConstant, "external procedure name");
+        expect(Token.Semicolon.class, "`;` of procedure declaration");
         return Optional
           .present(
             new Node.ExternalProc(
@@ -58,7 +49,7 @@ public final class SourceParser {
               returnType,
               externalName));
       }
-      var body = expect(this::parseBlock, "body of the procedure declaration");
+      var body = expect(this::parseBlock, "procedure body");
       return Optional
         .present(
           new Node.Proc(
@@ -70,16 +61,12 @@ public final class SourceParser {
             body));
     }
     if (take(Token.Struct.class)) {
-      var name =
-        expect(Token.Identifier.class, "name of the structure declaration");
-      expect(
-        Token.Semicolon.class,
-        "terminator `;` of the structure declaration");
+      var name = expect(Token.Identifier.class, "structure name");
+      expect(Token.Semicolon.class, "`;` of structure declaration");
       return Optional.present(new Node.Struct(location(begin), isPublic, name));
     }
     if (isPublic) {
-      throw Subject
-        .error("expected a declaration after the visibility modifier");
+      throw missing("declaration");
     }
     return Optional.absent();
   }
@@ -89,8 +76,7 @@ public final class SourceParser {
     var parameterName = parse(Token.Identifier.class);
     if (parameterName.isEmpty())
       return Optional.absent();
-    var parameterType =
-      expect(this::parseFormula, "type of the parameter declaration");
+    var parameterType = expect(this::parseFormula, "parameter type");
     return Optional
       .present(
         new Node.Parameter(
@@ -102,8 +88,7 @@ public final class SourceParser {
   private Optional<Node.Formula> parseFormula() {
     var begin = index;
     if (take(Token.Star.class)) {
-      var pointee =
-        expect(this::parseFormula, "pointee of the pointer formula");
+      var pointee = expect(this::parseFormula, "pointee type");
       return Optional.present(new Node.Pointer(location(begin), pointee));
     }
     var name = parseMention();
@@ -126,18 +111,14 @@ public final class SourceParser {
     if (!take(Token.If.class)) {
       return Optional.absent();
     }
-    var condition   =
-      expect(this::parseExpression, "condition of the if statement");
-    var trueBranch  =
-      expect(this::parseBlock, "true branch of the if statement");
+    var condition   = expect(this::parseExpression, "if condition");
+    var trueBranch  = expect(this::parseBlock, "if branch");
     var falseBranch = Optional.<Node.Statement>absent();
     if (take(Token.Else.class)) {
       falseBranch =
         Optional
           .present(
-            expect(
-              () -> or(this::parseBlock, this::parseIf),
-              "false branch of the if statement"));
+            expect(() -> or(this::parseBlock, this::parseIf), "else branch"));
     }
     return Optional
       .present(
@@ -149,7 +130,7 @@ public final class SourceParser {
     if (!take(Token.Return.class))
       return Optional.absent();
     var value = parseExpression();
-    expect(Token.Semicolon.class, "terminator `;` of the return statement");
+    expect(Token.Semicolon.class, "`;` of return statement");
     return Optional.present(new Node.Return(location(begin), value));
   }
 
@@ -158,7 +139,7 @@ public final class SourceParser {
     var discarded = parseExpression();
     if (discarded.isEmpty())
       return Optional.absent();
-    expect(Token.Semicolon.class, "terminator `;` of the discard statement");
+    expect(Token.Semicolon.class, "`;` of discard statement");
     return Optional
       .present(new Node.Discard(location(begin), discarded.getFirst()));
   }
@@ -167,18 +148,10 @@ public final class SourceParser {
     var begin = index;
     if (!take(Token.Var.class))
       return Optional.absent();
-    var name         =
-      expect(
-        Token.Identifier.class,
-        "name of the variable declaration statement");
+    var name         = expect(Token.Identifier.class, "variable name");
     var type         = parseFormula();
-    var initialValue =
-      expect(
-        this::parseExpression,
-        "initial value of the variable declaration statement");
-    expect(
-      Token.Semicolon.class,
-      "terminator `;` of the variable declaration statement");
+    var initialValue = expect(this::parseExpression, "initial value");
+    expect(Token.Semicolon.class, "`;` of variable declaration");
     return Optional
       .present(new Node.Var(location(begin), name, type, initialValue));
   }
@@ -194,9 +167,7 @@ public final class SourceParser {
         break;
       innerStatements.add(innerStatement.getFirst());
     }
-    expect(
-      Token.ClosingBrace.class,
-      "inner statement list closer `}` of the block expression");
+    expect(Token.ClosingBrace.class, "`}` of block statement");
     return Optional
       .present(new Node.Block(location(begin), innerStatements.toList()));
   }
@@ -213,7 +184,7 @@ public final class SourceParser {
     if (!take(Token.Left.class))
       return Optional.present(left.getFirst());
     var right =
-      expect(this::parsePrecedence01, "right operand of less than expression");
+      expect(this::parsePrecedence01, "right operand of less-than expression");
     return Optional
       .present(new Node.LessThan(location(begin), left.getFirst(), right));
   }
@@ -243,9 +214,7 @@ public final class SourceParser {
     if (!take(Token.OpeningParenthesis.class))
       return Optional.present(new Node.Access(symbol.getFirst()));
     var arguments = parseSeparated(this::parseExpression);
-    expect(
-      Token.ClosingParenthesis.class,
-      "argument list closer `)` of the invocation expression");
+    expect(Token.ClosingParenthesis.class, "`)` of argument list");
     return Optional
       .present(
         new Node.Invocation(location(begin), symbol.getFirst(), arguments));
@@ -260,7 +229,7 @@ public final class SourceParser {
     var subspaces = ListBuffer.<Token.Identifier>create();
     while (take(Token.Dot.class)) {
       subspaces.add(name);
-      name = expect(Token.Identifier.class, "name of the mention");
+      name = expect(Token.Identifier.class, "name");
     }
     return Optional
       .present(new Node.Mention(location(begin), subspaces.toList(), name));
@@ -300,7 +269,33 @@ public final class SourceParser {
     if (!value.isEmpty()) {
       return value.getLast();
     }
-    throw Subject.error("expected %s", explanation);
+    throw missing(explanation);
+  }
+
+  private RuntimeException missing(String explanation) {
+    if (index == 0) {
+      return Diagnostic
+        .error(
+          tokens.getFirst().location(),
+          "expected %s instead of %s at beginning of file",
+          explanation,
+          tokens.getFirst());
+    }
+    if (index == tokens.length()) {
+      return Diagnostic
+        .error(
+          tokens.getLast().location(),
+          "expected %s after %s at end of file",
+          explanation,
+          tokens.getLast());
+    }
+    return Diagnostic
+      .error(
+        tokens.get(index).location(),
+        "expected %s instead of %s after %s",
+        explanation,
+        tokens.getLast(),
+        tokens.get(index - 1));
   }
 
   private <T extends Token> boolean take(Class<T> tokenClass) {

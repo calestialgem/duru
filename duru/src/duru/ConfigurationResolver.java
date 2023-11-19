@@ -9,8 +9,8 @@ public final class ConfigurationResolver {
   }
 
   private final List<ConfigurationNode.PackageDeclaration> declarations;
-  private SetBuffer<String>                                executables;
-  private SetBuffer<String>                                libraries;
+  private MapBuffer<String, Location>                      executables;
+  private MapBuffer<String, Location>                      libraries;
 
   private ConfigurationResolver(
     List<ConfigurationNode.PackageDeclaration> declarations)
@@ -19,23 +19,23 @@ public final class ConfigurationResolver {
   }
 
   private Configuration resolve() {
-    executables = SetBuffer.create();
-    libraries   = SetBuffer.create();
+    executables = MapBuffer.create();
+    libraries   = MapBuffer.create();
     for (var declaration : declarations) {
       switch (declaration) {
         case ConfigurationNode.Executable executable -> {
           var text = text(executable.name());
-          checkUniqueness(text);
-          executables.add(text);
+          checkUniqueness(text, executable.name().location());
+          executables.add(text, executable.name().location());
         }
         case ConfigurationNode.Library library -> {
           var text = text(library.name());
-          checkUniqueness(text);
-          libraries.add(text);
+          checkUniqueness(text, library.name().location());
+          libraries.add(text, library.name().location());
         }
       }
     }
-    return new Configuration(executables.toSet(), libraries.toSet());
+    return new Configuration(executables.toMap(), libraries.toMap());
   }
 
   private String text(ConfigurationNode.PackageName name) {
@@ -48,13 +48,12 @@ public final class ConfigurationResolver {
     return string.toString();
   }
 
-  private void checkUniqueness(String text) {
-    if (executables.contains(text)) {
-      throw Subject
-        .error("package `%s` is already defined as executable", text);
-    }
-    if (libraries.contains(text)) {
-      throw Subject.error("package `%s` is already defined as library", text);
-    }
+  private void checkUniqueness(String text, Location location) {
+    if (executables.contains(text))
+      throw Diagnostic
+        .error(location, "redefinition of executable package `%s`", text);
+    if (libraries.contains(text))
+      throw Diagnostic
+        .error(location, "redefinition of library package `%s`", text);
   }
 }

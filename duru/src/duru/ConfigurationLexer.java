@@ -34,7 +34,7 @@ public final class ConfigurationLexer {
             break;
           }
           if (!hasCharacter() || getCharacter() != '*') {
-            throw Subject.error("incomplete comment");
+            throw Diagnostic.error(location(), "incomplete comment");
           }
           advance();
           var blockComments = 1;
@@ -54,7 +54,7 @@ public final class ConfigurationLexer {
             }
           }
           if (blockComments != 0) {
-            throw Subject.error("incomplete block comment");
+            throw Diagnostic.error(location(), "incomplete block comment");
           }
         }
         case ';' -> tokens.add(new ConfigurationToken.Semicolon(location()));
@@ -75,7 +75,7 @@ public final class ConfigurationLexer {
             }
             break;
           }
-          throw Subject.error("unknown character `%c`", initial);
+          throw Diagnostic.error(location(), "unknown character `%c`", initial);
         }
       }
     }
@@ -83,6 +83,10 @@ public final class ConfigurationLexer {
   }
 
   private Location location() {
+    return location(begin);
+  }
+
+  private Location location(int begin) {
     return new Location(source, begin, index);
   }
 

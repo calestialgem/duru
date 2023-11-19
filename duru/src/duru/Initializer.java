@@ -28,8 +28,11 @@ public final class Initializer {
     for (var i = directory; i != null; i = i.getParent()) {
       var configuration = i.resolve("module.duru");
       if (Files.exists(configuration)) {
-        throw Subject
-          .error("initializing in module defined by `%s`", configuration);
+        throw Diagnostic
+          .error(
+            directory,
+            "initializing in module defined by `%s`",
+            configuration);
       }
     }
   }
@@ -38,36 +41,45 @@ public final class Initializer {
     for (var i = 0; i != name.length(); i = name.offsetByCodePoints(i, 1)) {
       var body = name.codePointAt(i);
       if (!Text.isIdentifierBody(body)) {
-        throw Subject
-          .error("invalid codepoint `%c` in name `%s` at %d", body, name, i);
+        throw Diagnostic
+          .error(
+            directory,
+            "invalid codepoint `%c` in name `%s` at %d",
+            body,
+            name,
+            i);
       }
     }
     if (name.length() == 0) {
-      throw Subject.error("empty name");
+      throw Diagnostic.error(directory, "empty name");
     }
     var initial = name.codePointAt(0);
     if (!Text.isIdentifierInitial(initial)) {
-      throw Subject.error("invalid initial `%c` of name `%s`", initial, name);
+      throw Diagnostic
+        .error(directory, "invalid initial `%c` of name `%s`", initial, name);
     }
     if (Text.isReserved(name)) {
-      throw Subject.error("name `%s` is a keyword", name);
+      throw Diagnostic.error(directory, "name `%s` is a keyword", name);
     }
     if (Text.isReservedForConfiguration(name)) {
-      throw Subject
-        .error("name `%s` is a keyword for module configuration", name);
+      throw Diagnostic
+        .error(
+          directory,
+          "name `%s` is a keyword for module configuration",
+          name);
     }
   }
 
   private void createConfiguration() {
-    Persistance.store(directory.resolve("module.duru"), """
+    Persistance.store(directory, directory.resolve("module.duru"), """
 executable %s;
 """.formatted(name));
   }
 
   private void createMainSource() {
     var sources = directory.resolve("src");
-    Persistance.create(sources);
-    Persistance.store(sources.resolve("main.duru"), """
+    Persistance.create(directory, sources);
+    Persistance.store(directory, sources.resolve("main.duru"), """
 proc main() {
   duru.print("Hello, World!\\n");
 }

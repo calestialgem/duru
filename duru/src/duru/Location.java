@@ -18,6 +18,8 @@ public record Location(Source source, int begin, int end) {
       line++;
       column = 1;
     }
+    string.append(source);
+    string.append(':');
     string.append(line);
     string.append('.');
     string.append(column);

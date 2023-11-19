@@ -22,8 +22,7 @@ public final class ConfigurationParser {
     var declarations =
       ListBuffer.<ConfigurationNode.PackageDeclaration>create();
     while (index != tokens.length()) {
-      var declaration =
-        expect(this::parsePackageDeclaration, "package declaration");
+      var declaration = expect(this::parsePackageDeclaration, "declaration");
       declarations.add(declaration);
     }
     return declarations.toList();
@@ -38,13 +37,8 @@ public final class ConfigurationParser {
     if (parse(ConfigurationToken.Executable.class).isEmpty()) {
       return Optional.absent();
     }
-    var name =
-      expect(
-        this::parsePackageName,
-        "name of the executable package declaration");
-    expect(
-      ConfigurationToken.Semicolon.class,
-      "terminator of the executable package declaration");
+    var name = expect(this::parsePackageName, "executable name");
+    expect(ConfigurationToken.Semicolon.class, "`;` of executable declaration");
     return Optional
       .present(new ConfigurationNode.Executable(location(begin), name));
   }
@@ -54,11 +48,8 @@ public final class ConfigurationParser {
     if (parse(ConfigurationToken.Library.class).isEmpty()) {
       return Optional.absent();
     }
-    var name =
-      expect(this::parsePackageName, "name of the library package declaration");
-    expect(
-      ConfigurationToken.Semicolon.class,
-      "terminator of the library package declaration");
+    var name = expect(this::parsePackageName, "library name");
+    expect(ConfigurationToken.Semicolon.class, "`;` of library declaration");
     return Optional
       .present(new ConfigurationNode.Library(location(begin), name));
   }
@@ -72,10 +63,7 @@ public final class ConfigurationParser {
     var subspaces = ListBuffer.<ConfigurationToken.Identifier>create();
     subspaces.add(name.getLast());
     while (!parse(ConfigurationToken.Dot.class).isEmpty()) {
-      var subspace =
-        expect(
-          ConfigurationToken.Identifier.class,
-          "subspace of the package name");
+      var subspace = expect(ConfigurationToken.Identifier.class, "name");
       subspaces.add(subspace);
     }
     return Optional
@@ -107,7 +95,33 @@ public final class ConfigurationParser {
     if (!value.isEmpty()) {
       return value.getLast();
     }
-    throw Subject.error("expected %s", explanation);
+    throw missing(explanation);
+  }
+
+  private RuntimeException missing(String explanation) {
+    if (index == 0) {
+      return Diagnostic
+        .error(
+          tokens.getFirst().location(),
+          "expected %s instead of %s at beginning of file",
+          explanation,
+          tokens.getFirst());
+    }
+    if (index == tokens.length()) {
+      return Diagnostic
+        .error(
+          tokens.getLast().location(),
+          "expected %s after %s at end of file",
+          explanation,
+          tokens.getLast());
+    }
+    return Diagnostic
+      .error(
+        tokens.get(index).location(),
+        "expected %s instead of %s after %s",
+        explanation,
+        tokens.getLast(),
+        tokens.get(index - 1));
   }
 
   @SuppressWarnings("unchecked")

@@ -4,13 +4,17 @@ import java.nio.file.Path;
 
 public final class ModuleChecker {
   public static Semantic.Module check(
+    CompilerDebugger debugger,
+    Object subject,
     Accessor<String, Semantic.Module> accessor,
     Path directory)
   {
-    var checker = new ModuleChecker(accessor, directory);
+    var checker = new ModuleChecker(debugger, subject, accessor, directory);
     return checker.check();
   }
 
+  private final CompilerDebugger                  debugger;
+  private final Object                            subject;
   private final Accessor<String, Semantic.Module> accessor;
   private final Path                              directory;
   private String                                  name;
@@ -20,9 +24,13 @@ public final class ModuleChecker {
   private AcyclicCache<String, Semantic.Package>  packages;
 
   private ModuleChecker(
+    CompilerDebugger debugger,
+    Object subject,
     Accessor<String, Semantic.Module> accessor,
     Path directory)
   {
+    this.debugger  = debugger;
+    this.subject   = subject;
     this.accessor  = accessor;
     this.directory = directory;
   }
@@ -31,7 +39,7 @@ public final class ModuleChecker {
     name      = directory.getFileName().toString();
     sources   = directory.resolve("src");
     artifacts = directory.resolve("art");
-    Persistance.ensure(artifacts);
+    Persistance.ensure(directory, artifacts);
     resolveConfiguration();
     packages = AcyclicCache.create(this::checkPackage);
     checkPackageDeclarations();
@@ -40,46 +48,59 @@ public final class ModuleChecker {
 
   private void checkPackageDeclarations() {
     for (var executable : configuration.executables()) {
-      var main = packages.get(executable).symbols().get("main");
+      var main =
+        packages
+          .get(executable.value(), executable.key())
+          .symbols()
+          .get("main");
       if (main.isEmpty() || !(main.getFirst() instanceof Semantic.Proc proc)) {
-        throw Subject
+        throw Diagnostic
           .error(
+            executable.value(),
             "executable package `%s` does not have a main procedure",
             executable);
       }
       if (!proc.parameters().isEmpty())
-        throw Subject
+        throw Diagnostic
           .error(
+            executable.value(),
             "executable package `%s` has a main procedure with parameters",
             executable);
       if (!(proc.returnType() instanceof Semantic.Unit))
-        throw Subject
+        throw Diagnostic
           .error(
+            executable.value(),
             "executable package `%s` has a main procedure with a non-unit return type",
             executable);
     }
     for (var library : configuration.libraries()) {
-      var main = packages.get(library).symbols().get("main");
+      var main =
+        packages.get(library.value(), library.key()).symbols().get("main");
       if (!main.isEmpty() && main.getFirst() instanceof Semantic.Proc)
-        throw Subject
-          .error("library package `%s` has a main procedure", library);
+        throw Diagnostic
+          .error(
+            library.value(),
+            "library package `%s` has a main procedure",
+            library);
     }
   }
 
   private void resolveConfiguration() {
     var configurationFile   = directory.resolve("module.duru");
     var configurationSource =
-      new Source(configurationFile, Persistance.load(configurationFile));
-    Persistance.record(artifacts, configurationSource, "module", "source");
+      new Source(
+        configurationFile,
+        Persistance.load(subject, configurationFile));
+    debugger.record(artifacts, configurationSource, "module", "source");
     var configurationTokens = ConfigurationLexer.lex(configurationSource);
-    Persistance.record(artifacts, configurationTokens, "module", "tokens");
+    debugger.record(artifacts, configurationTokens, "module", "tokens");
     var configurationNode = ConfigurationParser.parse(configurationTokens);
-    Persistance.record(artifacts, configurationNode, "module", "node");
+    debugger.record(artifacts, configurationNode, "module", "node");
     configuration = ConfigurationResolver.resolve(configurationNode);
-    Persistance.record(artifacts, configuration, "module", "resolution");
+    debugger.record(artifacts, configuration, "module", "resolution");
   }
 
-  private Semantic.Package checkPackage(String packageName) {
+  private Semantic.Package checkPackage(Object subject, String packageName) {
     PackageType type;
     if (configuration.executables().contains(packageName))
       type = PackageType.EXECUTABLE;
@@ -88,31 +109,48 @@ public final class ModuleChecker {
     else
       type = PackageType.IMPLEMENTATION;
     return PackageChecker
-      .check(this::accessPackage, sources, artifacts, type, packageName);
+      .check(
+        debugger,
+        subject,
+        this::accessPackage,
+        sources,
+        artifacts,
+        type,
+        packageName);
   }
 
-  private Semantic.Package accessPackage(String accessedPackage) {
+  private Semantic.Package accessPackage(
+    Object subject,
+    String accessedPackage)
+  {
     var accessedModule = Text.getModule(accessedPackage);
     if (accessedModule.equals(name)) {
       if (!(packages
-        .get(accessedPackage) instanceof Semantic.Library library))
+        .get(subject, accessedPackage) instanceof Semantic.Library library))
       {
-        throw Subject
-          .error("accessed package `%s` is not a library", accessedPackage);
+        throw Diagnostic
+          .error(
+            subject,
+            "accessed package `%s` is not a library",
+            accessedPackage);
       }
       return library;
     }
     var accessed =
-      accessor.access(accessedModule).packages().get(accessedPackage);
+      accessor.access(subject, accessedModule).packages().get(accessedPackage);
     if (accessed.isEmpty())
-      throw Subject
+      throw Diagnostic
         .error(
+          subject,
           "there is no package `%s` in module `%s`",
           accessedPackage,
           accessedModule);
     if (!(accessed.getFirst() instanceof Semantic.Library library)) {
-      throw Subject
-        .error("accessed package `%s` is not a library", accessedPackage);
+      throw Diagnostic
+        .error(
+          subject,
+          "accessed package `%s` is not a library",
+          accessedPackage);
     }
     return library;
   }
