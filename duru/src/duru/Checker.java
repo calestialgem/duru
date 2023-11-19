@@ -22,7 +22,9 @@ public final class Checker {
     main    = directory.getFileName().toString();
     modules = AcyclicCache.create(this::checkModule);
     modules.get(main);
-    return new Semantic.Target(main, modules.getAll());
+    var target = new Semantic.Target(main, modules.getAll());
+    Persistance.record(directory.resolve("art"), target, "target");
+    return target;
   }
 
   private Semantic.Module checkModule(String name) {
