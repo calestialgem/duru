@@ -74,6 +74,10 @@ public final class ListBuffer<Element> implements ListLike<Element> {
     return element;
   }
 
+  public void removeDownTo(int newLength) {
+    length = newLength;
+  }
+
   public void clear() {
     length = 0;
   }

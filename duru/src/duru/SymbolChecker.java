@@ -15,6 +15,7 @@ public final class SymbolChecker {
   private final Node.Declaration                  declaration;
   private String                                  symbolName;
   private MapBuffer<String, Semantic.Type>        locals;
+  private Optional<Semantic.Type>                 returnType;
 
   private SymbolChecker(
     Accessor<String, Semantic.Symbol> accessor,
@@ -37,12 +38,17 @@ public final class SymbolChecker {
   }
 
   private Semantic.Proc checkProc(Node.Proc node) {
+    var parameters = checkParameters(node.parameters());
+    returnType = node.returnType().transform(this::checkType);
+    var body = checkStatement(node.body());
+    if (!returnType.isEmpty() && body.control() == Control.FLOWS)
+      throw Subject.error("procedure `%s` must return a value", symbolName);
     return new Semantic.Proc(
       node.isPublic(),
       symbolName,
-      checkParameters(node.parameters()),
-      node.returnType().transform(this::checkType),
-      checkStatement(node.body()));
+      parameters,
+      returnType,
+      body.statement());
   }
 
   private Semantic.ExternalProc checkExternalProc(Node.ExternalProc node) {
@@ -88,28 +94,79 @@ public final class SymbolChecker {
     };
   }
 
-  private Semantic.Statement checkStatement(Node.Statement node) {
+  private CheckedStatement checkStatement(Node.Statement node) {
     return switch (node) {
       case Node.Block block -> {
+        var scope           = locals.length();
+        var control         = Control.FLOWS;
         var innerStatements = ListBuffer.<Semantic.Statement>create();
-        for (var innerStatement : block.innerStatements())
-          innerStatements.add(checkStatement(innerStatement));
-        yield new Semantic.Block(innerStatements.toList());
+        for (var innerStatement : block.innerStatements()) {
+          var checkedStatement = checkStatement(innerStatement);
+          control =
+            Control.combineSequents(control, checkedStatement.control());
+          innerStatements.add(checkedStatement.statement());
+        }
+        locals.removeDownTo(scope);
+        yield new CheckedStatement(
+          new Semantic.Block(innerStatements.toList()),
+          control);
       }
-      case Node.Discard discard ->
-        new Semantic.Discard(checkExpression(discard.discarded()));
-      case Node.If if_ ->
-        new Semantic.If(
-          checkExpression(if_.condition()),
-          checkStatement(if_.trueBranch()),
-          if_.falseBranch().transform(this::checkStatement));
-      case Node.Return return_ ->
-        new Semantic.Return(return_.value().transform(this::checkExpression));
-      case Node.Var var ->
-        new Semantic.Var(
-          var.name().text(),
-          var.type().transform(this::checkType),
-          checkExpression(var.initialValue()));
+      case Node.Discard discard -> {
+        var discarded = checkExpression(discard.discarded());
+        // TODO: Check for calling a noreturn procedure!
+        yield new CheckedStatement(
+          new Semantic.Discard(discarded),
+          Control.FLOWS);
+      }
+      case Node.If if_ -> {
+        var scope           = locals.length();
+        var control         = Control.FLOWS;
+        var condition       = checkExpression(if_.condition());
+        var trueBranchScope = locals.length();
+        var trueBranch      = checkStatement(if_.trueBranch());
+        locals.removeDownTo(trueBranchScope);
+        var falseBranchScope = locals.length();
+        var falseBranch      =
+          if_.falseBranch().transform(this::checkStatement);
+        locals.removeDownTo(falseBranchScope);
+        if (!falseBranch.isEmpty()) {
+          control =
+            Control
+              .combineBranches(
+                trueBranch.control(),
+                falseBranch.getFirst().control());
+        }
+        locals.removeDownTo(scope);
+        yield new CheckedStatement(
+          new Semantic.If(
+            condition,
+            trueBranch.statement(),
+            falseBranch.transform(CheckedStatement::statement)),
+          control);
+      }
+      case Node.Return return_ -> {
+        // TODO: Check for calling a noreturn procedure!
+        // TODO: Check the return type!
+        var value = return_.value().transform(this::checkExpression);
+        if (returnType.isEmpty() && !value.isEmpty())
+          throw Subject
+            .error("procedure `%s` cannot return a value", symbolName);
+        if (!returnType.isEmpty() && value.isEmpty())
+          throw Subject.error("procedure `%s` must return a value", symbolName);
+        yield new CheckedStatement(new Semantic.Return(value), Control.RETURNS);
+      }
+      case Node.Var var -> {
+        // TODO: Check for calling a noreturn procedure!
+        // TODO: Check the variable type!
+        // TODO: Add variable to locals!
+        var initialValue = checkExpression(var.initialValue());
+        yield new CheckedStatement(
+          new Semantic.Var(
+            var.name().text(),
+            var.type().transform(this::checkType),
+            initialValue),
+          Control.FLOWS);
+      }
     };
   }
 

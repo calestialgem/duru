@@ -147,6 +147,12 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
     return false;
   }
 
+  public void removeDownTo(int newLength) {
+    keys.removeDownTo(newLength);
+    values.removeDownTo(newLength);
+    rehash();
+  }
+
   private void rehash() {
     buckets.clear();
     buckets.fill(-1, keys.length() * 2);
