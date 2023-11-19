@@ -43,9 +43,7 @@ public sealed interface Semantic {
 
   sealed interface Type extends Semantic {}
 
-  record Struct(String packageName, boolean isPublic, String name)
-    implements Type, Symbol
-  {}
+  record Struct(boolean isPublic, String name) implements Type, Symbol {}
 
   record Byte() implements Type, Builtin {
     @Override
@@ -121,7 +119,6 @@ public sealed interface Semantic {
   }
 
   record Proc(
-    String packageName,
     boolean isPublic,
     String name,
     Map<String, Type> parameters,
@@ -130,7 +127,6 @@ public sealed interface Semantic {
   {}
 
   record ExternalProc(
-    String packageName,
     boolean isPublic,
     String name,
     Map<String, Type> parameters,
@@ -160,7 +156,7 @@ public sealed interface Semantic {
 
   record LessThan(Expression left, Expression right) implements Expression {}
 
-  record Invocation(String packageName, String name, List<Expression> arguments)
+  record Invocation(String name, List<Expression> arguments)
     implements Expression
   {}
 

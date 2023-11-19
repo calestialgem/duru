@@ -36,9 +36,8 @@ public final class SymbolChecker {
 
   private Semantic.Proc checkProc(Node.Proc node) {
     return new Semantic.Proc(
-      packageName,
       node.isPublic(),
-      node.name().text(),
+      buildName(node.name().text()),
       checkParameters(node.parameters()),
       node.returnType().transform(this::checkType),
       checkStatement(node.body()));
@@ -46,9 +45,8 @@ public final class SymbolChecker {
 
   private Semantic.ExternalProc checkExternalProc(Node.ExternalProc node) {
     return new Semantic.ExternalProc(
-      packageName,
       node.isPublic(),
-      node.name().text(),
+      buildName(node.name().text()),
       checkParameters(node.parameters()),
       node.returnType().transform(this::checkType),
       node.externalName().toString());
@@ -70,10 +68,7 @@ public final class SymbolChecker {
   }
 
   private Semantic.Struct checkStruct(Node.Struct node) {
-    return new Semantic.Struct(
-      packageName,
-      node.isPublic(),
-      node.name().text());
+    return new Semantic.Struct(node.isPublic(), buildName(node.name().text()));
   }
 
   private Semantic.Type checkType(Node.Formula node) {
@@ -138,5 +133,9 @@ public final class SymbolChecker {
     }
     string.append(mention.name().text());
     return accessor.access(string.toString());
+  }
+
+  private String buildName(String identifier) {
+    return "%s.%s".formatted(packageName, identifier);
   }
 }
