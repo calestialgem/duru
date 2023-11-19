@@ -20,7 +20,6 @@ public final class PackageChecker {
   private final PackageType                        type;
   private final String                             name;
   private Map<String, Node.Declaration>            declarations;
-  private Map<String, Semantic.Type>               types;
   private AcyclicCache<String, Semantic.Symbol>    symbols;
 
   private PackageChecker(
@@ -39,7 +38,6 @@ public final class PackageChecker {
 
   private Semantic.Package check() {
     resolveDeclarations();
-    checkSignatures();
     symbols = AcyclicCache.create(this::checkSymbol);
     for (var declaration : declarations.keys())
       symbols.get(declaration);
@@ -86,20 +84,6 @@ public final class PackageChecker {
     }
     declarations = packageDeclarations.toMap();
     Persistance.record(artifacts, declarations, name, "declarations");
-  }
-
-  private void checkSignatures() {
-    types = declarations.transformValues(this::checkSignature);
-    Persistance.record(artifacts, types, name, "types");
-  }
-
-  private Semantic.Type checkSignature(Node.Declaration declaration) {
-    return switch (declaration) {
-      case Node.Proc proc -> throw Subject.unimplemented();
-      case Node.ExternalProc proc -> throw Subject.unimplemented();
-      case Node.Struct struct ->
-        new Semantic.Struct(name, struct.isPublic(), struct.name().text());
-    };
   }
 
   private Semantic.Symbol checkSymbol(String symbolName) {
