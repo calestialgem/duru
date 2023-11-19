@@ -1,0 +1,7 @@
+45B72EF8
+print:0001.0013-0001.0018: public proc `print`
+print:0008.0008-0008.0014: struct `Stream`
+print:0010.0006-0010.0016: externalproc `get_stream`
+print:0012.0006-0012.0028: externalproc `print_string_to_stream`
+print:0015.0006-0015.0022: proc `get_error_stream`
+print:0019.0006-0019.0010: externalproc `exit`

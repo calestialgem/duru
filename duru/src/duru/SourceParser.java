@@ -148,8 +148,9 @@ public final class SourceParser {
     var begin = index;
     if (!take(Token.Var.class))
       return Optional.absent();
-    var name         = expect(Token.Identifier.class, "variable name");
-    var type         = parseFormula();
+    var name = expect(Token.Identifier.class, "variable name");
+    var type = parseFormula();
+    expect(Token.Equal.class, "`=` of variable declaration");
     var initialValue = expect(this::parseExpression, "initial value");
     expect(Token.Semicolon.class, "`;` of variable declaration");
     return Optional
