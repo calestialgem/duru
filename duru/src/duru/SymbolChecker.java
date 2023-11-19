@@ -13,6 +13,7 @@ public final class SymbolChecker {
   private final Accessor<String, Semantic.Symbol> accessor;
   private final String                            packageName;
   private final Node.Declaration                  declaration;
+  private String                                  symbolName;
   private MapBuffer<String, Semantic.Type>        locals;
 
   private SymbolChecker(
@@ -26,7 +27,8 @@ public final class SymbolChecker {
   }
 
   private Semantic.Symbol check() {
-    locals = MapBuffer.create();
+    symbolName = "%s.%s".formatted(packageName, declaration.name().text());
+    locals     = MapBuffer.create();
     return switch (declaration) {
       case Node.Proc proc -> checkProc(proc);
       case Node.ExternalProc proc -> checkExternalProc(proc);
@@ -37,7 +39,7 @@ public final class SymbolChecker {
   private Semantic.Proc checkProc(Node.Proc node) {
     return new Semantic.Proc(
       node.isPublic(),
-      buildName(node.name().text()),
+      symbolName,
       checkParameters(node.parameters()),
       node.returnType().transform(this::checkType),
       checkStatement(node.body()));
@@ -46,7 +48,7 @@ public final class SymbolChecker {
   private Semantic.ExternalProc checkExternalProc(Node.ExternalProc node) {
     return new Semantic.ExternalProc(
       node.isPublic(),
-      buildName(node.name().text()),
+      symbolName,
       checkParameters(node.parameters()),
       node.returnType().transform(this::checkType),
       node.externalName().toString());
@@ -59,7 +61,8 @@ public final class SymbolChecker {
     for (var parameter : nodes) {
       var name = parameter.name().text();
       if (parameters.contains(name))
-        throw Subject.error("redeclaration of parameter `%s`", name);
+        throw Subject
+          .error("redeclaration of parameter `%s.%s`", symbolName, name);
       var type = checkType(parameter.type());
       parameters.add(name, type);
       locals.add(name, type);
@@ -68,7 +71,7 @@ public final class SymbolChecker {
   }
 
   private Semantic.Struct checkStruct(Node.Struct node) {
-    return new Semantic.Struct(node.isPublic(), buildName(node.name().text()));
+    return new Semantic.Struct(node.isPublic(), symbolName);
   }
 
   private Semantic.Type checkType(Node.Formula node) {
@@ -133,9 +136,5 @@ public final class SymbolChecker {
     }
     string.append(mention.name().text());
     return accessor.access(string.toString());
-  }
-
-  private String buildName(String identifier) {
-    return "%s.%s".formatted(packageName, identifier);
   }
 }
