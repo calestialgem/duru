@@ -37,7 +37,7 @@ public final class Checker {
     modules = AcyclicCache.create(this::checkModule);
     modules.get(subject, main);
     var target = new Semantic.Target(main, modules.getAll());
-    debugger.record(directory.resolve("art"), target, "target");
+    debugger.recordTarget(directory.resolve("art"), target);
     return target;
   }
 

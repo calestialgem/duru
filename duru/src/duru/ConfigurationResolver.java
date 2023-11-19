@@ -24,28 +24,18 @@ public final class ConfigurationResolver {
     for (var declaration : declarations) {
       switch (declaration) {
         case ConfigurationNode.Executable executable -> {
-          var text = text(executable.name());
+          var text = executable.name().toString();
           checkUniqueness(text, executable.name().location());
           executables.add(text, executable.name().location());
         }
         case ConfigurationNode.Library library -> {
-          var text = text(library.name());
+          var text = library.name().toString();
           checkUniqueness(text, library.name().location());
           libraries.add(text, library.name().location());
         }
       }
     }
     return new Configuration(executables.toMap(), libraries.toMap());
-  }
-
-  private String text(ConfigurationNode.PackageName name) {
-    var string = new StringBuilder();
-    string.append(name.subspaces().getFirst().text());
-    for (var i = 1; i < name.subspaces().length(); i++) {
-      string.append('.');
-      string.append(name.subspaces().get(i).text());
-    }
-    return string.toString();
   }
 
   private void checkUniqueness(String text, Location location) {

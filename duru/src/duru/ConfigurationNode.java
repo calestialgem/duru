@@ -16,7 +16,18 @@ public sealed interface ConfigurationNode {
   record PackageName(
     Location location,
     List<ConfigurationToken.Identifier> subspaces) implements ConfigurationNode
-  {}
+  {
+    @Override
+    public String toString() {
+      var string = new StringBuilder();
+      string.append(subspaces.getFirst().text());
+      for (var i = 1; i < subspaces.length(); i++) {
+        string.append('.');
+        string.append(subspaces.get(i).text());
+      }
+      return string.toString();
+    }
+  }
 
   Location location();
 }

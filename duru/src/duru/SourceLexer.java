@@ -162,7 +162,7 @@ public final class SourceLexer {
   }
 
   private Location location(int begin) {
-    return new Location(source, begin, index);
+    return Location.at(source, begin, index);
   }
 
   private boolean hasCharacter() {

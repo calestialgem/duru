@@ -238,10 +238,11 @@ public final class SourceParser {
   private Location location(int begin) {
     var beginLocation = tokens.get(begin).location();
     var endLocation   = tokens.get(index - 1).location();
-    return new Location(
-      beginLocation.source(),
-      beginLocation.begin(),
-      endLocation.end());
+    return Location
+      .at(
+        beginLocation.source(),
+        beginLocation.beginIndex(),
+        endLocation.endIndex());
   }
 
   private <V> List<V> parseSeparated(Supplier<Optional<V>> parserFunction) {

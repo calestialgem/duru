@@ -74,10 +74,11 @@ public final class ConfigurationParser {
   private Location location(int begin) {
     var beginLocation = tokens.get(begin).location();
     var endLocation   = tokens.get(index - 1).location();
-    return new Location(
-      beginLocation.source(),
-      beginLocation.begin(),
-      endLocation.end());
+    return Location
+      .at(
+        beginLocation.source(),
+        beginLocation.beginIndex(),
+        endLocation.endIndex());
   }
 
   private <Token extends ConfigurationToken> Token expect(

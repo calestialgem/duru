@@ -1,1 +1,5 @@
+503DDD41
 C:\Users\Cem\duru\testmodule\src\main.duru
+proc main() {
+  duru.print("Hello, World!\n");
+}

@@ -87,7 +87,7 @@ public final class ConfigurationLexer {
   }
 
   private Location location(int begin) {
-    return new Location(source, begin, index);
+    return Location.at(source, begin, index);
   }
 
   private boolean hasCharacter() {

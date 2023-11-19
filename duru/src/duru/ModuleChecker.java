@@ -91,13 +91,13 @@ public final class ModuleChecker {
       new Source(
         configurationFile,
         Persistance.load(subject, configurationFile));
-    debugger.record(artifacts, configurationSource, "module", "source");
+    debugger.recordConfigurationSource(artifacts, configurationSource);
     var configurationTokens = ConfigurationLexer.lex(configurationSource);
-    debugger.record(artifacts, configurationTokens, "module", "tokens");
+    debugger.recordConfigurationTokens(artifacts, configurationTokens);
     var configurationNode = ConfigurationParser.parse(configurationTokens);
-    debugger.record(artifacts, configurationNode, "module", "node");
+    debugger.recordConfigurationDeclarations(artifacts, configurationNode);
     configuration = ConfigurationResolver.resolve(configurationNode);
-    debugger.record(artifacts, configuration, "module", "resolution");
+    debugger.recordConfiguration(artifacts, configuration);
   }
 
   private Semantic.Package checkPackage(Object subject, String packageName) {

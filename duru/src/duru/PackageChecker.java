@@ -84,11 +84,11 @@ public final class PackageChecker {
       var filename     =
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
       var source       = new Source(file, Persistance.load(directory, file));
-      debugger.record(artifacts, source, name, filename, "source");
+      debugger.recordSource(artifacts, source, name, filename);
       var tokens = SourceLexer.lex(source);
-      debugger.record(artifacts, tokens, name, filename, "tokens");
+      debugger.recordTokens(artifacts, tokens, name, filename);
       var declarations = SourceParser.parse(tokens);
-      debugger.record(artifacts, declarations, name, filename, "declarations");
+      debugger.recordDeclarations(artifacts, declarations, name, filename);
       for (var declaration : declarations) {
         var identifier = declaration.name().text();
         if (packageDeclarations.contains(identifier)) {
@@ -103,7 +103,7 @@ public final class PackageChecker {
       }
     }
     declarations = packageDeclarations.toMap();
-    debugger.record(artifacts, declarations, name, "declarations");
+    debugger.recordResolution(artifacts, declarations, name);
   }
 
   private Semantic.Symbol checkSymbol(Object subject, String symbolName) {

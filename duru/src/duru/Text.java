@@ -1,6 +1,25 @@
 package duru;
 
 public final class Text {
+  public static String quote(String constant) {
+    var string = new StringBuilder();
+    for (
+      var i = 0;
+      i < constant.length();
+      i = constant.offsetByCodePoints(i, 1))
+    {
+      var character = constant.codePointAt(i);
+      switch (character) {
+        case '\\', '"' -> string.append('\\').append(character);
+        case '\t' -> string.append('\\').append('t');
+        case '\r' -> string.append('\\').append('r');
+        case '\n' -> string.append('\\').append('n');
+        default -> string.appendCodePoint(character);
+      }
+    }
+    return string.toString();
+  }
+
   public static String getModule(String name) {
     var separator = name.indexOf('.');
     if (separator == -1)

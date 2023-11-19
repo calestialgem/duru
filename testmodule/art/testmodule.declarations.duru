@@ -1,2 +1,0 @@
-{main: Proc[location=C:\Users\Cem\duru\testmodule\src\main.duru:1.1-3.2, isPublic=false, name=identifier `main`, parameters=[], returnType=[], body=Block[location=C:\Users\Cem\duru\testmodule\src\main.duru:1.13-3.2, innerStatements=[Discard[location=C:\Users\Cem\duru\testmodule\src\main.duru:2.3-33, discarded=Invocation[location=C:\Users\Cem\duru\testmodule\src\main.duru:2.3-32, procedure=Mention[location=C:\Users\Cem\duru\testmodule\src\main.duru:2.3-13, subspaces=[identifier `duru`], name=identifier `print`], arguments=[StringConstant[value=string `Hello, World!
-`]]]]]]]}
