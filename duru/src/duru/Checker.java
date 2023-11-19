@@ -42,8 +42,9 @@ public final class Checker {
   }
 
   private Semantic.Module checkModule(Object subject, String name) {
-    if (name.equals(main))
+    if (name.equals(main)) {
       return checkModule(subject, directory);
+    }
     return checkModule(subject, libraries.resolve(name));
   }
 

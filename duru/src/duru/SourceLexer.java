@@ -70,21 +70,25 @@ public final class SourceLexer {
         case '"' -> {
           var value = new StringBuilder();
           while (true) {
-            if (!hasCharacter())
+            if (!hasCharacter()) {
               throw Diagnostic.error(location(), "incomplete string constant");
+            }
             var escapeSequenceBegin = index;
             var character           = getCharacter();
             advance();
-            if (character == '\n')
+            if (character == '\n') {
               throw Diagnostic.error(location(), "incomplete string constant");
-            if (character == '"')
+            }
+            if (character == '"') {
               break;
+            }
             if (character != '\\') {
               value.appendCodePoint(character);
               continue;
             }
-            if (!hasCharacter())
+            if (!hasCharacter()) {
               throw Diagnostic.error(location(), "incomplete escape sequence");
+            }
             character = getCharacter();
             advance();
             switch (character) {
@@ -122,11 +126,15 @@ public final class SourceLexer {
                 break;
               }
               var digit = character - '0';
-              if (Long.compareUnsigned(value, Long.divideUnsigned(-1L, 10)) > 0)
+              if (Long.compareUnsigned(value, Long.divideUnsigned(-1L, 10))
+                > 0)
+              {
                 throw Diagnostic.error(location(), "huge number");
+              }
               value *= 10;
-              if (Long.compareUnsigned(value, -1L - digit) > 0)
+              if (Long.compareUnsigned(value, -1L - digit) > 0) {
                 throw Diagnostic.error(location(), "huge number");
+              }
               value += digit;
             }
             tokens.add(new Token.NaturalConstant(location(), value));

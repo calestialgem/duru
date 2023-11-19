@@ -29,10 +29,12 @@ public final class AcyclicCache<Key, Value> {
 
   public Value get(Object subject, Key key) {
     var cached = cache.get(key);
-    if (!cached.isEmpty())
+    if (!cached.isEmpty()) {
       return cached.getFirst();
-    if (current.contains(key))
+    }
+    if (current.contains(key)) {
       throw Diagnostic.error(subject, "cyclic dependencies `%s`", key);
+    }
     current.add(key);
     var value = function.apply(subject, key);
     current.remove(key);

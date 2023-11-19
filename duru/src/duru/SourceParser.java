@@ -74,8 +74,9 @@ public final class SourceParser {
   private Optional<Node.Parameter> parseParameter() {
     var begin         = index;
     var parameterName = parse(Token.Identifier.class);
-    if (parameterName.isEmpty())
+    if (parameterName.isEmpty()) {
       return Optional.absent();
+    }
     var parameterType = expect(this::parseFormula, "parameter type");
     return Optional
       .present(
@@ -92,8 +93,9 @@ public final class SourceParser {
       return Optional.present(new Node.Pointer(location(begin), pointee));
     }
     var name = parseMention();
-    if (name.isEmpty())
+    if (name.isEmpty()) {
       return Optional.absent();
+    }
     return Optional.present(new Node.Base(name.getFirst()));
   }
 
@@ -127,8 +129,9 @@ public final class SourceParser {
 
   private Optional<Node.Return> parseReturn() {
     var begin = index;
-    if (!take(Token.Return.class))
+    if (!take(Token.Return.class)) {
       return Optional.absent();
+    }
     var value = parseExpression();
     expect(Token.Semicolon.class, "`;` of return statement");
     return Optional.present(new Node.Return(location(begin), value));
@@ -137,8 +140,9 @@ public final class SourceParser {
   private Optional<Node.Discard> parseDiscard() {
     var begin     = index;
     var discarded = parseExpression();
-    if (discarded.isEmpty())
+    if (discarded.isEmpty()) {
       return Optional.absent();
+    }
     expect(Token.Semicolon.class, "`;` of discard statement");
     return Optional
       .present(new Node.Discard(location(begin), discarded.getFirst()));
@@ -146,8 +150,9 @@ public final class SourceParser {
 
   private Optional<Node.Var> parseVar() {
     var begin = index;
-    if (!take(Token.Var.class))
+    if (!take(Token.Var.class)) {
       return Optional.absent();
+    }
     var name = expect(Token.Identifier.class, "variable name");
     var type = parseFormula();
     expect(Token.Equal.class, "`=` of variable declaration");
@@ -159,13 +164,15 @@ public final class SourceParser {
 
   private Optional<Node.Block> parseBlock() {
     var begin = index;
-    if (!take(Token.OpeningBrace.class))
+    if (!take(Token.OpeningBrace.class)) {
       return Optional.absent();
+    }
     var innerStatements = ListBuffer.<Node.Statement>create();
     while (true) {
       var innerStatement = parseStatement();
-      if (innerStatement.isEmpty())
+      if (innerStatement.isEmpty()) {
         break;
+      }
       innerStatements.add(innerStatement.getFirst());
     }
     expect(Token.ClosingBrace.class, "`}` of block statement");
@@ -180,10 +187,12 @@ public final class SourceParser {
   private Optional<Node.Precedence01> parsePrecedence01() {
     var begin = index;
     var left  = parsePrecedence00();
-    if (left.isEmpty())
+    if (left.isEmpty()) {
       return Optional.absent();
-    if (!take(Token.Left.class))
+    }
+    if (!take(Token.Left.class)) {
       return Optional.present(left.getFirst());
+    }
     var right =
       expect(this::parsePrecedence01, "right operand of less-than expression");
     return Optional
@@ -210,10 +219,12 @@ public final class SourceParser {
   private Optional<Node.Precedence00> parseAccessOrInvocation() {
     var begin  = index;
     var symbol = parseMention();
-    if (symbol.isEmpty())
+    if (symbol.isEmpty()) {
       return Optional.absent();
-    if (!take(Token.OpeningParenthesis.class))
+    }
+    if (!take(Token.OpeningParenthesis.class)) {
       return Optional.present(new Node.Access(symbol.getFirst()));
+    }
     var arguments = parseSeparated(this::parseExpression);
     expect(Token.ClosingParenthesis.class, "`)` of argument list");
     return Optional
@@ -224,8 +235,9 @@ public final class SourceParser {
   private Optional<Node.Mention> parseMention() {
     var begin   = index;
     var portion = parse(Token.Identifier.class);
-    if (portion.isEmpty())
+    if (portion.isEmpty()) {
       return Optional.absent();
+    }
     var name      = portion.getFirst();
     var subspaces = ListBuffer.<Token.Identifier>create();
     while (take(Token.Dot.class)) {
@@ -250,11 +262,13 @@ public final class SourceParser {
     var list = ListBuffer.<V>create();
     while (true) {
       var value = parserFunction.get();
-      if (value.isEmpty())
+      if (value.isEmpty()) {
         break;
+      }
       list.add(value.getFirst());
-      if (!take(Token.Comma.class))
+      if (!take(Token.Comma.class)) {
         break;
+      }
     }
     return list.toList();
   }

@@ -60,28 +60,31 @@ public final class ModuleChecker {
             "executable package `%s` does not have a main procedure",
             executable);
       }
-      if (!proc.parameters().isEmpty())
+      if (!proc.parameters().isEmpty()) {
         throw Diagnostic
           .error(
             executable.value(),
             "executable package `%s` has a main procedure with parameters",
             executable);
-      if (!(proc.returnType() instanceof Semantic.Unit))
+      }
+      if (!(proc.returnType() instanceof Semantic.Unit)) {
         throw Diagnostic
           .error(
             executable.value(),
             "executable package `%s` has a main procedure with a non-unit return type",
             executable);
+      }
     }
     for (var library : configuration.libraries()) {
       var main =
         packages.get(library.value(), library.key()).symbols().get("main");
-      if (!main.isEmpty() && main.getFirst() instanceof Semantic.Proc)
+      if (!main.isEmpty() && main.getFirst() instanceof Semantic.Proc) {
         throw Diagnostic
           .error(
             library.value(),
             "library package `%s` has a main procedure",
             library);
+      }
     }
   }
 
@@ -102,12 +105,15 @@ public final class ModuleChecker {
 
   private Semantic.Package checkPackage(Object subject, String packageName) {
     PackageType type;
-    if (configuration.executables().contains(packageName))
+    if (configuration.executables().contains(packageName)) {
       type = PackageType.EXECUTABLE;
-    else if (configuration.libraries().contains(packageName))
+    }
+    else if (configuration.libraries().contains(packageName)) {
       type = PackageType.LIBRARY;
-    else
+    }
+    else {
       type = PackageType.IMPLEMENTATION;
+    }
     return PackageChecker
       .check(
         debugger,
@@ -138,13 +144,14 @@ public final class ModuleChecker {
     }
     var accessed =
       accessor.access(subject, accessedModule).packages().get(accessedPackage);
-    if (accessed.isEmpty())
+    if (accessed.isEmpty()) {
       throw Diagnostic
         .error(
           subject,
           "there is no package `%s` in module `%s`",
           accessedPackage,
           accessedModule);
+    }
     if (!(accessed.getFirst() instanceof Semantic.Library library)) {
       throw Diagnostic
         .error(

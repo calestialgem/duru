@@ -35,20 +35,23 @@ public record Optional<Value>(Value value) implements Collection<Value> {
 
   @Override
   public <U> Optional<U> transform(Function<Value, ? extends U> transformer) {
-    if (isEmpty())
+    if (isEmpty()) {
       return absent();
+    }
     return present(transformer.apply(value));
   }
 
   public Value getOrElse(Value fallback) {
-    if (isEmpty())
+    if (isEmpty()) {
       return fallback;
+    }
     return value;
   }
 
   public Value getOrElse(Supplier<? extends Value> fallback) {
-    if (isEmpty())
+    if (isEmpty()) {
       return fallback.get();
+    }
     return value;
   }
 }

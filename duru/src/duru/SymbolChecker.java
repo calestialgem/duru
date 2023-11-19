@@ -47,12 +47,14 @@ public final class SymbolChecker {
     var body = checkStatement(node.body());
     if (!(returnType instanceof Semantic.Unit)
       && body.control() == Control.FLOWS)
+    {
       throw Diagnostic
         .error(
           node.returnType().getFirst().location(),
           "procedure `%s` must return a `%s`",
           symbolName,
           returnType);
+    }
     return new Semantic.Proc(
       node.isPublic(),
       symbolName,
@@ -79,13 +81,14 @@ public final class SymbolChecker {
     var parameters = MapBuffer.<String, Semantic.Type>create();
     for (var parameter : nodes) {
       var name = parameter.name().text();
-      if (parameters.contains(name))
+      if (parameters.contains(name)) {
         throw Diagnostic
           .error(
             parameter.name().location(),
             "redeclaration of parameter `%s.%s`",
             symbolName,
             name);
+      }
       var type = checkType(parameter.type());
       parameters.add(name, type);
       locals.add(name, type);
@@ -188,13 +191,14 @@ public final class SymbolChecker {
         var typeAnnotation = var.type().transform(this::checkType);
         var initialValue   = checkExpression(var.initialValue());
         var type           = typeAnnotation.getOrElse(initialValue::type);
-        if (type instanceof Semantic.Noreturn)
+        if (type instanceof Semantic.Noreturn) {
           throw Diagnostic
             .error(
               var.initialValue().location(),
               "`%s.%s` cannot be `duru.Noreturn`",
               symbolName,
               name);
+        }
         locals.add(name, type);
         yield new CheckedStatement(
           new Semantic.Var(
@@ -211,18 +215,20 @@ public final class SymbolChecker {
       case Node.LessThan binary -> {
         var left  = checkExpression(binary.left());
         var right = checkExpression(binary.right());
-        if (!(left.type() instanceof Semantic.Arithmetic))
+        if (!(left.type() instanceof Semantic.Arithmetic)) {
           throw Diagnostic
             .error(
               binary.left().location(),
               "`%s` is not arithmetic",
               left.type());
-        if (!(right.type() instanceof Semantic.Arithmetic))
+        }
+        if (!(right.type() instanceof Semantic.Arithmetic)) {
           throw Diagnostic
             .error(
               binary.right().location(),
               "`%s` is not arithmetic",
               right.type());
+        }
         if (left.expression() instanceof Semantic.IntegralConstant cl) {
           if (right.expression() instanceof Semantic.IntegralConstant cr) {
             yield new CheckedExpression(
@@ -244,13 +250,14 @@ public final class SymbolChecker {
               coerce(binary.right().location(), right, left.type())),
             Semantic.BOOLEAN);
         }
-        if (!left.type().equals(right.type()))
+        if (!left.type().equals(right.type())) {
           throw Diagnostic
             .error(
               binary.location(),
               "`%s` and `%s` cannot be operated",
               left.type(),
               right.type());
+        }
         yield new CheckedExpression(
           new Semantic.LessThan(left.expression(), right.expression()),
           Semantic.BOOLEAN);
@@ -270,13 +277,16 @@ public final class SymbolChecker {
       }
       case Node.Invocation invocation -> {
         var accessed = accessGlobal(invocation.procedure());
-        if (!(accessed instanceof Semantic.Procedure procedure))
+        if (!(accessed instanceof Semantic.Procedure procedure)) {
           throw Diagnostic
             .error(
               invocation.procedure().location(),
               "`%s` is not procedure",
               accessed.name());
-        if (invocation.arguments().length() != procedure.parameters().length())
+        }
+        if (invocation.arguments().length()
+          != procedure.parameters().length())
+        {
           throw Diagnostic
             .error(
               invocation.location(),
@@ -284,6 +294,7 @@ public final class SymbolChecker {
               accessed.name(),
               procedure.parameters().length(),
               invocation.arguments().length());
+        }
         var arguments = ListBuffer.<Semantic.Expression>create();
         for (var i = 0; i < invocation.arguments().length(); i++) {
           var argument  = invocation.arguments().get(i);
@@ -323,8 +334,9 @@ public final class SymbolChecker {
     CheckedExpression raw,
     Semantic.Type target)
   {
-    if (raw.type().coerces(target))
+    if (raw.type().coerces(target)) {
       return raw.expression();
+    }
     if (!(raw.expression() instanceof Semantic.IntegralConstant constant)) {
       throw Diagnostic
         .error(subject, "`%s` cannot coerce to `%s`", raw.type(), target);
@@ -337,13 +349,14 @@ public final class SymbolChecker {
           Long.toUnsignedString(constant.value()),
           target);
     }
-    if (!type.canRepresent(constant.value()))
+    if (!type.canRepresent(constant.value())) {
       throw Diagnostic
         .error(
           subject,
           "`%s` cannot represent `%s`",
           type,
           Long.toUnsignedString(constant.value()));
+    }
     return type.constant(constant.value());
   }
 }

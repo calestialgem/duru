@@ -42,8 +42,9 @@ public final class Persistance {
   }
 
   public static void ensure(Object subject, Path directory) {
-    if (Files.exists(directory))
+    if (Files.exists(directory)) {
       return;
+    }
     create(subject, directory);
   }
 
@@ -92,7 +93,8 @@ public final class Persistance {
       });
     }
     catch (IOException cause) {
-      throw Diagnostic.failure(subject, cause, "could not delete `%s`", directory);
+      throw Diagnostic
+        .failure(subject, cause, "could not delete `%s`", directory);
     }
   }
 

@@ -51,9 +51,10 @@ public record Location(
 
   @Override
   public String toString() {
-    if (beginLine != endLine)
+    if (beginLine != endLine) {
       return "%s:%d.%d-%d.%d"
         .formatted(source, beginLine, beginColumn, endLine, endColumn);
+    }
     return "%s:%d.%d-%d".formatted(source, beginLine, beginColumn, endColumn);
   }
 }

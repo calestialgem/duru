@@ -39,11 +39,13 @@ public final class ConfigurationResolver {
   }
 
   private void checkUniqueness(String text, Location location) {
-    if (executables.contains(text))
+    if (executables.contains(text)) {
       throw Diagnostic
         .error(location, "redefinition of executable package `%s`", text);
-    if (libraries.contains(text))
+    }
+    if (libraries.contains(text)) {
       throw Diagnostic
         .error(location, "redefinition of library package `%s`", text);
+    }
   }
 }

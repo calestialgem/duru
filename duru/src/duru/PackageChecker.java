@@ -65,11 +65,13 @@ public final class PackageChecker {
             new Semantic.Integer32(),
             new Semantic.Unit(),
             new Semantic.Noreturn());
-      for (var builtin : builtins)
+      for (var builtin : builtins) {
         symbols.add(builtin.identifier(), builtin);
+      }
     }
-    for (var declaration : declarations)
+    for (var declaration : declarations) {
       symbols.get(declaration.value().location(), declaration.key());
+    }
     return switch (type) {
       case EXECUTABLE -> new Semantic.Executable(name, symbols.getAll());
       case LIBRARY -> new Semantic.Library(name, symbols.getAll());
@@ -121,36 +123,40 @@ public final class PackageChecker {
 
   private Semantic.Symbol checkSymbol(Object subject, String symbolName) {
     var checked = declarations.get(symbolName);
-    if (checked.isEmpty())
+    if (checked.isEmpty()) {
       throw Diagnostic
         .error(
           subject,
           "there is no symbol `%s` in package `%s`",
           Text.getSymbol(symbolName),
           name);
+    }
     return SymbolChecker.check(this::accessSymbol, name, checked.getFirst());
   }
 
   private Semantic.Symbol accessSymbol(Object subject, String accessedSymbol) {
     var symbolName = Text.getSymbol(accessedSymbol);
-    if (accessedSymbol.equals(symbolName))
+    if (accessedSymbol.equals(symbolName)) {
       return symbols.get(subject, symbolName);
+    }
     var accessedPackage = Text.getPackage(accessedSymbol);
     if (accessedPackage.equals(name)) {
       return symbols.get(subject, symbolName);
     }
     var accessed =
       accessor.access(subject, accessedPackage).symbols().get(symbolName);
-    if (accessed.isEmpty())
+    if (accessed.isEmpty()) {
       throw Diagnostic
         .error(
           subject,
           "there is no symbol `%s` in package `%s`",
           symbolName,
           accessedPackage);
-    if (!accessed.getFirst().isPublic())
+    }
+    if (!accessed.getFirst().isPublic()) {
       throw Diagnostic
         .error(subject, "accessed symbol `%s` is not public", accessedSymbol);
+    }
     return accessed.getFirst();
   }
 }
