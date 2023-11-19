@@ -229,20 +229,20 @@ public final class SymbolChecker {
               new Semantic.LessThan(
                 new Semantic.Natural64Constant(cl.value()),
                 new Semantic.Natural64Constant(cr.value())),
-              new Semantic.Natural64());
+              Semantic.BOOLEAN);
           }
           yield new CheckedExpression(
             new Semantic.LessThan(
               coerce(binary.left().location(), left, right.type()),
               right.expression()),
-            right.type());
+            Semantic.BOOLEAN);
         }
         if (right.expression() instanceof Semantic.IntegralConstant cr) {
           yield new CheckedExpression(
             new Semantic.LessThan(
               left.expression(),
               coerce(binary.right().location(), right, left.type())),
-            left.type());
+            Semantic.BOOLEAN);
         }
         if (!left.type().equals(right.type()))
           throw Diagnostic
@@ -253,7 +253,7 @@ public final class SymbolChecker {
               right.type());
         yield new CheckedExpression(
           new Semantic.LessThan(left.expression(), right.expression()),
-          left.type());
+          Semantic.BOOLEAN);
       }
       case Node.Access access -> {
         if (access.mention().subspaces().isEmpty()) {

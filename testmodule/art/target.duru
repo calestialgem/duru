@@ -1,0 +1,16 @@
+B1C56E24
+public byte `duru.Byte`
+public boolean `duru.Boolean`
+public natural32 `duru.Natural32`
+public ınteger32 `duru.Integer32`
+public unit `duru.Unit`
+public noreturn `duru.Noreturn`
+struct `duru.Stream`
+externalproc `duru.print_string_to_stream`
+externalproc `duru.get_stream`
+proc `duru.get_error_stream`
+externalproc `duru.exit`
+public proc `duru.print`
+
+proc `testmodule.main`
+
