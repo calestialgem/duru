@@ -1,3 +1,6 @@
 package duru;
 
-public record Resolution(Map<String, Node.Declaration> declarations) {}
+public record Resolution(
+  String name,
+  Map<String, Node.Declaration> declarations)
+{}

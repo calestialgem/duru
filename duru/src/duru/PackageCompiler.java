@@ -19,6 +19,7 @@ public final class PackageCompiler {
   private final String                          name;
   private AcyclicCache<String, Semantic.Symbol> symbols;
   private Resolution                            resolution;
+  private Map<String, Semantic.Type>            types;
 
   private PackageCompiler(
     Path sources,
@@ -36,6 +37,8 @@ public final class PackageCompiler {
     symbols    = AcyclicCache.create(this::compileSymbol);
     resolution = PackageResolver.resolve(sources, artifacts, name);
     Persistance.record(artifacts, resolution, name, "resolution");
+    types = PackageChecker.check(resolution);
+    Persistance.record(artifacts, types, name, "types");
     for (var declaration : resolution.declarations().keys())
       symbols.get(declaration);
     return switch (type) {

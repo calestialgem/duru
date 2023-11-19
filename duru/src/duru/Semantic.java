@@ -83,6 +83,37 @@ public sealed interface Semantic {
 
   record Pointer(Type pointee) implements Type {}
 
+  sealed interface Callable extends Type {
+    List<Type> parameters();
+    Optional<Type> returnType();
+  }
+
+  record FunctionType(Type theReturnType, List<Type> parameters)
+    implements Callable, Builtin
+  {
+    @Override
+    public Optional<Type> returnType() {
+      return Optional.present(theReturnType);
+    }
+
+    @Override
+    public String name() {
+      return "Function";
+    }
+  }
+
+  record ProcedureType(List<Type> parameters) implements Callable, Builtin {
+    @Override
+    public Optional<Type> returnType() {
+      return Optional.absent();
+    }
+
+    @Override
+    public String name() {
+      return "Procedure";
+    }
+  }
+
   sealed interface Procedure extends Semantic {
     Map<String, Type> parameters();
     Optional<Type> returnType();

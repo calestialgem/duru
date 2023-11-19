@@ -51,6 +51,6 @@ public final class PackageResolver {
         packageDeclarations.add(identifier, declaration);
       }
     }
-    return new Resolution(packageDeclarations.toMap());
+    return new Resolution(name, packageDeclarations.toMap());
   }
 }
