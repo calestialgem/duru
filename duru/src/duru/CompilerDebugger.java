@@ -75,7 +75,7 @@ public sealed interface CompilerDebugger {
                 declaration.name().location().endColumn()));
         string.append(':');
         string.append(' ');
-        string.append(declaration.getClass().getSimpleName().toLowerCase());
+        string.append(declaration.getClass().getSimpleName());
         string.append(' ');
         string.append('`');
         string.append(declaration.name());
@@ -224,7 +224,7 @@ public sealed interface CompilerDebugger {
           string.append("public");
           string.append(' ');
         }
-        string.append(declaration.getClass().getSimpleName().toLowerCase());
+        string.append(declaration.getClass().getSimpleName());
         string.append(' ');
         string.append('`');
         string.append(declaration.name().text());
@@ -270,7 +270,7 @@ public sealed interface CompilerDebugger {
           string.append("public");
           string.append(' ');
         }
-        string.append(declaration.getClass().getSimpleName().toLowerCase());
+        string.append(declaration.getClass().getSimpleName());
         string.append(' ');
         string.append('`');
         string.append(declaration.name().text());
@@ -297,7 +297,7 @@ public sealed interface CompilerDebugger {
               string.append("public");
               string.append(' ');
             }
-            string.append(declaration.getClass().getSimpleName().toLowerCase());
+            string.append(declaration.getClass().getSimpleName());
             string.append(' ');
             string.append('`');
             string.append(declaration.name());
@@ -305,7 +305,6 @@ public sealed interface CompilerDebugger {
             string.append(System.lineSeparator());
           }
         }
-        string.append(System.lineSeparator());
       }
       Persistance
         .store("compiler debugger", artifacts.resolve("target.duru"), string);

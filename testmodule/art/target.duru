@@ -1,16 +1,14 @@
 B1C56E24
-public byte `duru.Byte`
-public boolean `duru.Boolean`
-public natural32 `duru.Natural32`
-public ınteger32 `duru.Integer32`
-public unit `duru.Unit`
-public noreturn `duru.Noreturn`
-struct `duru.Stream`
-externalproc `duru.print_string_to_stream`
-externalproc `duru.get_stream`
-proc `duru.get_error_stream`
-externalproc `duru.exit`
-public proc `duru.print`
-
-proc `testmodule.main`
-
+public Byte `duru.Byte`
+public Boolean `duru.Boolean`
+public Natural32 `duru.Natural32`
+public Integer32 `duru.Integer32`
+public Unit `duru.Unit`
+public Noreturn `duru.Noreturn`
+Struct `duru.Stream`
+ExternalProc `duru.print_string_to_stream`
+ExternalProc `duru.get_stream`
+Proc `duru.get_error_stream`
+ExternalProc `duru.exit`
+public Proc `duru.print`
+Proc `testmodule.main`
