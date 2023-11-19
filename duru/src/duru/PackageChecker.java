@@ -55,6 +55,19 @@ public final class PackageChecker {
   private Semantic.Package check() {
     resolveDeclarations();
     symbols = AcyclicCache.create(this::checkSymbol);
+    if (name.equals("duru")) {
+      var builtins =
+        List.<Semantic
+          .Builtin>of(
+            new Semantic.Byte(),
+            new Semantic.Boolean(),
+            new Semantic.Natural32(),
+            new Semantic.Integer32(),
+            new Semantic.Unit(),
+            new Semantic.Noreturn());
+      for (var builtin : builtins)
+        symbols.add(builtin.identifier(), builtin);
+    }
     for (var declaration : declarations)
       symbols.get(declaration.value().location(), declaration.key());
     return switch (type) {
@@ -114,7 +127,7 @@ public final class PackageChecker {
           subject,
           "there is no symbol `%s` in package `%s`",
           Text.getSymbol(symbolName),
-          Text.getPackage(symbolName));
+          name);
     return SymbolChecker.check(this::accessSymbol, name, checked.getFirst());
   }
 

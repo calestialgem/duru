@@ -23,6 +23,10 @@ public final class AcyclicCache<Key, Value> {
     this.current  = current;
   }
 
+  public void add(Key key, Value value) {
+    cache.add(key, value);
+  }
+
   public Value get(Object subject, Key key) {
     var cached = cache.get(key);
     if (!cached.isEmpty())
