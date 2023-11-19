@@ -45,6 +45,15 @@ public sealed interface Semantic {
 
   sealed interface Arithmetic extends Type {}
 
+  sealed interface Integral extends Arithmetic {
+    long max();
+    Expression constant(long value);
+  }
+
+  sealed interface Integer extends Integral {}
+
+  sealed interface Natural extends Integral {}
+
   record Struct(boolean isPublic, String name) implements Type, Symbol {
     @Override
     public String toString() {
@@ -76,7 +85,39 @@ public sealed interface Semantic {
     }
   }
 
-  record Natural32() implements Arithmetic, Builtin {
+  record ConstantIntegral() implements Integral, Builtin {
+    @Override
+    public long max() {
+      return -1L;
+    }
+
+    @Override
+    public IntegralConstant constant(long value) {
+      return new IntegralConstant(value);
+    }
+
+    @Override
+    public String identifier() {
+      return "ConstantIntegral";
+    }
+
+    @Override
+    public String toString() {
+      return name();
+    }
+  }
+
+  record Natural32() implements Natural, Builtin {
+    @Override
+    public long max() {
+      return -1;
+    }
+
+    @Override
+    public Natural32Constant constant(long value) {
+      return new Natural32Constant((int) value);
+    }
+
     @Override
     public String identifier() {
       return "Natural32";
@@ -88,7 +129,39 @@ public sealed interface Semantic {
     }
   }
 
-  record Integer32() implements Arithmetic, Builtin {
+  record Natural64() implements Natural, Builtin {
+    @Override
+    public long max() {
+      return -1L;
+    }
+
+    @Override
+    public Natural64Constant constant(long value) {
+      return new Natural64Constant(value);
+    }
+
+    @Override
+    public String identifier() {
+      return "Natural64";
+    }
+
+    @Override
+    public String toString() {
+      return name();
+    }
+  }
+
+  record Integer32() implements Integer, Builtin {
+    @Override
+    public long max() {
+      return java.lang.Integer.MAX_VALUE;
+    }
+
+    @Override
+    public Integer32Constant constant(long value) {
+      return new Integer32Constant((int) value);
+    }
+
     @Override
     public String identifier() {
       return "Integer32";
@@ -178,7 +251,13 @@ public sealed interface Semantic {
     implements Expression
   {}
 
-  record NaturalConstant(long value) implements Expression {}
+  record IntegralConstant(long value) implements Expression {}
+
+  record Integer32Constant(int value) implements Expression {}
+
+  record Natural32Constant(int value) implements Expression {}
+
+  record Natural64Constant(long value) implements Expression {}
 
   record StringConstant(String value) implements Expression {}
 

@@ -1,7 +1,5 @@
 package duru;
 
-import duru.Semantic.Type;
-
 public final class SymbolChecker {
   public static Semantic.Symbol check(
     Accessor<String, Semantic.Symbol> accessor,
@@ -229,18 +227,51 @@ public final class SymbolChecker {
       case Node.LessThan binary -> {
         var left  = checkExpression(binary.left());
         var right = checkExpression(binary.right());
-        if (!(left.type() instanceof Semantic.Arithmetic))
+        if (!(left.type() instanceof Semantic.Integral il))
           throw Diagnostic
             .error(
               binary.left().location(),
-              "binary operator's left operand must be `duru.Arithmetic` not `%s`",
+              "binary operator's left operand must be `duru.Integral` not `%s`",
               left.type());
-        if (!(right.type() instanceof Semantic.Arithmetic))
+        if (!(right.type() instanceof Semantic.Integral ir))
           throw Diagnostic
             .error(
               binary.right().location(),
-              "binary operator's right operand must be `duru.Arithmetic` not `%s`",
+              "binary operator's right operand must be `duru.Integral` not `%s`",
               right.type());
+        if (left.expression() instanceof Semantic.IntegralConstant cl) {
+          if (right.expression() instanceof Semantic.IntegralConstant cr) {
+            yield new CheckedExpression(
+              new Semantic.LessThan(
+                new Semantic.Natural64Constant(cl.value()),
+                new Semantic.Natural64Constant(cr.value())),
+              new Semantic.Natural64());
+          }
+          if (cl.value() > ir.max())
+            throw Diagnostic
+              .error(
+                binary.left().location(),
+                "binary operator's left operand `%s` cannot be represented in `%s` whose max is `%s`",
+                Long.toUnsignedString(cl.value()),
+                ir,
+                Long.toUnsignedString(ir.max()));
+          yield new CheckedExpression(
+            new Semantic.LessThan(ir.constant(cl.value()), right.expression()),
+            right.type());
+        }
+        if (right.expression() instanceof Semantic.IntegralConstant cr) {
+          if (cr.value() > il.max())
+            throw Diagnostic
+              .error(
+                binary.left().location(),
+                "binary operator's right operand `%s` cannot be represented in `%s` whose max is `%s`",
+                Long.toUnsignedString(cr.value()),
+                il,
+                Long.toUnsignedString(il.max()));
+          yield new CheckedExpression(
+            new Semantic.LessThan(left.expression(), il.constant(cr.value())),
+            left.type());
+        }
         if (!left.type().equals(right.type()))
           throw Diagnostic
             .error(
@@ -301,12 +332,9 @@ public final class SymbolChecker {
           procedure.returnType());
       }
       case Node.NaturalConstant naturalConstant -> {
-        var value = naturalConstant.value().value();
-        if (Long.compareUnsigned(value, -1) >= 0)
-          throw Diagnostic.unimplemented(naturalConstant.location());
         yield new CheckedExpression(
-          new Semantic.NaturalConstant(value),
-          new Semantic.Natural32());
+          new Semantic.IntegralConstant(naturalConstant.value().value()),
+          new Semantic.ConstantIntegral());
       }
       case Node.StringConstant stringConstant ->
         new CheckedExpression(
