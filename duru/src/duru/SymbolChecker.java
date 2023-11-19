@@ -137,16 +137,15 @@ public final class SymbolChecker {
             : Control.FLOWS);
       }
       case Node.If if_ -> {
-        var scope     = locals.length();
-        var condition = checkExpression(if_.condition());
-        if (!(condition.type() instanceof Semantic.Boolean))
-          throw Diagnostic
-            .error(
-              if_.condition().location(),
-              "if statement's condition must be `duru.Boolean` not `%s`",
-              condition.type());
-        var trueBranchScope = locals.length();
-        var trueBranch      = checkStatement(if_.trueBranch());
+        var scope            = locals.length();
+        var checkedCondition = checkExpression(if_.condition());
+        var condition        =
+          coerce(
+            if_.condition().location(),
+            checkedCondition,
+            Semantic.BOOLEAN);
+        var trueBranchScope  = locals.length();
+        var trueBranch       = checkStatement(if_.trueBranch());
         locals.removeDownTo(trueBranchScope);
         var falseBranchScope = locals.length();
         var falseBranch      =
@@ -162,7 +161,7 @@ public final class SymbolChecker {
         locals.removeDownTo(scope);
         yield new CheckedStatement(
           new Semantic.If(
-            condition.expression(),
+            condition,
             trueBranch.statement(),
             falseBranch.transform(CheckedStatement::statement)),
           control);
@@ -193,7 +192,7 @@ public final class SymbolChecker {
           throw Diagnostic
             .error(
               var.initialValue().location(),
-              "variable `%s.%s` is `duru.Noreturn`",
+              "`%s.%s` cannot be `duru.Noreturn`",
               symbolName,
               name);
         locals.add(name, type);
@@ -324,7 +323,7 @@ public final class SymbolChecker {
     CheckedExpression raw,
     Semantic.Type target)
   {
-    if (raw.type().equals(target))
+    if (raw.type().coerces(target))
       return raw.expression();
     if (!(raw.expression() instanceof Semantic.IntegralConstant constant)) {
       throw Diagnostic

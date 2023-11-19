@@ -41,7 +41,11 @@ public sealed interface Semantic {
     }
   }
 
-  sealed interface Type extends Semantic {}
+  sealed interface Type extends Semantic {
+    default boolean coerces(Type target) {
+      return equals(target);
+    }
+  }
 
   sealed interface Arithmetic extends Type {}
 
@@ -266,4 +270,6 @@ public sealed interface Semantic {
   record StringConstant(String value) implements Expression {}
 
   record LocalAccess(String name) implements Expression {}
+
+  Boolean BOOLEAN = new Boolean();
 }
