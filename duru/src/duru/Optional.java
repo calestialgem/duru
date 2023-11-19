@@ -1,6 +1,7 @@
 package duru;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public record Optional<Value>(Value value) implements Collection<Value> {
   public static <Value> Optional<Value> present(Value value) {
@@ -37,5 +38,17 @@ public record Optional<Value>(Value value) implements Collection<Value> {
     if (isEmpty())
       return absent();
     return present(transformer.apply(value));
+  }
+
+  public Value getOrElse(Value fallback) {
+    if (isEmpty())
+      return fallback;
+    return value;
+  }
+
+  public Value getOrElse(Supplier<? extends Value> fallback) {
+    if (isEmpty())
+      return fallback.get();
+    return value;
   }
 }

@@ -43,33 +43,42 @@ public sealed interface Semantic {
 
   sealed interface Type extends Semantic {}
 
+  sealed interface Arithmetic extends Type {}
+
   record Struct(boolean isPublic, String name) implements Type, Symbol {}
 
-  record Byte() implements Type, Builtin {
+  record Byte() implements Arithmetic, Builtin {
     @Override
     public String identifier() {
       return "Byte";
     }
   }
 
-  record Boolean() implements Type, Builtin {
+  record Boolean() implements Arithmetic, Builtin {
     @Override
     public String identifier() {
       return "Boolean";
     }
   }
 
-  record Natural32() implements Type, Builtin {
+  record Natural32() implements Arithmetic, Builtin {
     @Override
     public String identifier() {
       return "Natural32";
     }
   }
 
-  record Integer32() implements Type, Builtin {
+  record Integer32() implements Arithmetic, Builtin {
     @Override
     public String identifier() {
       return "Integer32";
+    }
+  }
+
+  record Unit() implements Type, Builtin {
+    @Override
+    public String identifier() {
+      return "Unit";
     }
   }
 
@@ -82,47 +91,16 @@ public sealed interface Semantic {
 
   record Pointer(Type pointee) implements Type {}
 
-  sealed interface Callable extends Type {
-    List<Type> parameters();
-    Optional<Type> returnType();
-  }
-
-  record FunctionType(Type theReturnType, List<Type> parameters)
-    implements Callable, Builtin
-  {
-    @Override
-    public Optional<Type> returnType() {
-      return Optional.present(theReturnType);
-    }
-
-    @Override
-    public String identifier() {
-      return "Function";
-    }
-  }
-
-  record ProcedureType(List<Type> parameters) implements Callable, Builtin {
-    @Override
-    public Optional<Type> returnType() {
-      return Optional.absent();
-    }
-
-    @Override
-    public String identifier() {
-      return "Procedure";
-    }
-  }
-
   sealed interface Procedure extends Semantic {
     Map<String, Type> parameters();
-    Optional<Type> returnType();
+    Type returnType();
   }
 
   record Proc(
     boolean isPublic,
     String name,
     Map<String, Type> parameters,
-    Optional<Type> returnType,
+    Type returnType,
     Statement body) implements Procedure, Symbol
   {}
 
@@ -130,7 +108,7 @@ public sealed interface Semantic {
     boolean isPublic,
     String name,
     Map<String, Type> parameters,
-    Optional<Type> returnType,
+    Type returnType,
     String externalName) implements Procedure, Symbol
   {}
 
@@ -146,7 +124,7 @@ public sealed interface Semantic {
 
   record Return(Optional<Expression> value) implements Statement {}
 
-  record Var(String name, Optional<Type> type, Expression initialValue)
+  record Var(String name, Type type, Expression initialValue)
     implements Statement
   {}
 

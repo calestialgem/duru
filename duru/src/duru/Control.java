@@ -1,26 +1,21 @@
 package duru;
 
+import java.util.Arrays;
+
 public enum Control {
   FLOWS, SINKS, RETURNS, BRANCHING;
 
-  public static Control combineSequents(Control first, Control second) {
-    if (first != Control.FLOWS)
-      return first;
+  public Control sequent(Control second) {
+    if (this != FLOWS)
+      return this;
     return second;
   }
 
-  public static Control combineBranches(Control... branches) {
-    if (branches.length == 0) {
-      return Control.BRANCHING;
-    }
-    for (var branch : branches) {
-      if (branch == Control.FLOWS)
-        return Control.FLOWS;
-    }
-    for (var branch : branches) {
-      if (branch != branches[0])
-        return Control.BRANCHING;
-    }
-    return branches[0];
+  public Control branch(Control... branches) {
+    if (this == FLOWS || Arrays.stream(branches).anyMatch(FLOWS::equals))
+      return FLOWS;
+    if (Arrays.stream(branches).allMatch(this::equals))
+      return this;
+    return BRANCHING;
   }
 }

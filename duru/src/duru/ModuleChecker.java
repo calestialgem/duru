@@ -52,10 +52,10 @@ public final class ModuleChecker {
           .error(
             "executable package `%s` has a main procedure with parameters",
             executable);
-      if (!proc.returnType().isEmpty())
+      if (!(proc.returnType() instanceof Semantic.Unit))
         throw Subject
           .error(
-            "executable package `%s` has a main procedure with a return type",
+            "executable package `%s` has a main procedure with a non-unit return type",
             executable);
     }
     for (var library : configuration.libraries()) {
