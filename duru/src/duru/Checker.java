@@ -32,6 +32,10 @@ public final class Checker {
   }
 
   private Semantic.Module checkModule(Path directory) {
-    return ModuleChecker.check(directory);
+    return ModuleChecker.check(this::accessModule, directory);
+  }
+
+  private Semantic.Module accessModule(String name) {
+    return modules.get(name);
   }
 }

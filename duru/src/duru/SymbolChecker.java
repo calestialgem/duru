@@ -81,7 +81,7 @@ public final class SymbolChecker {
       case Node.Pointer pointer ->
         new Semantic.Pointer(checkType(pointer.pointee()));
       case Node.Base base -> {
-        var symbol = getSymbol(base.name());
+        var symbol = accessGlobal(base.name());
         if (!(symbol instanceof Semantic.Type type)) {
           throw Subject
             .error(
@@ -134,7 +134,7 @@ public final class SymbolChecker {
     };
   }
 
-  private Semantic.Symbol getSymbol(Node.Mention mention) {
+  private Semantic.Symbol accessGlobal(Node.Mention mention) {
     var string = new StringBuilder();
     for (var subspace : mention.subspaces()) {
       string.append(subspace.text());

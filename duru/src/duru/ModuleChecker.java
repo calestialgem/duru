@@ -3,19 +3,27 @@ package duru;
 import java.nio.file.Path;
 
 public final class ModuleChecker {
-  public static Semantic.Module check(Path directory) {
-    var checker = new ModuleChecker(directory);
+  public static Semantic.Module check(
+    Accessor<String, Semantic.Module> accessor,
+    Path directory)
+  {
+    var checker = new ModuleChecker(accessor, directory);
     return checker.check();
   }
 
-  private final Path                             directory;
-  private String                                 name;
-  private Path                                   sources;
-  private Path                                   artifacts;
-  private Configuration                          configuration;
-  private AcyclicCache<String, Semantic.Package> packages;
+  private final Accessor<String, Semantic.Module> accessor;
+  private final Path                              directory;
+  private String                                  name;
+  private Path                                    sources;
+  private Path                                    artifacts;
+  private Configuration                           configuration;
+  private AcyclicCache<String, Semantic.Package>  packages;
 
-  private ModuleChecker(Path directory) {
+  private ModuleChecker(
+    Accessor<String, Semantic.Module> accessor,
+    Path directory)
+  {
+    this.accessor  = accessor;
     this.directory = directory;
   }
 
@@ -79,6 +87,34 @@ public final class ModuleChecker {
       type = PackageType.LIBRARY;
     else
       type = PackageType.IMPLEMENTATION;
-    return PackageChecker.check(sources, artifacts, type, packageName);
+    return PackageChecker
+      .check(this::accessPackage, sources, artifacts, type, packageName);
+  }
+
+  private Semantic.Package accessPackage(String accessedPackage) {
+    var accessedModule =
+      accessedPackage.substring(0, accessedPackage.indexOf('.'));
+    if (accessedModule.equals(name)) {
+      if (!(packages
+        .get(accessedPackage) instanceof Semantic.Library library))
+      {
+        throw Subject
+          .error("accessed package `%s` is not a library", accessedPackage);
+      }
+      return library;
+    }
+    var accessed =
+      accessor.access(accessedModule).packages().get(accessedPackage);
+    if (accessed.isEmpty())
+      throw Subject
+        .error(
+          "there is no package `%s` in module `%s`",
+          accessedPackage,
+          accessedModule);
+    if (!(accessed.getFirst() instanceof Semantic.Library library)) {
+      throw Subject
+        .error("accessed package `%s` is not a library", accessedPackage);
+    }
+    return library;
   }
 }

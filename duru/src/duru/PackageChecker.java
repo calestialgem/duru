@@ -4,29 +4,33 @@ import java.nio.file.Path;
 
 public final class PackageChecker {
   public static Semantic.Package check(
+    Accessor<String, Semantic.Package> accessor,
     Path sources,
     Path artifacts,
     PackageType type,
     String name)
   {
-    var checker = new PackageChecker(sources, artifacts, type, name);
+    var checker = new PackageChecker(accessor, sources, artifacts, type, name);
     return checker.check();
   }
 
-  private final Path                            sources;
-  private final Path                            artifacts;
-  private final PackageType                     type;
-  private final String                          name;
-  private Map<String, Node.Declaration>         declarations;
-  private Map<String, Semantic.Type>            types;
-  private AcyclicCache<String, Semantic.Symbol> symbols;
+  private final Accessor<String, Semantic.Package> accessor;
+  private final Path                               sources;
+  private final Path                               artifacts;
+  private final PackageType                        type;
+  private final String                             name;
+  private Map<String, Node.Declaration>            declarations;
+  private Map<String, Semantic.Type>               types;
+  private AcyclicCache<String, Semantic.Symbol>    symbols;
 
   private PackageChecker(
+    Accessor<String, Semantic.Package> accessor,
     Path sources,
     Path artifacts,
     PackageType type,
     String name)
   {
+    this.accessor  = accessor;
     this.sources   = sources;
     this.artifacts = artifacts;
     this.type      = type;
@@ -103,7 +107,24 @@ public final class PackageChecker {
       .check(this::accessSymbol, name, declarations.get(symbolName).getFirst());
   }
 
-  private Semantic.Symbol accessSymbol(String symbolName) {
-    throw Subject.unimplemented();
+  private Semantic.Symbol accessSymbol(String accessedSymbol) {
+    var separator = accessedSymbol.lastIndexOf('.');
+    if (separator == -1)
+      return symbols.get(accessedSymbol);
+    var accessedPackage = accessedSymbol.substring(0, separator);
+    var symbolName      = accessedSymbol.substring(separator);
+    if (accessedPackage.equals(name)) {
+      return symbols.get(symbolName);
+    }
+    var accessed = accessor.access(accessedPackage).symbols().get(symbolName);
+    if (accessed.isEmpty())
+      throw Subject
+        .error(
+          "there is no symbol `%s` in package `%s`",
+          symbolName,
+          accessedPackage);
+    if (!accessed.getFirst().isPublic())
+      throw Subject.error("accessed symbol `%s` is not public", accessedSymbol);
+    return accessed.getFirst();
   }
 }
