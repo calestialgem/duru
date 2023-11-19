@@ -31,7 +31,7 @@ public final class PackageChecker {
   }
 
   private Semantic.Callable checkCallable(
-    Map<Token.Identifier, Node.Formula> parameters,
+    List<Node.Parameter> parameters,
     Optional<Node.Formula> returnType)
   {
     throw Subject.unimplemented();

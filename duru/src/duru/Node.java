@@ -10,7 +10,7 @@ public sealed interface Node {
     Location location,
     boolean isPublic,
     Token.Identifier name,
-    Map<Token.Identifier, Formula> parameters,
+    List<Parameter> parameters,
     Optional<Formula> returnType,
     Statement body) implements Declaration
   {}
@@ -19,9 +19,13 @@ public sealed interface Node {
     Location location,
     boolean isPublic,
     Token.Identifier name,
-    Map<Token.Identifier, Formula> parameters,
+    List<Parameter> parameters,
     Optional<Formula> returnType,
     StringConstant externalName) implements Declaration
+  {}
+
+  record Parameter(Location location, Token.Identifier name, Formula type)
+    implements Node
   {}
 
   record Struct(Location location, boolean isPublic, Token.Identifier name)

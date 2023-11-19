@@ -35,37 +35,38 @@ public final class SymbolChecker {
   }
 
   private Semantic.Proc checkProc(Node.Proc node) {
-    var parameters = MapBuffer.<String, Semantic.Type>create();
-    for (var parameter : node.parameters()) {
-      var name = parameter.key().text();
-      var type = checkType(parameter.value());
-      parameters.add(name, type);
-      locals.add(name, type);
-    }
     return new Semantic.Proc(
       packageName,
       node.isPublic(),
       node.name().text(),
-      parameters.toMap(),
+      checkParameters(node.parameters()),
       node.returnType().transform(this::checkType),
       checkStatement(node.body()));
   }
 
   private Semantic.ExternalProc checkExternalProc(Node.ExternalProc node) {
-    var parameters = MapBuffer.<String, Semantic.Type>create();
-    for (var parameter : node.parameters()) {
-      var name = parameter.key().text();
-      var type = checkType(parameter.value());
-      parameters.add(name, type);
-      locals.add(name, type);
-    }
     return new Semantic.ExternalProc(
       packageName,
       node.isPublic(),
       node.name().text(),
-      parameters.toMap(),
+      checkParameters(node.parameters()),
       node.returnType().transform(this::checkType),
       node.externalName().toString());
+  }
+
+  private Map<String, Semantic.Type> checkParameters(
+    List<Node.Parameter> nodes)
+  {
+    var parameters = MapBuffer.<String, Semantic.Type>create();
+    for (var parameter : nodes) {
+      var name = parameter.name().text();
+      if (parameters.contains(name))
+        throw Subject.error("redeclaration of parameter `%s`", name);
+      var type = checkType(parameter.type());
+      parameters.add(name, type);
+      locals.add(name, type);
+    }
+    return parameters.toMap();
   }
 
   private Semantic.Struct checkStruct(Node.Struct node) {

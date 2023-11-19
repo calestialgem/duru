@@ -35,17 +35,7 @@ public final class SourceParser {
       expect(
         Token.OpeningParenthesis.class,
         "parameter list opener `(` of the procedure declaration");
-      var parameters = MapBuffer.<Token.Identifier, Node.Formula>create();
-      while (true) {
-        var parameterName = parse(Token.Identifier.class);
-        if (parameterName.isEmpty())
-          break;
-        var parameterType =
-          expect(this::parseFormula, "type of the parameter declaration");
-        parameters.add(parameterName.getFirst(), parameterType);
-        if (!take(Token.Comma.class))
-          break;
-      }
+      var parameters = parseSeparated(this::parseParameter);
       expect(
         Token.ClosingParenthesis.class,
         "parameter list closer `)` of the procedure declaration");
@@ -64,7 +54,7 @@ public final class SourceParser {
               location(begin),
               isPublic,
               name,
-              parameters.toMap(),
+              parameters,
               returnType,
               externalName));
       }
@@ -75,7 +65,7 @@ public final class SourceParser {
             location(begin),
             isPublic,
             name,
-            parameters.toMap(),
+            parameters,
             returnType,
             body));
     }
@@ -92,6 +82,21 @@ public final class SourceParser {
         .error("expected a declaration after the visibility modifier");
     }
     return Optional.absent();
+  }
+
+  private Optional<Node.Parameter> parseParameter() {
+    var begin         = index;
+    var parameterName = parse(Token.Identifier.class);
+    if (parameterName.isEmpty())
+      return Optional.absent();
+    var parameterType =
+      expect(this::parseFormula, "type of the parameter declaration");
+    return Optional
+      .present(
+        new Node.Parameter(
+          location(begin),
+          parameterName.getFirst(),
+          parameterType));
   }
 
   private Optional<Node.Formula> parseFormula() {
@@ -237,24 +242,13 @@ public final class SourceParser {
       return Optional.absent();
     if (!take(Token.OpeningParenthesis.class))
       return Optional.present(new Node.Access(symbol.getFirst()));
-    var arguments = ListBuffer.<Node.Expression>create();
-    while (true) {
-      var argument = parseExpression();
-      if (argument.isEmpty())
-        break;
-      arguments.add(argument.getFirst());
-      if (!take(Token.Comma.class))
-        break;
-    }
+    var arguments = parseSeparated(this::parseExpression);
     expect(
       Token.ClosingParenthesis.class,
-      "argument list closer `)` of the procedure invocation expression");
+      "argument list closer `)` of the invocation expression");
     return Optional
       .present(
-        new Node.Invocation(
-          location(begin),
-          symbol.getFirst(),
-          arguments.toList()));
+        new Node.Invocation(location(begin), symbol.getFirst(), arguments));
   }
 
   private Optional<Node.Mention> parseMention() {
@@ -279,6 +273,19 @@ public final class SourceParser {
       beginLocation.source(),
       beginLocation.begin(),
       endLocation.end());
+  }
+
+  private <V> List<V> parseSeparated(Supplier<Optional<V>> parserFunction) {
+    var list = ListBuffer.<V>create();
+    while (true) {
+      var value = parserFunction.get();
+      if (value.isEmpty())
+        break;
+      list.add(value.getFirst());
+      if (!take(Token.Comma.class))
+        break;
+    }
+    return list.toList();
   }
 
   private <T extends Token> T expect(Class<T> tokenClass, String explanation) {
