@@ -42,17 +42,13 @@ public final class SymbolChecker {
       parameters.add(name, type);
       locals.add(name, type);
     }
-    var returnType = Optional.<Semantic.Type>absent();
-    if (!node.returnType().isEmpty())
-      returnType = Optional.present(checkType(node.returnType().getFirst()));
-    var body = checkStatement(node.body());
     return new Semantic.Proc(
       packageName,
       node.isPublic(),
       node.name().text(),
       parameters.toMap(),
-      returnType,
-      body);
+      node.returnType().transform(this::checkType),
+      checkStatement(node.body()));
   }
 
   private Semantic.ExternalProc checkExternalProc(Node.ExternalProc node) {
@@ -63,15 +59,12 @@ public final class SymbolChecker {
       parameters.add(name, type);
       locals.add(name, type);
     }
-    var returnType = Optional.<Semantic.Type>absent();
-    if (!node.returnType().isEmpty())
-      returnType = Optional.present(checkType(node.returnType().getFirst()));
     return new Semantic.ExternalProc(
       packageName,
       node.isPublic(),
       node.name().text(),
       parameters.toMap(),
-      returnType,
+      node.returnType().transform(this::checkType),
       node.externalName().toString());
   }
 
@@ -114,20 +107,13 @@ public final class SymbolChecker {
         new Semantic.If(
           checkExpression(if_.condition()),
           checkStatement(if_.trueBranch()),
-          if_.falseBranch().isEmpty()
-            ? Optional.absent()
-            : Optional.present(checkStatement(if_.falseBranch().getFirst())));
+          if_.falseBranch().transform(this::checkStatement));
       case Node.Return return_ ->
-        new Semantic.Return(
-          return_.value().isEmpty()
-            ? Optional.absent()
-            : Optional.present(checkExpression(return_.value().getFirst())));
+        new Semantic.Return(return_.value().transform(this::checkExpression));
       case Node.Var var ->
         new Semantic.Var(
           var.name().text(),
-          var.type().isEmpty()
-            ? Optional.absent()
-            : Optional.present(checkType(var.type().getFirst())),
+          var.type().transform(this::checkType),
           checkExpression(var.initialValue()));
     };
   }
