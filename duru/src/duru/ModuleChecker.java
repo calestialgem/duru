@@ -92,8 +92,7 @@ public final class ModuleChecker {
   }
 
   private Semantic.Package accessPackage(String accessedPackage) {
-    var accessedModule =
-      accessedPackage.substring(0, accessedPackage.indexOf('.'));
+    var accessedModule = Text.getModule(accessedPackage);
     if (accessedModule.equals(name)) {
       if (!(packages
         .get(accessedPackage) instanceof Semantic.Library library))

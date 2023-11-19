@@ -92,11 +92,10 @@ public final class PackageChecker {
   }
 
   private Semantic.Symbol accessSymbol(String accessedSymbol) {
-    var separator = accessedSymbol.lastIndexOf('.');
-    if (separator == -1)
-      return symbols.get(accessedSymbol);
-    var accessedPackage = accessedSymbol.substring(0, separator);
-    var symbolName      = accessedSymbol.substring(separator);
+    var symbolName = Text.getSymbol(accessedSymbol);
+    if (accessedSymbol.equals(symbolName))
+      return symbols.get(symbolName);
+    var accessedPackage = Text.getPackage(accessedSymbol);
     if (accessedPackage.equals(name)) {
       return symbols.get(symbolName);
     }

@@ -1,0 +1,20 @@
+Source[path=C:\Users\Cem\duru\libraries\duru\src\print.duru, contents=public proc print(string *Byte) {
+  var result = print_string_to_stream(string, get_error_stream());
+  if result < 0 {
+    exit(result);
+  }
+}
+
+struct Stream;
+
+proc get_stream(index Natural32) *Stream = "__acrt_iob_func";
+
+proc print_string_to_stream(string *Byte, destination *Stream) Integer32
+  = "fputs";
+
+proc get_error_stream() *Stream {
+  return get_stream(2);
+}
+
+proc exit(code Integer32) Noreturn = "exit";
+]

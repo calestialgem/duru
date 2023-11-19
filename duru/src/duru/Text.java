@@ -1,6 +1,27 @@
 package duru;
 
 public final class Text {
+  public static String getModule(String name) {
+    var separator = name.indexOf('.');
+    if (separator == -1)
+      return name;
+    return name.substring(0, separator);
+  }
+
+  public static String getPackage(String name) {
+    var separator = name.lastIndexOf('.');
+    if (separator == -1)
+      return name;
+    return name.substring(0, separator);
+  }
+
+  public static String getSymbol(String name) {
+    var separator = name.lastIndexOf('.');
+    if (separator == -1)
+      return name;
+    return name.substring(separator + 1, name.length());
+  }
+
   public static boolean isReserved(String name) {
     return switch (name) {
       case "public", "proc", "struct", "var", "if", "else", "return" -> true;
