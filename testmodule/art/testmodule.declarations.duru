@@ -1,0 +1,2 @@
+{main: Proc[location=1.1-3.2, isPublic=false, name=Identifier[location=1.6-10, text=main], parameters=[], returnType=[], body=Block[location=1.13-3.2, innerStatements=[Discard[location=2.3-33, discarded=Invocation[location=2.3-32, procedure=Mention[location=2.3-13, subspaces=[Identifier[location=2.3-7, text=duru]], name=Identifier[location=2.8-13, text=print]], arguments=[StringConstant[value=StringConstant[location=2.14-31, value=Hello, World!
+]]]]]]]]}
