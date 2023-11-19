@@ -2,15 +2,15 @@ package duru;
 
 import java.nio.file.Path;
 
-public final class PackageChecker {
-  public static Semantic.Package check(
+public final class PackageCompiler {
+  public static Semantic.Package compile(
     Path sources,
     Path artifacts,
     PackageType type,
     String name)
   {
-    var checker = new PackageChecker(sources, artifacts, type, name);
-    return checker.check();
+    var checker = new PackageCompiler(sources, artifacts, type, name);
+    return checker.compile();
   }
 
   private final Path                            sources;
@@ -20,7 +20,7 @@ public final class PackageChecker {
   private AcyclicCache<String, Semantic.Symbol> symbols;
   private Resolution                            resolution;
 
-  private PackageChecker(
+  private PackageCompiler(
     Path sources,
     Path artifacts,
     PackageType type,
@@ -32,8 +32,8 @@ public final class PackageChecker {
     this.name      = name;
   }
 
-  private Semantic.Package check() {
-    symbols    = AcyclicCache.create(this::checkSymbol);
+  private Semantic.Package compile() {
+    symbols    = AcyclicCache.create(this::compileSymbol);
     resolution = PackageResolver.resolve(sources, artifacts, name);
     Persistance.record(artifacts, resolution, name, "resolution");
     for (var declaration : resolution.declarations().keys())
@@ -46,7 +46,7 @@ public final class PackageChecker {
     };
   }
 
-  private Semantic.Symbol checkSymbol(String symbolName) {
+  private Semantic.Symbol compileSymbol(String symbolName) {
     return SymbolChecker
       .check(
         this::accessSymbol,

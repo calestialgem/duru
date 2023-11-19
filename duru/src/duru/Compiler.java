@@ -20,18 +20,18 @@ public final class Compiler {
 
   private Semantic.Target compile() {
     main    = directory.getFileName().toString();
-    modules = AcyclicCache.create(this::checkModule);
+    modules = AcyclicCache.create(this::compileModule);
     modules.get(main);
     return new Semantic.Target(main, modules.getAll());
   }
 
-  private Semantic.Module checkModule(String name) {
+  private Semantic.Module compileModule(String name) {
     if (name.equals(main))
-      return checkModule(directory);
-    return checkModule(libraries.resolve(name));
+      return compileModule(directory);
+    return compileModule(libraries.resolve(name));
   }
 
-  private Semantic.Module checkModule(Path directory) {
-    return ModuleChecker.check(directory);
+  private Semantic.Module compileModule(Path directory) {
+    return ModuleCompiler.compile(directory);
   }
 }
