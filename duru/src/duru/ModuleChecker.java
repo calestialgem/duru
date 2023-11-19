@@ -2,10 +2,10 @@ package duru;
 
 import java.nio.file.Path;
 
-public final class ModuleCompiler {
-  public static Semantic.Module compile(Path directory) {
-    var checker = new ModuleCompiler(directory);
-    return checker.compile();
+public final class ModuleChecker {
+  public static Semantic.Module check(Path directory) {
+    var checker = new ModuleChecker(directory);
+    return checker.check();
   }
 
   private final Path                             directory;
@@ -15,17 +15,17 @@ public final class ModuleCompiler {
   private Configuration                          configuration;
   private AcyclicCache<String, Semantic.Package> packages;
 
-  private ModuleCompiler(Path directory) {
+  private ModuleChecker(Path directory) {
     this.directory = directory;
   }
 
-  private Semantic.Module compile() {
+  private Semantic.Module check() {
     name      = directory.getFileName().toString();
     sources   = directory.resolve("src");
     artifacts = directory.resolve("art");
     Persistance.ensure(artifacts);
     resolveConfiguration();
-    packages = AcyclicCache.create(this::compilePackage);
+    packages = AcyclicCache.create(this::checkPackage);
     checkPackageDeclarations();
     return new Semantic.Module(name, packages.getAll());
   }
@@ -71,7 +71,7 @@ public final class ModuleCompiler {
     Persistance.record(artifacts, configuration, "module", "resolution");
   }
 
-  private Semantic.Package compilePackage(String packageName) {
+  private Semantic.Package checkPackage(String packageName) {
     PackageType type;
     if (configuration.executables().contains(packageName))
       type = PackageType.EXECUTABLE;
@@ -79,6 +79,6 @@ public final class ModuleCompiler {
       type = PackageType.LIBRARY;
     else
       type = PackageType.IMPLEMENTATION;
-    return PackageCompiler.compile(sources, artifacts, type, packageName);
+    return PackageChecker.check(sources, artifacts, type, packageName);
   }
 }

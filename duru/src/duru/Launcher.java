@@ -7,7 +7,7 @@ final class Launcher {
     Subject.add(directory);
     Persistance.recreate(directory);
     Initializer.initialize(directory);
-    var target = Compiler.compile(directory, Persistance.path("libraries"));
+    var target = Checker.check(directory, Persistance.path("libraries"));
     Builder.build(target);
     Subject.removeLast();
     Subject.removeLast();
