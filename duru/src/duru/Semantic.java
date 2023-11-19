@@ -48,6 +48,10 @@ public sealed interface Semantic {
   sealed interface Integral extends Arithmetic {
     long max();
     Expression constant(long value);
+
+    default boolean canRepresent(long value) {
+      return Long.compareUnsigned(value, max()) <= 0;
+    }
   }
 
   sealed interface Integer extends Integral {}

@@ -177,46 +177,31 @@ public final class SymbolChecker {
               symbolName,
               returnType);
         }
-        if (!value.isEmpty() && !value.getFirst().type().equals(returnType)) {
-          throw Diagnostic
-            .error(
-              return_.value().getFirst().location(),
-              "procedure `%s` must return `%s` not `%s`",
-              symbolName,
-              returnType,
-              value.getFirst().type());
-        }
         yield new CheckedStatement(
-          new Semantic.Return(value.transform(CheckedExpression::expression)),
+          new Semantic.Return(
+            value
+              .transform(
+                v -> coerce(return_.value().getFirst(), v, returnType))),
           Control.RETURNS);
       }
       case Node.Var var -> {
-        var initialValue   = checkExpression(var.initialValue());
-        var typeAnnotation = var.type().transform(this::checkType);
         var name           = var.name().text();
-        var type           = initialValue.type();
-        if (!typeAnnotation.isEmpty()
-          && !typeAnnotation.getFirst().equals(type))
-        {
-          throw Diagnostic
-            .error(
-              var.type().getFirst().location(),
-              "variable `%s.%s` is `%s` while initial value is `%s` ",
-              symbolName,
-              name,
-              typeAnnotation.getFirst(),
-              type);
-        }
+        var typeAnnotation = var.type().transform(this::checkType);
+        var initialValue   = checkExpression(var.initialValue());
+        var type           = typeAnnotation.getOrElse(initialValue::type);
         if (type instanceof Semantic.Noreturn)
           throw Diagnostic
             .error(
-              var.name().location(),
-              "variable `%s.%s` is of type `duru.Noreturn`",
+              var.initialValue().location(),
+              "variable `%s.%s` is `duru.Noreturn`",
               symbolName,
               name);
         locals.add(name, type);
         yield new CheckedStatement(
-          new Semantic.Var(name, type, initialValue.expression()),
+          new Semantic.Var(
+            name,
+            type,
+            coerce(var.initialValue().location(), initialValue, type)),
           Control.FLOWS);
       }
     };
@@ -227,17 +212,17 @@ public final class SymbolChecker {
       case Node.LessThan binary -> {
         var left  = checkExpression(binary.left());
         var right = checkExpression(binary.right());
-        if (!(left.type() instanceof Semantic.Integral il))
+        if (!(left.type() instanceof Semantic.Arithmetic))
           throw Diagnostic
             .error(
               binary.left().location(),
-              "binary operator's left operand must be `duru.Integral` not `%s`",
+              "`%s` is not arithmetic",
               left.type());
-        if (!(right.type() instanceof Semantic.Integral ir))
+        if (!(right.type() instanceof Semantic.Arithmetic))
           throw Diagnostic
             .error(
               binary.right().location(),
-              "binary operator's right operand must be `duru.Integral` not `%s`",
+              "`%s` is not arithmetic",
               right.type());
         if (left.expression() instanceof Semantic.IntegralConstant cl) {
           if (right.expression() instanceof Semantic.IntegralConstant cr) {
@@ -247,36 +232,24 @@ public final class SymbolChecker {
                 new Semantic.Natural64Constant(cr.value())),
               new Semantic.Natural64());
           }
-          if (cl.value() > ir.max())
-            throw Diagnostic
-              .error(
-                binary.left().location(),
-                "binary operator's left operand `%s` cannot be represented in `%s` whose max is `%s`",
-                Long.toUnsignedString(cl.value()),
-                ir,
-                Long.toUnsignedString(ir.max()));
           yield new CheckedExpression(
-            new Semantic.LessThan(ir.constant(cl.value()), right.expression()),
+            new Semantic.LessThan(
+              coerce(binary.left().location(), left, right.type()),
+              right.expression()),
             right.type());
         }
         if (right.expression() instanceof Semantic.IntegralConstant cr) {
-          if (cr.value() > il.max())
-            throw Diagnostic
-              .error(
-                binary.left().location(),
-                "binary operator's right operand `%s` cannot be represented in `%s` whose max is `%s`",
-                Long.toUnsignedString(cr.value()),
-                il,
-                Long.toUnsignedString(il.max()));
           yield new CheckedExpression(
-            new Semantic.LessThan(left.expression(), il.constant(cr.value())),
+            new Semantic.LessThan(
+              left.expression(),
+              coerce(binary.right().location(), right, left.type())),
             left.type());
         }
         if (!left.type().equals(right.type()))
           throw Diagnostic
             .error(
               binary.location(),
-              "binary operator's left operand is `%s` while right operand is `%s`",
+              "`%s` and `%s` cannot be operated",
               left.type(),
               right.type());
         yield new CheckedExpression(
@@ -302,30 +275,23 @@ public final class SymbolChecker {
           throw Diagnostic
             .error(
               invocation.procedure().location(),
-              "invoked symbol `%s` is not a procedure",
+              "`%s` is not procedure",
               accessed.name());
         if (invocation.arguments().length() != procedure.parameters().length())
           throw Diagnostic
             .error(
               invocation.location(),
-              "invoked procedure `%s` takes %d parameters but %d arguments were given",
+              "`%s` takes %d parameters but %d arguments were given",
               accessed.name(),
               procedure.parameters().length(),
               invocation.arguments().length());
         var arguments = ListBuffer.<Semantic.Expression>create();
         for (var i = 0; i < invocation.arguments().length(); i++) {
-          var argument  = checkExpression(invocation.arguments().get(i));
+          var argument  = invocation.arguments().get(i);
           var parameter = procedure.parameters().values().get(i);
-          if (!argument.type().equals(parameter))
-            throw Diagnostic
-              .error(
-                invocation.arguments().get(i).location(),
-                "parameter `%s.%s` is `%s` while passed argument is `%s`",
-                accessed.name(),
-                procedure.parameters().keys().get(i),
-                parameter,
-                argument.type());
-          arguments.add(argument.expression());
+          var checked   = checkExpression(argument);
+          var coerced   = coerce(argument.location(), checked, parameter);
+          arguments.add(coerced);
         }
         yield new CheckedExpression(
           new Semantic.Invocation(accessed.name(), arguments.toList()),
@@ -351,5 +317,34 @@ public final class SymbolChecker {
     }
     string.append(mention.name().text());
     return accessor.access(mention.location(), string.toString());
+  }
+
+  private Semantic.Expression coerce(
+    Object subject,
+    CheckedExpression raw,
+    Semantic.Type target)
+  {
+    if (raw.type().equals(target))
+      return raw.expression();
+    if (!(raw.expression() instanceof Semantic.IntegralConstant constant)) {
+      throw Diagnostic
+        .error(subject, "`%s` cannot coerce to `%s`", raw.type(), target);
+    }
+    if (!(target instanceof Semantic.Integral type)) {
+      throw Diagnostic
+        .error(
+          subject,
+          "constant integral `%s` cannot coerce to `%s`",
+          Long.toUnsignedString(constant.value()),
+          target);
+    }
+    if (!type.canRepresent(constant.value()))
+      throw Diagnostic
+        .error(
+          subject,
+          "`%s` cannot represent `%s`",
+          type,
+          Long.toUnsignedString(constant.value()));
+    return type.constant(constant.value());
   }
 }
