@@ -23,20 +23,21 @@ public sealed interface Semantic {
   {}
 
   sealed interface Symbol extends Semantic {
-    String packageName();
     boolean isPublic();
     String name();
   }
 
   sealed interface Builtin extends Symbol {
-    @Override
-    default String packageName() {
-      return "duru";
-    }
+    String identifier();
 
     @Override
     default boolean isPublic() {
       return true;
+    }
+
+    @Override
+    default String name() {
+      return "duru.%s".formatted(identifier());
     }
   }
 
@@ -48,35 +49,35 @@ public sealed interface Semantic {
 
   record Byte() implements Type, Builtin {
     @Override
-    public String name() {
+    public String identifier() {
       return "Byte";
     }
   }
 
   record Boolean() implements Type, Builtin {
     @Override
-    public String name() {
+    public String identifier() {
       return "Boolean";
     }
   }
 
   record Natural32() implements Type, Builtin {
     @Override
-    public String name() {
+    public String identifier() {
       return "Natural32";
     }
   }
 
   record Integer32() implements Type, Builtin {
     @Override
-    public String name() {
+    public String identifier() {
       return "Integer32";
     }
   }
 
   record Noreturn() implements Type, Builtin {
     @Override
-    public String name() {
+    public String identifier() {
       return "Noreturn";
     }
   }
@@ -97,7 +98,7 @@ public sealed interface Semantic {
     }
 
     @Override
-    public String name() {
+    public String identifier() {
       return "Function";
     }
   }
@@ -109,7 +110,7 @@ public sealed interface Semantic {
     }
 
     @Override
-    public String name() {
+    public String identifier() {
       return "Procedure";
     }
   }

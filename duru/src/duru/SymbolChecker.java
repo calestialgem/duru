@@ -83,11 +83,7 @@ public final class SymbolChecker {
       case Node.Base base -> {
         var symbol = accessGlobal(base.name());
         if (!(symbol instanceof Semantic.Type type)) {
-          throw Subject
-            .error(
-              "`%s.%s` is not a type",
-              symbol.packageName(),
-              symbol.name());
+          throw Subject.error("`%s` is not a type", symbol.name());
         }
         yield type;
       }
