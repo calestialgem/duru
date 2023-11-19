@@ -42,7 +42,9 @@ public final class SetBuffer<Member> implements SetLike<Member> {
   }
 
   @Override
-  public <U> ListBuffer<U> transform(Function<Member, U> transformer) {
+  public <U> ListBuffer<U> transform(
+    Function<Member, ? extends U> transformer)
+  {
     return members.transform(transformer);
   }
 

@@ -68,7 +68,9 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
   }
 
   @Override
-  public <U> MapBuffer<Key, U> transformValues(Function<Value, U> transformer) {
+  public <U> MapBuffer<Key, U> transformValues(
+    Function<Value, ? extends U> transformer)
+  {
     return new MapBuffer<>(
       keys.copy(),
       values.transform(transformer),
@@ -76,7 +78,9 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
   }
 
   @Override
-  public <U> ListBuffer<U> transform(BiFunction<Key, Value, U> transformer) {
+  public <U> ListBuffer<U> transform(
+    BiFunction<Key, Value, ? extends U> transformer)
+  {
     var list = ListBuffer.<U>create();
     for (var i = 0; i < length(); i++) {
       list.add(transformer.apply(keys.get(i), values.get(i)));
@@ -86,7 +90,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
 
   @Override
   public <U> ListBuffer<U> transform(
-    Function<Entry<Key, Value>, U> transformer)
+    Function<Entry<Key, Value>, ? extends U> transformer)
   {
     var list = ListBuffer.<U>create();
     for (var entry : this) {

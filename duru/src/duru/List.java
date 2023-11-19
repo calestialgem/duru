@@ -41,7 +41,7 @@ public final class List<Element>
 
   @Override
   @SuppressWarnings("unchecked")
-  public <U> List<U> transform(Function<Element, U> transformer) {
+  public <U> List<U> transform(Function<Element, ? extends U> transformer) {
     var elements = (U[]) new Object[length()];
     for (var i = 0; i < length(); i++) {
       elements[i] = transformer.apply(get(i));

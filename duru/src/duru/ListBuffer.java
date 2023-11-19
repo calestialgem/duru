@@ -29,7 +29,9 @@ public final class ListBuffer<Element> implements ListLike<Element> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <U> ListBuffer<U> transform(Function<Element, U> transformer) {
+  public <U> ListBuffer<U> transform(
+    Function<Element, ? extends U> transformer)
+  {
     var elements = (U[]) new Object[length];
     for (var i = 0; i < length; i++) {
       elements[i] = transformer.apply(get(i));

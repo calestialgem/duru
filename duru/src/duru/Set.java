@@ -32,7 +32,7 @@ public record Set<Member>(List<Member> members, List<Integer> buckets)
   }
 
   @Override
-  public <U> List<U> transform(Function<Member, U> transformer) {
+  public <U> List<U> transform(Function<Member, ? extends U> transformer) {
     return members.transform(transformer);
   }
 

@@ -33,7 +33,7 @@ public record Optional<Value>(Value value) implements Collection<Value> {
   }
 
   @Override
-  public <U> Optional<U> transform(Function<Value, U> transformer) {
+  public <U> Optional<U> transform(Function<Value, ? extends U> transformer) {
     if (isEmpty())
       return absent();
     return present(transformer.apply(value));
