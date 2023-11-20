@@ -310,7 +310,7 @@ public final class SourceParser {
         tokens.get(index).location(),
         "expected %s instead of %s after %s",
         explanation,
-        tokens.getLast(),
+        tokens.get(index),
         tokens.get(index - 1));
   }
 
