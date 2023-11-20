@@ -17,6 +17,3 @@ proc print_string_to_stream(string *Byte, destination *Stream) Integer32;
 proc get_error_stream() *Stream {
   return get_stream(2);
 }
-
-extern "exit"
-proc exit(code Integer32) Noreturn;

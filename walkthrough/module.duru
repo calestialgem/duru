@@ -1,1 +1,2 @@
 executable walkthrough;
+executable walkthrough.returns2;
