@@ -220,6 +220,12 @@ public sealed interface CompilerDebugger {
                 declaration.name().location().endColumn()));
         string.append(':');
         string.append(' ');
+        for (var externalName : declaration.externalName()) {
+          string.append("extern");
+          string.append(' ');
+          Text.quote(string, externalName.value());
+          string.append(' ');
+        }
         if (declaration.isPublic()) {
           string.append("public");
           string.append(' ');
@@ -266,6 +272,12 @@ public sealed interface CompilerDebugger {
                 declaration.name().location().endColumn()));
         string.append(':');
         string.append(' ');
+        for (var externalName : declaration.externalName()) {
+          string.append("extern");
+          string.append(' ');
+          Text.quote(string, externalName.value());
+          string.append(' ');
+        }
         if (declaration.isPublic()) {
           string.append("public");
           string.append(' ');
@@ -293,6 +305,12 @@ public sealed interface CompilerDebugger {
       for (var module : target.modules().values()) {
         for (var package_ : module.packages().values()) {
           for (var declaration : package_.symbols().values()) {
+            for (var externalName : declaration.externalName()) {
+              string.append("extern");
+              string.append(' ');
+              Text.quote(string, externalName);
+              string.append(' ');
+            }
             if (declaration.isPublic()) {
               string.append("public");
               string.append(' ');

@@ -5,10 +5,10 @@ public Natural32 `duru.Natural32`
 public Integer32 `duru.Integer32`
 public Unit `duru.Unit`
 public Noreturn `duru.Noreturn`
-Struct `duru.Stream`
-Proc `duru.print_string_to_stream`
-Proc `duru.get_stream`
+extern "FILE" Struct `duru.Stream`
+extern "fputs" Proc `duru.print_string_to_stream`
+extern "__acrt_iob_func" Proc `duru.get_stream`
 Proc `duru.get_error_stream`
-Proc `duru.exit`
+extern "exit" Proc `duru.exit`
 public Proc `duru.print`
 Proc `testmodule.main`
