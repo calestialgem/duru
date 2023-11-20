@@ -101,9 +101,11 @@ public final class PackageChecker {
     var packageDeclarations = MapBuffer.<String, Node.Declaration>create();
     for (var file : Persistance.list(subject, directory)) {
       var fullFilename = file.getFileName().toString();
-      var filename     =
+      if (!fullFilename.endsWith(".duru"))
+        return;
+      var filename =
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
-      var source       = new Source(file, Persistance.load(directory, file));
+      var source   = new Source(file, Persistance.load(directory, file));
       debugger.recordSource(artifacts, source, name, filename);
       var tokens = SourceLexer.lex(source);
       debugger.recordTokens(artifacts, tokens, name, filename);
