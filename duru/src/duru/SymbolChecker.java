@@ -91,7 +91,8 @@ public final class SymbolChecker {
     var parameters = MapBuffer.<String, Semantic.Type>create();
     for (var parameter : nodes) {
       var name = parameter.name().text();
-      if (parameters.contains(name)) {
+      var type = checkType(parameter.type());
+      if (!parameters.add(name, type) || !locals.add(name, type)) {
         throw Diagnostic
           .error(
             parameter.name().location(),
@@ -99,9 +100,6 @@ public final class SymbolChecker {
             symbolName,
             name);
       }
-      var type = checkType(parameter.type());
-      parameters.add(name, type);
-      locals.add(name, type);
     }
     return parameters.toMap();
   }
@@ -209,7 +207,14 @@ public final class SymbolChecker {
               symbolName,
               name);
         }
-        locals.add(name, type);
+        if (!locals.add(name, type)) {
+          throw Diagnostic
+            .error(
+              var.name().location(),
+              "redeclaration of local `%s.%s`",
+              symbolName,
+              name);
+        }
         yield new CheckedStatement(
           new Semantic.Var(
             name,
