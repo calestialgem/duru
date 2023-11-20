@@ -6,7 +6,8 @@
       "request": "launch",
       "projectName": "duru",
       "mainClass": "duru/duru.Launcher",
-      "args": ["init", "walkthrough"]
+      "cwd": "${workspaceFolder}/walkthrough",
+      "args": ["run"]
     }
   ]
 }

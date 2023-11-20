@@ -1,5 +1,6 @@
 package duru;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class Checker {
@@ -7,16 +8,16 @@ public final class Checker {
     CompilerDebugger debugger,
     Object subject,
     Path directory,
-    Path libraries)
+    List<Path> moduleBases)
   {
-    var checker = new Checker(debugger, subject, directory, libraries);
+    var checker = new Checker(debugger, subject, directory, moduleBases);
     return checker.check();
   }
 
   private final CompilerDebugger                debugger;
   private final Object                          subject;
   private final Path                            directory;
-  private final Path                            libraries;
+  private final List<Path>                      moduleBases;
   private String                                main;
   private AcyclicCache<String, Semantic.Module> modules;
   private SetBuffer<String>                     externalNames;
@@ -25,12 +26,12 @@ public final class Checker {
     CompilerDebugger debugger,
     Object subject,
     Path directory,
-    Path libraries)
+    List<Path> moduleBases)
   {
-    this.debugger  = debugger;
-    this.subject   = subject;
-    this.directory = directory;
-    this.libraries = libraries;
+    this.debugger    = debugger;
+    this.subject     = subject;
+    this.directory   = directory;
+    this.moduleBases = moduleBases;
   }
 
   private Semantic.Target check() {
@@ -47,7 +48,13 @@ public final class Checker {
     if (name.equals(main)) {
       return checkModule(subject, directory);
     }
-    return checkModule(subject, libraries.resolve(name));
+    for (var moduleBase : moduleBases) {
+      var checkedDirectory = moduleBase.resolve(name);
+      if (Files.exists(checkedDirectory.resolve("module.duru")))
+        return checkModule(subject, checkedDirectory);
+    }
+    throw Diagnostic
+      .error(subject, "no module `%s` in bases `%s`", name, moduleBases);
   }
 
   private Semantic.Module checkModule(Object subject, Path directory) {

@@ -80,7 +80,7 @@ duru testCompiler
     var debugger   = CompilerDebugger.inactive();
     var subject    = "launcher";
     var modulePath = Persistance.path(".");
-    Checker.check(debugger, subject, modulePath, null);
+    Checker.check(debugger, subject, modulePath, List.of());
   }
 
   private void build() {
@@ -92,7 +92,7 @@ duru testCompiler
     var subject    = "launcher";
     var modulePath = Persistance.path(".");
     var artifacts  = modulePath.resolve("art");
-    var target     = Checker.check(debugger, subject, modulePath, null);
+    var target     = Checker.check(debugger, subject, modulePath, List.of());
     Builder.build(subject, artifacts, target);
   }
 
@@ -105,7 +105,7 @@ duru testCompiler
     var subject    = "launcher";
     var modulePath = Persistance.path(".");
     var artifacts  = modulePath.resolve("art");
-    var target     = Checker.check(debugger, subject, modulePath, null);
+    var target     = Checker.check(debugger, subject, modulePath, List.of());
     Builder.build(subject, artifacts, target);
     var    module = target.modules().get(target.main()).getFirst();
     String name;
@@ -148,7 +148,11 @@ duru testCompiler
     Initializer.initialize(directory);
     var target =
       Checker
-        .check(debugger, subject, directory, Persistance.path("libraries"));
+        .check(
+          debugger,
+          subject,
+          directory,
+          List.of(Persistance.path("libraries")));
     Builder.build(subject, directory.resolve("art"), target);
   }
 }
