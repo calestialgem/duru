@@ -10,7 +10,7 @@ final class Launcher {
     var target =
       Checker
         .check(debugger, subject, directory, Persistance.path("libraries"));
-    Builder.build(subject, target);
+    Builder.build(subject, directory.resolve("art"), target);
   }
 
   private Launcher() {}

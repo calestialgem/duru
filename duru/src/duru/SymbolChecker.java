@@ -72,7 +72,7 @@ public final class SymbolChecker {
         .returnType()
         .transform(this::checkType)
         .getOrElse(Semantic.Unit::new),
-      node.externalName().toString());
+      node.externalName().value().value());
   }
 
   private Map<String, Semantic.Type> checkParameters(

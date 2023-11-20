@@ -93,7 +93,7 @@ public sealed interface Semantic {
     }
   }
 
-  record ConstantIntegral() implements Integral, Builtin {
+  record ConstantIntegral() implements Integral {
     @Override
     public long max() {
       return -1L;
@@ -105,13 +105,8 @@ public sealed interface Semantic {
     }
 
     @Override
-    public String identifier() {
-      return "ConstantIntegral";
-    }
-
-    @Override
     public String toString() {
-      return name();
+      return "constant integral";
     }
   }
 

@@ -93,6 +93,11 @@ public final class SetBuffer<Member> implements SetLike<Member> {
     return false;
   }
 
+  public void clear() {
+    members.clear();
+    buckets.clear();
+  }
+
   private void rehash() {
     buckets.clear();
     buckets.fill(-1, members.length() * 2);

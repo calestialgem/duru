@@ -3,6 +3,12 @@ package duru;
 public final class Text {
   public static String quote(String constant) {
     var string = new StringBuilder();
+    quote(string, constant);
+    return string.toString();
+  }
+
+  public static void quote(StringBuilder string, String constant) {
+    string.append('"');
     for (
       var i = 0;
       i < constant.length();
@@ -17,7 +23,7 @@ public final class Text {
         default -> string.appendCodePoint(character);
       }
     }
-    return string.toString();
+    string.append('"');
   }
 
   public static String getModule(String name) {

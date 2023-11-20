@@ -137,7 +137,7 @@ public sealed interface Token {
   record StringConstant(Location location, String value) implements Token {
     @Override
     public String toString() {
-      return "string `\"%s\"`".formatted(Text.quote(value));
+      return "string `%s`".formatted(Text.quote(value));
     }
   }
 
