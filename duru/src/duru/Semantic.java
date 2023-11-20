@@ -254,6 +254,8 @@ public sealed interface Semantic {
     implements Expression
   {}
 
+  record UnitConstant() implements Expression {}
+
   record IntegralConstant(long value) implements Expression {}
 
   record Integer32Constant(int value) implements Expression {}
@@ -266,5 +268,7 @@ public sealed interface Semantic {
 
   record LocalAccess(String name) implements Expression {}
 
-  Boolean BOOLEAN = new Boolean();
+  Boolean      BOOLEAN       = new Boolean();
+  UnitConstant UNIT_CONSTANT = new UnitConstant();
+  Return       UNIT_RETURN   = new Return(Optional.present(UNIT_CONSTANT));
 }

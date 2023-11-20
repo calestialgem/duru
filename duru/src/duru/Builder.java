@@ -187,6 +187,7 @@ public final class Builder {
 
   private void buildExpressionDependencies(Semantic.Expression expression) {
     switch (expression) {
+      case Semantic.UnitConstant constant -> {}
       case Semantic.Integer32Constant constant -> {}
       case Semantic.IntegralConstant constant ->
         throw Diagnostic
@@ -276,6 +277,7 @@ public final class Builder {
 
   private void buildExpression(Semantic.Expression expression) {
     switch (expression) {
+      case Semantic.UnitConstant constant -> string.append('0');
       case Semantic.Integer32Constant constant ->
         string.append(Integer.toUnsignedString(constant.value()));
       case Semantic.IntegralConstant constant ->

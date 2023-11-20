@@ -44,23 +44,33 @@ public final class SymbolChecker {
         .returnType()
         .transform(this::checkType)
         .getOrElse(Semantic.Unit::new);
-    var body = checkStatement(node.body());
-    if (!(returnType instanceof Semantic.Unit)
-      && body.control() == Control.FLOWS)
-    {
-      throw Diagnostic
-        .error(
-          node.returnType().getFirst().location(),
-          "procedure `%s` must return a `%s`",
-          symbolName,
-          returnType);
+    var checkedBody = checkStatement(node.body());
+    var body        = checkedBody.statement();
+    if (checkedBody.control() == Control.FLOWS) {
+      if (!(returnType instanceof Semantic.Unit)) {
+        throw Diagnostic
+          .error(
+            node.returnType().getFirst().location(),
+            "procedure `%s` must return a `%s`",
+            symbolName,
+            returnType);
+      }
+      if (body instanceof Semantic.Block block) {
+        var innerStatements = ListBuffer.<Semantic.Statement>create();
+        innerStatements.addAll(block.innerStatements());
+        innerStatements.add(Semantic.UNIT_RETURN);
+        body = new Semantic.Block(innerStatements.toList());
+      }
+      else {
+        body = new Semantic.Block(List.of(body, Semantic.UNIT_RETURN));
+      }
     }
     return new Semantic.Proc(
       node.isPublic(),
       symbolName,
       parameters,
       returnType,
-      body.statement());
+      body);
   }
 
   private Semantic.ExternalProc checkExternalProc(Node.ExternalProc node) {

@@ -15,7 +15,9 @@ duru$Unit duru$print(duru$Byte* string) {
   if (result < 0) {
     exit(result);
   }
+  return 0;
 }
 duru$Unit testmodule$main() {
   duru$print("Hello, World!\n");
+  return 0;
 }

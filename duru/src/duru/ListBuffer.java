@@ -57,6 +57,13 @@ public final class ListBuffer<Element> implements ListLike<Element> {
     length++;
   }
 
+  public void addAll(List<Element> list) {
+    reserve(list.length());
+    for (var i = 0; i < list.length(); i++)
+      elements[length + i] = list.get(i);
+    length += list.length();
+  }
+
   public void fill(Element element, int amount) {
     reserve(amount);
     Arrays.fill(elements, length, length + amount, element);
