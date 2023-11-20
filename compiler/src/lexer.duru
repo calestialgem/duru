@@ -1,0 +1,307 @@
+import duru.Size;
+
+public enum Token_Kind {
+  OPENING_BRACE,
+  CLOSING_BRACE,
+  OPENING_PARENTHESIS,
+  CLOSING_PARENTHESIS,
+  SEMICOLON,
+  DOT,
+  COMMA,
+  EQUAL,
+  STAR,
+  LEFT,
+  EXTERN,
+  PUBLIC,
+  PROC,
+  STRUCT,
+  VAR,
+  IF,
+  ELSE,
+  RETURN,
+  IDENTIFIER,
+  INTEGRAL_CONSTANT,
+  STRING_CONSTANT,
+}
+
+public struct Token_Buffer {
+  path                                 String,
+  contents                             String,
+  kinds                      [capacity]Token_Kind,
+  locations                  [capacity]Location,
+  integrals         [integral_capacity]duru.Natural64,
+  integral_capacity                    Size,
+  integral_count                       Size,
+  string_constants                     String,
+  strings             [string_capacity]Location,
+  string_capacity                      Size,
+  string_count                         Size,
+  capacity                             Size,
+  count                                Size,
+}
+
+public struct Lexer {
+  tokens  Token_Buffer,
+  index   Size,
+  begin   Size,
+  initial duru.Integer32,
+}
+
+public struct Location {
+  begin Size,
+  end   Size,
+}
+
+public struct String {
+  bytes  [size]duru.Byte,
+  size         Size,
+  length       Size,
+}
+
+public proc lex(path String, contents String) Token_Buffer {
+  var lexer = Lexer{tokens = Token_Buffer{path = path, contents = contents}};
+  for lexer:has_codepoint() {
+    begin = index;
+    initial = lexer:get_codepoint();
+    lexer:advance();
+    switch initial {
+      case ' ', '\r', '\n' {}
+      case '/' {
+        if lexer:take_codepoint('/') {
+          for !lexer:take_codepoint('\n') && lexer:has_codepoint() {
+            lexer:advance();
+          }
+          break;
+        }
+        if !lexer:take_codepoint('*') {
+          duru.print("incomplete comment");
+          duru.exit(-1);
+        }
+        for var block_comments = 1; block_comments != 0 {
+          if lexer:take_codepoint('*') && lexer:take_codepoint('/') {
+            block_comments--;
+            continue;
+          }
+          if lexer:take_codepoint('/') && lexer:take_codepoint('*') {
+            block_comments++;
+          }
+          if !lexer:has_codepoint() {
+            duru.print("incomplete block comment");
+            duru.exit(-1);
+          }
+          lexer:advance();
+        }
+      }
+      case '{' { lexer:tokenize(Token_Kind.OPENING_BRACE      ); }
+      case '}' { lexer:tokenize(Token_Kind.CLOSING_BRACE      ); }
+      case '(' { lexer:tokenize(Token_Kind.OPENING_PARENTHESIS); }
+      case ')' { lexer:tokenize(Token_Kind.CLOSING_PARENTHESIS); }
+      case ';' { lexer:tokenize(Token_Kind.SEMICOLON          ); }
+      case '.' { lexer:tokenize(Token_Kind.DOT                ); }
+      case ',' { lexer:tokenize(Token_Kind.COMMA              ); }
+      case '=' { lexer:tokenize(Token_Kind.EQUAL              ); }
+      case '*' { lexer:tokenize(Token_Kind.STAR               ); }
+      case '<' { lexer:tokenize(Token_Kind.LEFT               ); }
+      case '"' {
+        var string_begin = lexer.string_constants.length;
+        for {
+          if !lexer:has_codepoint() {
+            duru.print("incomplete string constant");
+            duru.exit(-1);
+          }
+          var codepoint = lexer:get_codepoint();
+          lexer:advance();
+          if codepoint == '\n' {
+            duru.print("incomplete string constant");
+            duru.exit(-1);
+          }
+          if codepoint = '"' { break; }
+          if codepoint != '\\' {
+            lexer.string_constants:append(codepoint);
+            continue;
+          }
+          if !lexer:has_codepoint() {
+            duru.print("incomplete escape sequence");
+            duru.exit(-1);
+          }
+          codepoint = lexer:get_codepoint();
+          lexer:advance();
+          switch codepoint {
+            case '\\', '"' { lexer.string_constants:append(codepoint); }
+            case 't' { lexer.string_constants:append('\t'); }
+            case 'r' { lexer.string_constants:append('\r'); }
+            case 'n' { lexer.string_constants:append('\n'); }
+            default {
+              duru.print("unknown escape sequence");
+              duru.exit(-1);
+            }
+          }
+        }
+        if lexer.string_count == lexer.string_capacity {
+          if lexer.string_capacity == 0 { lexer.string_capacity++; }
+          else { lexer.string_capacity *= 2; }
+          lexer.strings = reallocate_memory(
+            lexer.strings,
+            lexer.string_capacity);
+          if lexer.strings == 0 {
+            duru.print("allocation failure");
+            duru.exit(-1);
+          }
+        }
+        lexer.strings[lexer.string_count] = Location{
+          begin = string_begin,
+          end   = lexer.string_constants.length};
+        lexer.string_count++;
+        lexer:tokenize(Token_Kind.STRING_CONSTANT);
+      }
+      case {
+        if initial:is_digit() {
+          var value duru.Natural64 = 0;
+          value += initial - '0';
+          for lexer:has_codepoint() {
+            var codepoint = lexer:get_codepoint();
+            if codepoint == '_' {
+              if !lexer:has_codepoint() || !lexer:get_codepoint():is_digit() {
+                duru.print("expected digit after separator");
+                duru.exit(-1);
+              }
+              codepoint = lexer:get_codepoint();
+            }
+            else if !codepoint:is_digit() { break; }
+            var digit = codepoint - '0';
+            if value > 0xffff_ffff_ffff_ffff / 10 {
+              duru.print("huge number");
+              duru.exit(-1);
+            }
+            value *= 10;
+            if value > 0xffff_ffff_ffff_ffff - digit {
+              duru.print("huge number");
+              duru.exit(-1);
+            }
+            value += digit;
+          }
+          if lexer.integral_count == lexer.integral_capacity {
+            if lexer.integral_capacity == 0 { lexer.integral_capacity++; }
+            else { lexer.integral_capacity *= 2; }
+            lexer.integrals = reallocate_memory(
+              lexer.integrals,
+              lexer.integral_capacity);
+            if lexer.integrals == 0 {
+              duru.print("allocation failure");
+              duru.exit(-1);
+            }
+          }
+          lexer.integrals[lexer.integral_count] = value;
+          lexer.integral_count++;
+          lexer:tokenize(Token_Kind.INTEGRAL_CONSTANT);
+          break;
+        }
+        if initial:is_identifier_initial() {
+          for lexer:has_codepoint() && lexer:get_codepoint():is_identifier_body() {
+            lexer:advance();
+          }
+          if      lexer:is_equal("extern") { lexer:tokenize(Token_Kind.EXTERN    ); }
+          else if lexer:is_equal("public") { lexer:tokenize(Token_Kind.PUBLIC    ); }
+          else if lexer:is_equal("proc")   { lexer:tokenize(Token_Kind.PROC      ); }
+          else if lexer:is_equal("struct") { lexer:tokenize(Token_Kind.STRUCT    ); }
+          else if lexer:is_equal("var")    { lexer:tokenize(Token_Kind.VAR       ); }
+          else if lexer:is_equal("if")     { lexer:tokenize(Token_Kind.IF        ); }
+          else if lexer:is_equal("else")   { lexer:tokenize(Token_Kind.ELSE      ); }
+          else if lexer:is_equal("return") { lexer:tokenize(Token_Kind.RETURN    ); }
+          else                             { lexer:tokenize(Token_Kind.IDENTIFIER); }
+          break;
+        }
+        duru.print("unknown character");
+        duru.exit(-1);
+      }
+    }
+  }
+}
+
+proc is_equal(lexer *Lexer, text *duru.Byte) duru.Boolean {
+  var length = lexer.index - lexer.begin;
+  for var i = 0; i != length; i++ {
+    if text[i] == 0 || lexer.contents.bytes[lexer.begin + i] != text[i] {
+      return 0;
+    }
+  }
+  return text[length] == 0;
+}
+
+proc append(string *String, codepoint duru.Integer32) {
+  if codepoint > 127 {
+    duru.print("UTF-8 is not implemented");
+    duru.exit(-1);
+  }
+  if string.length == string.size {
+    if string.size == 0 { string.size++; }
+    else { string.size *= 2; }
+    string.bytes = reallocate_memory(string.bytes, string.size);
+    if string.bytes == 0 {
+      duru.print("allocation failure");
+      duru.exit(-1);
+    }
+  }
+  string.bytes[string.length] = duru.Byte{codepoint};
+  string.length++;
+}
+
+proc tokenize(lexer *Lexer, kind Token_Kind) {
+  if lexer.count == lexer.capacity {
+    if lexer.capacity == 0 { lexer.capacity++; }
+    else { lexer.capacity *= 2; }
+    lexer.kinds     = reallocate_memory(lexer.kinds,     lexer.capacity);
+    lexer.locations = reallocate_memory(lexer.locations, lexer.capacity);
+    if lexer.kinds == 0 || lexer.locations == 0 {
+      duru.print("allocation failure");
+      duru.exit(-1);
+    }
+  }
+  lexer.kind[lexer.count]      = kind;
+  lexer.locations[lexer.count] = Location{
+    begin = lexer.begin,
+    end   = lexer.index};
+  lexer.count++;
+}
+
+
+proc is_identifier_body(codepoint duru.Integer32) duru.Boolean {
+  return codepoint:is_identifier_initial() || codepoint:is_digit();
+}
+
+proc is_identifier_initial(codepoint duru.Integer32) duru.Boolean {
+  return codepoint >= 'a' && codepoint <= 'z'
+      || codepoint >= 'A' && codepoint <= 'Z'
+      || codepoint == '_';
+}
+
+proc is_digit(codepoint duru.Integer32) duru.Boolean {
+  return codepoint >= '0' && codepoint <= '9';
+}
+
+proc take_codepoint(lexer *Lexer, codepoint duru.Integer32) duru.Boolean {
+  if !lexer:has_codepoint() { return 0; }
+  if lexer:get_codepoint() != codepoint { return 0; }
+  lexer:advance();
+  return 1;
+}
+
+proc has_codepoint(lexer *Lexer) duru.Boolean {
+  return lexer.index != lexer.contents.length;
+}
+
+proc get_codepoint(lexer *Lexer) duru.Integer32 {
+  var byte = lexer.contents.bytes[lexer.index];
+  if byte > 127 {
+    duru.print("UTF-8 is not implemented");
+    duru.exit(-1);
+  }
+  return byte;
+}
+
+proc advance(lexer *Lexer) {
+  lexer.index++;
+}
+
+extern "realloc"
+proc reallocate_memory(block *duru.Any, new_size Size) *duru.Any;
