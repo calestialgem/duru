@@ -71,6 +71,13 @@ public sealed interface Token {
     }
   }
 
+  record Extern(Location location) implements Token {
+    @Override
+    public String toString() {
+      return "keyword `extern`";
+    }
+  }
+
   record Public(Location location) implements Token {
     @Override
     public String toString() {

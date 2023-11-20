@@ -1,7 +1,7 @@
-17AD678D
+B73B690C
 0001.0013-0001.0018: public Proc `print`
-0008.0008-0008.0014: Struct `Stream`
-0010.0006-0010.0016: ExternalProc `get_stream`
-0012.0006-0012.0028: ExternalProc `print_string_to_stream`
-0015.0006-0015.0022: Proc `get_error_stream`
-0019.0006-0019.0010: ExternalProc `exit`
+0009.0008-0009.0014: Struct `Stream`
+0012.0006-0012.0016: Proc `get_stream`
+0015.0006-0015.0028: Proc `print_string_to_stream`
+0017.0006-0017.0022: Proc `get_error_stream`
+0022.0006-0022.0010: Proc `exit`

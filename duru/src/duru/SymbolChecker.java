@@ -32,57 +32,57 @@ public final class SymbolChecker {
     locals     = MapBuffer.create();
     return switch (declaration) {
       case Node.Proc proc -> checkProc(proc);
-      case Node.ExternalProc proc -> checkExternalProc(proc);
       case Node.Struct struct -> checkStruct(struct);
     };
   }
 
   private Semantic.Proc checkProc(Node.Proc node) {
-    var parameters = checkParameters(node.parameters());
+    var externalName =
+      node.externalName().transform(Token.StringConstant::value);
+    var isPublic     = node.isPublic();
+    var parameters   = checkParameters(node.parameters());
     returnType =
       node
         .returnType()
         .transform(this::checkType)
         .getOrElse(Semantic.Unit::new);
-    var checkedBody = checkStatement(node.body());
-    var body        = checkedBody.statement();
-    if (checkedBody.control() == Control.FLOWS) {
-      if (!(returnType instanceof Semantic.Unit)) {
-        throw Diagnostic
-          .error(
-            node.returnType().getFirst().location(),
-            "procedure `%s` must return a `%s`",
-            symbolName,
-            returnType);
+    for (var bodyNode : node.body()) {
+      var checkedBody = checkStatement(bodyNode);
+      var body        = checkedBody.statement();
+      if (checkedBody.control() == Control.FLOWS) {
+        if (!(returnType instanceof Semantic.Unit)) {
+          throw Diagnostic
+            .error(
+              node.returnType().getFirst().location(),
+              "procedure `%s` must return a `%s`",
+              symbolName,
+              returnType);
+        }
+        if (body instanceof Semantic.Block block) {
+          var innerStatements = ListBuffer.<Semantic.Statement>create();
+          innerStatements.addAll(block.innerStatements());
+          innerStatements.add(Semantic.UNIT_RETURN);
+          body = new Semantic.Block(innerStatements.toList());
+        }
+        else {
+          body = new Semantic.Block(List.of(body, Semantic.UNIT_RETURN));
+        }
       }
-      if (body instanceof Semantic.Block block) {
-        var innerStatements = ListBuffer.<Semantic.Statement>create();
-        innerStatements.addAll(block.innerStatements());
-        innerStatements.add(Semantic.UNIT_RETURN);
-        body = new Semantic.Block(innerStatements.toList());
-      }
-      else {
-        body = new Semantic.Block(List.of(body, Semantic.UNIT_RETURN));
-      }
+      return new Semantic.Proc(
+        externalName,
+        isPublic,
+        symbolName,
+        parameters,
+        returnType,
+        Optional.present(body));
     }
     return new Semantic.Proc(
-      node.isPublic(),
+      externalName,
+      isPublic,
       symbolName,
       parameters,
       returnType,
-      body);
-  }
-
-  private Semantic.ExternalProc checkExternalProc(Node.ExternalProc node) {
-    return new Semantic.ExternalProc(
-      node.isPublic(),
-      symbolName,
-      checkParameters(node.parameters()),
-      node
-        .returnType()
-        .transform(this::checkType)
-        .getOrElse(Semantic.Unit::new),
-      node.externalName().value().value());
+      Optional.absent());
   }
 
   private Map<String, Semantic.Type> checkParameters(
@@ -105,7 +105,10 @@ public final class SymbolChecker {
   }
 
   private Semantic.Struct checkStruct(Node.Struct node) {
-    return new Semantic.Struct(node.isPublic(), symbolName);
+    return new Semantic.Struct(
+      node.externalName().transform(Token.StringConstant::value),
+      node.isPublic(),
+      symbolName);
   }
 
   private Semantic.Type checkType(Node.Formula node) {

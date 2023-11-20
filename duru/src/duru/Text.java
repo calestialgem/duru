@@ -52,7 +52,16 @@ public final class Text {
 
   public static boolean isReserved(String name) {
     return switch (name) {
-      case "public", "proc", "struct", "var", "if", "else", "return" -> true;
+      case
+        "extern",
+        "public",
+        "proc",
+        "struct",
+        "var",
+        "if",
+        "else",
+        "return" ->
+        true;
       default -> false;
     };
   }

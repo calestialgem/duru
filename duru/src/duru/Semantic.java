@@ -23,12 +23,18 @@ public sealed interface Semantic {
   {}
 
   sealed interface Symbol extends Semantic {
+    Optional<String> externalName();
     boolean isPublic();
     String name();
   }
 
   sealed interface Builtin extends Symbol {
     String identifier();
+
+    @Override
+    default Optional<String> externalName() {
+      return Optional.absent();
+    }
 
     @Override
     default boolean isPublic() {
@@ -62,7 +68,9 @@ public sealed interface Semantic {
 
   sealed interface Natural extends Integral {}
 
-  record Struct(boolean isPublic, String name) implements Type, Symbol {
+  record Struct(Optional<String> externalName, boolean isPublic, String name)
+    implements Type, Symbol
+  {
     @Override
     public String toString() {
       return name();
@@ -213,19 +221,12 @@ public sealed interface Semantic {
   }
 
   record Proc(
+    Optional<String> externalName,
     boolean isPublic,
     String name,
     Map<String, Type> parameters,
     Type returnType,
-    Statement body) implements Procedure, Symbol
-  {}
-
-  record ExternalProc(
-    boolean isPublic,
-    String name,
-    Map<String, Type> parameters,
-    Type returnType,
-    String externalName) implements Procedure, Symbol
+    Optional<Statement> body) implements Procedure, Symbol
   {}
 
   sealed interface Statement extends Semantic {}

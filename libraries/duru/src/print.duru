@@ -5,15 +5,18 @@ public proc print(string *Byte) {
   }
 }
 
+extern "FILE"
 struct Stream;
 
-proc get_stream(index Natural32) *Stream = "__acrt_iob_func";
+extern "__acrt_iob_func"
+proc get_stream(index Natural32) *Stream;
 
-proc print_string_to_stream(string *Byte, destination *Stream) Integer32
-  = "fputs";
+extern "fputs"
+proc print_string_to_stream(string *Byte, destination *Stream) Integer32;
 
 proc get_error_stream() *Stream {
   return get_stream(2);
 }
 
-proc exit(code Integer32) Noreturn = "exit";
+extern "exit"
+proc exit(code Integer32) Noreturn;

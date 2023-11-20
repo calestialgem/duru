@@ -147,6 +147,7 @@ public final class SourceLexer {
             }
             var text = source.contents().substring(begin, index);
             switch (text) {
+              case "extern" -> tokens.add(new Token.Extern(location()));
               case "public" -> tokens.add(new Token.Public(location()));
               case "proc" -> tokens.add(new Token.Proc(location()));
               case "struct" -> tokens.add(new Token.Struct(location()));

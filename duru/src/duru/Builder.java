@@ -72,10 +72,9 @@ public final class Builder {
 
   private void buildAccess(String name) {
     var symbol = accessSymbol(name);
-    switch (symbol) {
-      case Semantic.ExternalProc proc -> string.append(proc.externalName());
-      default -> string.append(symbol.name().replace('.', '$'));
-    }
+    string
+      .append(
+        symbol.externalName().getOrElse(() -> symbol.name().replace('.', '$')));
   }
 
   private void buildSymbol(String name) {
@@ -95,7 +94,6 @@ public final class Builder {
     built.add(symbol.name());
     switch (symbol) {
       case Semantic.Proc proc -> buildProc(proc);
-      case Semantic.ExternalProc proc -> buildExternalProc(proc);
       case Semantic.Struct struct -> buildStruct(struct);
       case Semantic.Byte byte_ -> string.append("typedef char duru$Byte;");
       case Semantic.Boolean boolean_ ->
@@ -117,7 +115,8 @@ public final class Builder {
     for (var parameter : proc.parameters().values())
       buildTypeDependencies(parameter);
     buildTypeDependencies(proc.returnType());
-    buildStatementDependencies(proc.body());
+    for (var body : proc.body())
+      buildStatementDependencies(body);
     buildType(proc.returnType());
     string.append(' ');
     buildAccess(proc.name());
@@ -135,32 +134,13 @@ public final class Builder {
       }
     }
     string.append(')');
-    string.append(' ');
-    buildStatement(proc.body());
-  }
-
-  private void buildExternalProc(Semantic.ExternalProc proc) {
-    for (var parameter : proc.parameters().values())
-      buildTypeDependencies(parameter);
-    buildTypeDependencies(proc.returnType());
-    buildType(proc.returnType());
-    string.append(' ');
-    string.append(proc.externalName());
-    string.append('(');
-    if (!proc.parameters().isEmpty()) {
-      buildType(proc.parameters().values().getFirst());
-      string.append(' ');
-      string.append(proc.parameters().keys().getFirst());
-      for (var i = 1; i < proc.parameters().length(); i++) {
-        string.append(',');
-        string.append(' ');
-        buildType(proc.parameters().values().get(i));
-        string.append(' ');
-        string.append(proc.parameters().keys().get(i));
-      }
+    if (proc.body().isEmpty()) {
+      string.append(';');
     }
-    string.append(')');
-    string.append(';');
+    else {
+      string.append(' ');
+      buildStatement(proc.body().getFirst());
+    }
   }
 
   private void buildStruct(Semantic.Struct struct) {

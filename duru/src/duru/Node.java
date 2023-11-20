@@ -2,34 +2,30 @@ package duru;
 
 public sealed interface Node {
   sealed interface Declaration extends Node {
+    Optional<Token.StringConstant> externalName();
     boolean isPublic();
     Token.Identifier name();
   }
 
   record Proc(
     Location location,
+    Optional<Token.StringConstant> externalName,
     boolean isPublic,
     Token.Identifier name,
     List<Parameter> parameters,
     Optional<Formula> returnType,
-    Statement body) implements Declaration
-  {}
-
-  record ExternalProc(
-    Location location,
-    boolean isPublic,
-    Token.Identifier name,
-    List<Parameter> parameters,
-    Optional<Formula> returnType,
-    StringConstant externalName) implements Declaration
+    Optional<Statement> body) implements Declaration
   {}
 
   record Parameter(Location location, Token.Identifier name, Formula type)
     implements Node
   {}
 
-  record Struct(Location location, boolean isPublic, Token.Identifier name)
-    implements Declaration
+  record Struct(
+    Location location,
+    Optional<Token.StringConstant> externalName,
+    boolean isPublic,
+    Token.Identifier name) implements Declaration
   {}
 
   sealed interface Statement extends Node {}

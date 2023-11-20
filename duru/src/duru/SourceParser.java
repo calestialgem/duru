@@ -27,7 +27,12 @@ public final class SourceParser {
   }
 
   private Optional<Node.Declaration> parseDeclaration() {
-    var begin    = index;
+    var begin        = index;
+    var externalName = Optional.<Token.StringConstant>absent();
+    if (take(Token.Extern.class)) {
+      externalName =
+        Optional.present(expect(Token.StringConstant.class, "external name"));
+    }
     var isPublic = take(Token.Public.class);
     if (take(Token.Proc.class)) {
       var name = expect(Token.Identifier.class, "procedure name");
@@ -35,25 +40,15 @@ public final class SourceParser {
       var parameters = parseSeparated(this::parseParameter);
       expect(Token.ClosingParenthesis.class, "`)` of parameter list");
       var returnType = parseFormula();
-      if (take(Token.Equal.class)) {
-        var externalName =
-          expect(this::parseStringConstant, "external procedure name");
-        expect(Token.Semicolon.class, "`;` of procedure declaration");
-        return Optional
-          .present(
-            new Node.ExternalProc(
-              location(begin),
-              isPublic,
-              name,
-              parameters,
-              returnType,
-              externalName));
+      var body       = Optional.<Node.Statement>absent();
+      if (!take(Token.Semicolon.class)) {
+        body = Optional.present(expect(this::parseBlock, "procedure body"));
       }
-      var body = expect(this::parseBlock, "procedure body");
       return Optional
         .present(
           new Node.Proc(
             location(begin),
+            externalName,
             isPublic,
             name,
             parameters,
@@ -63,9 +58,11 @@ public final class SourceParser {
     if (take(Token.Struct.class)) {
       var name = expect(Token.Identifier.class, "structure name");
       expect(Token.Semicolon.class, "`;` of structure declaration");
-      return Optional.present(new Node.Struct(location(begin), isPublic, name));
+      return Optional
+        .present(
+          new Node.Struct(location(begin), externalName, isPublic, name));
     }
-    if (isPublic) {
+    if (!externalName.isEmpty() || isPublic) {
       throw missing("declaration");
     }
     return Optional.absent();
