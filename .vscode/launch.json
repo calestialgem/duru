@@ -7,7 +7,7 @@
       "projectName": "duru",
       "mainClass": "duru/duru.Launcher",
       "cwd": "${workspaceFolder}",
-      "args": ["testCompiler"]
+      "args": ["-m=walkthrough", "run", "-I=libraries"]
     }
   ]
 }

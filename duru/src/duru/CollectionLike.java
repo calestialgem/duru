@@ -2,6 +2,7 @@ package duru;
 
 import java.util.Iterator;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public interface CollectionLike<Element> extends Iterable<Element> {
   int length();
@@ -18,6 +19,14 @@ public interface CollectionLike<Element> extends Iterable<Element> {
 
   default boolean isEmpty() {
     return length() == 0;
+  }
+
+  default Element[] toArray(IntFunction<Element[]> generator) {
+    var elements = generator.apply(length());
+    for (var i = 0; i < length(); i++) {
+      elements[i] = get(i);
+    }
+    return elements;
   }
 
   @Override

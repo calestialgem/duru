@@ -1,16 +1,37 @@
 package duru;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public final class Processes {
   public static int execute(
     Object subject,
     boolean showOutput,
-    Object... command)
+    Object... arguments)
   {
-    var arguments = Arrays.stream(command).map(String::valueOf).toList();
-    var builder   = new ProcessBuilder(arguments);
+    var combinedCommand = ListBuffer.<String>create();
+    for (var argument : arguments)
+      combinedCommand.add(argument.toString());
+    return execute(subject, showOutput, combinedCommand.toList());
+  }
+
+  public static int execute(
+    Object subject,
+    boolean showOutput,
+    Object command,
+    List<String> arguments)
+  {
+    var combinedCommand = ListBuffer.<String>create();
+    combinedCommand.add(command.toString());
+    combinedCommand.addAll(arguments);
+    return execute(subject, showOutput, combinedCommand.toList());
+  }
+
+  public static int execute(
+    Object subject,
+    boolean showOutput,
+    List<String> arguments)
+  {
+    var builder = new ProcessBuilder(arguments.toArray(String[]::new));
     if (showOutput) {
       builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
       builder.redirectError(ProcessBuilder.Redirect.INHERIT);
