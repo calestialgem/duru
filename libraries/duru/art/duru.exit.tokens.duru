@@ -1,0 +1,12 @@
+26B09269
+0001.0001-0001.0007: keyword `extern`
+0001.0008-0001.0014: string `"exit"`
+0002.0001-0002.0007: keyword `public`
+0002.0008-0002.0012: keyword `proc`
+0002.0013-0002.0017: identifier `exit`
+0002.0017-0002.0018: punctuation `(`
+0002.0018-0002.0022: identifier `code`
+0002.0023-0002.0032: identifier `Integer32`
+0002.0032-0002.0033: punctuation `)`
+0002.0034-0002.0042: identifier `Noreturn`
+0002.0042-0002.0043: punctuation `;`

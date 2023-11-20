@@ -1,4 +1,4 @@
-F57C835E
+85F30A93
 0001.0001-0001.0007: keyword `public`
 0001.0008-0001.0012: keyword `proc`
 0001.0013-0001.0018: identifier `print`
@@ -77,13 +77,3 @@ F57C835E
 0018.0022-0018.0023: punctuation `)`
 0018.0023-0018.0024: punctuation `;`
 0019.0001-0019.0002: punctuation `}`
-0021.0001-0021.0007: keyword `extern`
-0021.0008-0021.0014: string `"exit"`
-0022.0001-0022.0005: keyword `proc`
-0022.0006-0022.0010: identifier `exit`
-0022.0010-0022.0011: punctuation `(`
-0022.0011-0022.0015: identifier `code`
-0022.0016-0022.0025: identifier `Integer32`
-0022.0025-0022.0026: punctuation `)`
-0022.0027-0022.0035: identifier `Noreturn`
-0022.0035-0022.0036: punctuation `;`

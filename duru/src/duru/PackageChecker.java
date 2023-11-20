@@ -102,7 +102,7 @@ public final class PackageChecker {
     for (var file : Persistance.list(subject, directory)) {
       var fullFilename = file.getFileName().toString();
       if (!fullFilename.endsWith(".duru"))
-        return;
+        continue;
       var filename =
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
       var source   = new Source(file, Persistance.load(directory, file));

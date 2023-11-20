@@ -1,4 +1,4 @@
-C57AF946
+B0CD23E2
 C:\Users\Cem\duru\libraries\duru\src\print.duru
 public proc print(string *Byte) {
   var result = print_string_to_stream(string, get_error_stream());
@@ -19,6 +19,3 @@ proc print_string_to_stream(string *Byte, destination *Stream) Integer32;
 proc get_error_stream() *Stream {
   return get_stream(2);
 }
-
-extern "exit"
-proc exit(code Integer32) Noreturn;

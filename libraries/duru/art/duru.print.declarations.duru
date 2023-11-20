@@ -1,7 +1,6 @@
-B73B690C
+539F5791
 0001.0013-0001.0018: public Proc `print`
 0009.0008-0009.0014: extern "FILE" Struct `Stream`
 0012.0006-0012.0016: extern "__acrt_iob_func" Proc `get_stream`
 0015.0006-0015.0028: extern "fputs" Proc `print_string_to_stream`
 0017.0006-0017.0022: Proc `get_error_stream`
-0022.0006-0022.0010: extern "exit" Proc `exit`

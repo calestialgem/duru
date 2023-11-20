@@ -1,0 +1,4 @@
+8EF99BE9
+C:\Users\Cem\duru\libraries\duru\src\exit.duru
+extern "exit"
+public proc exit(code Integer32) Noreturn;
