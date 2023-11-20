@@ -4,181 +4,13 @@ import java.nio.file.Path;
 
 final class Launcher {
   public static void main(String[] arguments) {
+    if (arguments.length == 0)
+      printUsage();
     var launcher = new Launcher(List.of(arguments));
     launcher.launch();
   }
 
-  private final List<String> arguments;
-
-  private Launcher(List<String> arguments) {
-    this.arguments = arguments;
-  }
-
-  private void launch() {
-    var modulePath      = Persistance.path(".");
-    var packageName     = Optional.<String>absent();
-    var moduleBases     = ListBuffer.<Path>create();
-    var debugger        = CompilerDebugger.inactive();
-    var command         = Optional.<String>absent();
-    var passedArguments = ListBuffer.<String>create();
-    for (var i = 0; i != arguments.length(); i++) {
-      var argument = arguments.get(i);
-      if (argument.startsWith("-")) {
-        var separator = argument.indexOf('=');
-        var flag      = argument;
-        if (separator != -1)
-          flag = argument.substring(0, separator);
-        switch (flag) {
-          case "--module", "-m" -> {
-            if (separator != -1)
-              modulePath = Persistance.path(argument.substring(separator + 1));
-            else {
-              i++;
-              if (i == arguments.length())
-                throw Diagnostic
-                  .error("subject", "expected module path after `%s`", flag);
-              modulePath = Persistance.path(arguments.get(i));
-            }
-          }
-          case "--package", "-p" -> {
-            if (separator != -1)
-              packageName = Optional.present(argument.substring(separator + 1));
-            else {
-              i++;
-              if (i == arguments.length())
-                throw Diagnostic
-                  .error("subject", "expected package name after `%s`", flag);
-              packageName = Optional.present(arguments.get(i));
-            }
-          }
-          case "--include", "-I" -> {
-            if (separator != -1)
-              moduleBases
-                .add(Persistance.path(argument.substring(separator + 1)));
-            else {
-              i++;
-              if (i == arguments.length())
-                throw Diagnostic
-                  .error("subject", "expected module base after `%s`", flag);
-              moduleBases.add(Persistance.path(arguments.get(i)));
-            }
-          }
-          case "--debug", "-d" -> {
-            if (separator != -1)
-              throw Diagnostic
-                .error("subject", "`%s` does not take value", flag);
-            debugger = CompilerDebugger.active();
-          }
-          default ->
-            throw Diagnostic.error("subject", "unknown flag `%s`", flag);
-        }
-        continue;
-      }
-      if (command.isEmpty()) {
-        command = Optional.present(argument);
-        continue;
-      }
-      passedArguments.add(argument);
-    }
-    if (command.isEmpty()) {
-      throw Diagnostic.error("subject", "there is no command");
-    }
-    switch (command.getFirst()) {
-      case "help" -> printUsage();
-      case "init" -> init(modulePath);
-      case "check" -> check(debugger, modulePath, moduleBases.toList());
-      case "build" -> build(debugger, modulePath, moduleBases.toList());
-      case "run" ->
-        run(
-          debugger,
-          modulePath,
-          moduleBases.toList(),
-          packageName,
-          passedArguments.toList());
-      case "testCompilerByDeletingWholeModulePath" ->
-        testCompilerByDeletingWholeModulePath(
-          debugger,
-          modulePath,
-          moduleBases.toList());
-      default ->
-        throw Diagnostic
-          .error("launcher", "unknown command `%s`", command.getFirst());
-    }
-  }
-
-  private void init(Path modulePath) {
-    Initializer.initialize(modulePath);
-  }
-
-  private void check(
-    CompilerDebugger debugger,
-    Path modulePath,
-    List<Path> moduleBases)
-  {
-    Checker.check(debugger, "launcher", modulePath, moduleBases);
-  }
-
-  private void build(
-    CompilerDebugger debugger,
-    Path modulePath,
-    List<Path> moduleBases)
-  {
-    var artifacts = modulePath.resolve("art");
-    var target    = Checker.check(debugger, "subject", modulePath, moduleBases);
-    Builder.build("subject", artifacts, target);
-  }
-
-  private void run(
-    CompilerDebugger debugger,
-    Path modulePath,
-    List<Path> moduleBases,
-    Optional<String> packageName,
-    List<String> passedArguments)
-  {
-    var artifacts = modulePath.resolve("art");
-    var target    = Checker.check(debugger, "subject", modulePath, moduleBases);
-    Builder.build("subject", artifacts, target);
-    var    module = target.modules().get(target.main()).getFirst();
-    String name;
-    if (!packageName.isEmpty()) {
-      name = packageName.getFirst();
-    }
-    else {
-      var executables = ListBuffer.<String>create();
-      for (var package_ : module.packages().values()) {
-        if (package_ instanceof Semantic.Executable executable)
-          executables.add(executable.name());
-      }
-      if (executables.length() > 1) {
-        throw Diagnostic
-          .error("subject", "which executable out of `%s`", executables);
-      }
-      if (executables.isEmpty()) {
-        throw Diagnostic
-          .error("subject", "no executable in `%s`", module.name());
-      }
-      name = executables.getFirst();
-    }
-    var filename = "%s.exe".formatted(name.replace('.', '/'));
-    var binary   = artifacts.resolve(filename);
-    var exitCode = Processes.execute("subject", true, binary, passedArguments);
-    if (exitCode != 0) {
-      System.err.printf("note: `%s` exited with %d%n", binary, exitCode);
-    }
-  }
-
-  private void testCompilerByDeletingWholeModulePath(
-    CompilerDebugger debugger,
-    Path modulePath,
-    List<Path> moduleBases)
-  {
-    Persistance.recreate("subject", modulePath);
-    Initializer.initialize(modulePath);
-    var target = Checker.check(debugger, "subject", modulePath, moduleBases);
-    Builder.build("subject", modulePath.resolve("art"), target);
-  }
-
-  private void printUsage() {
+  private static void printUsage() {
     System.err.print("""
 Usage: duru [flags] <command> <arguments>
 
@@ -237,5 +69,170 @@ builds up a list depending on the flag.
       Defaults to false.
 """);
     System.exit(-1);
+  }
+
+  private final List<String> arguments;
+
+  private Launcher(List<String> arguments) {
+    this.arguments = arguments;
+  }
+
+  private void launch() {
+    var modulePath      = Persistance.path(".");
+    var packageName     = Optional.<String>absent();
+    var moduleBases     = ListBuffer.<Path>create();
+    var debugger        = CompilerDebugger.inactive();
+    var command         = Optional.<String>absent();
+    var passedArguments = ListBuffer.<String>create();
+    for (var i = 0; i != arguments.length(); i++) {
+      var argument = arguments.get(i);
+      if (argument.startsWith("-")) {
+        var separator = argument.indexOf('=');
+        var flag      = argument;
+        if (separator != -1)
+          flag = argument.substring(0, separator);
+        switch (flag) {
+          case "--module", "-m" -> {
+            if (separator != -1)
+              modulePath = Persistance.path(argument.substring(separator + 1));
+            else {
+              i++;
+              if (i == arguments.length())
+                throw Diagnostic
+                  .error("", "expected module path after `%s`", flag);
+              modulePath = Persistance.path(arguments.get(i));
+            }
+          }
+          case "--package", "-p" -> {
+            if (separator != -1)
+              packageName = Optional.present(argument.substring(separator + 1));
+            else {
+              i++;
+              if (i == arguments.length())
+                throw Diagnostic
+                  .error("", "expected package name after `%s`", flag);
+              packageName = Optional.present(arguments.get(i));
+            }
+          }
+          case "--include", "-I" -> {
+            if (separator != -1)
+              moduleBases
+                .add(Persistance.path(argument.substring(separator + 1)));
+            else {
+              i++;
+              if (i == arguments.length())
+                throw Diagnostic
+                  .error("", "expected module base after `%s`", flag);
+              moduleBases.add(Persistance.path(arguments.get(i)));
+            }
+          }
+          case "--debug", "-d" -> {
+            if (separator != -1)
+              throw Diagnostic.error("", "`%s` does not take value", flag);
+            debugger = CompilerDebugger.active();
+          }
+          default -> throw Diagnostic.error("", "unknown flag `%s`", flag);
+        }
+        continue;
+      }
+      if (command.isEmpty()) {
+        command = Optional.present(argument);
+        continue;
+      }
+      passedArguments.add(argument);
+    }
+    if (command.isEmpty()) {
+      throw Diagnostic.error("", "there is no command");
+    }
+    switch (command.getFirst()) {
+      case "help" -> printUsage();
+      case "init" -> init(modulePath);
+      case "check" -> check(debugger, modulePath, moduleBases.toList());
+      case "build" -> build(debugger, modulePath, moduleBases.toList());
+      case "run" ->
+        run(
+          debugger,
+          modulePath,
+          moduleBases.toList(),
+          packageName,
+          passedArguments.toList());
+      case "testCompilerByDeletingWholeModulePath" ->
+        testCompilerByDeletingWholeModulePath(
+          debugger,
+          modulePath,
+          moduleBases.toList());
+      default ->
+        throw Diagnostic.error("", "unknown command `%s`", command.getFirst());
+    }
+  }
+
+  private void init(Path modulePath) {
+    Initializer.initialize(modulePath);
+  }
+
+  private void check(
+    CompilerDebugger debugger,
+    Path modulePath,
+    List<Path> moduleBases)
+  {
+    Checker.check(debugger, "", modulePath, moduleBases);
+  }
+
+  private void build(
+    CompilerDebugger debugger,
+    Path modulePath,
+    List<Path> moduleBases)
+  {
+    var artifacts = modulePath.resolve("art");
+    var target    = Checker.check(debugger, "", modulePath, moduleBases);
+    Builder.build("", artifacts, target);
+  }
+
+  private void run(
+    CompilerDebugger debugger,
+    Path modulePath,
+    List<Path> moduleBases,
+    Optional<String> packageName,
+    List<String> passedArguments)
+  {
+    var artifacts = modulePath.resolve("art");
+    var target    = Checker.check(debugger, "", modulePath, moduleBases);
+    Builder.build("", artifacts, target);
+    var    module = target.modules().get(target.main()).getFirst();
+    String name;
+    if (!packageName.isEmpty()) {
+      name = packageName.getFirst();
+    }
+    else {
+      var executables = ListBuffer.<String>create();
+      for (var package_ : module.packages().values()) {
+        if (package_ instanceof Semantic.Executable executable)
+          executables.add(executable.name());
+      }
+      if (executables.length() > 1) {
+        throw Diagnostic.error("", "which executable out of `%s`", executables);
+      }
+      if (executables.isEmpty()) {
+        throw Diagnostic.error("", "no executable in `%s`", module.name());
+      }
+      name = executables.getFirst();
+    }
+    var filename = "%s.exe".formatted(name.replace('.', '/'));
+    var binary   = artifacts.resolve(filename);
+    var exitCode = Processes.execute("", true, binary, passedArguments);
+    if (exitCode != 0) {
+      System.err.printf("note: `%s` exited with %d%n", binary, exitCode);
+    }
+  }
+
+  private void testCompilerByDeletingWholeModulePath(
+    CompilerDebugger debugger,
+    Path modulePath,
+    List<Path> moduleBases)
+  {
+    Persistance.recreate("", modulePath);
+    Initializer.initialize(modulePath);
+    var target = Checker.check(debugger, "", modulePath, moduleBases);
+    Builder.build("", modulePath.resolve("art"), target);
   }
 }

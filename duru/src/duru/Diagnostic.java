@@ -51,7 +51,11 @@ public final class Diagnostic {
     String format,
     Object... arguments)
   {
+    var name = subject.toString();
+    if (name.isEmpty())
+      return new RuntimeException(
+        "%s: %s".formatted(title, format.formatted(arguments)));
     return new RuntimeException(
-      "%s: %s: %s".formatted(subject, title, format.formatted(arguments)));
+      "%s: %s: %s".formatted(name, title, format.formatted(arguments)));
   }
 }
