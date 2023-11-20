@@ -220,7 +220,8 @@ builds up a list depending on the flag.
         }
       }
       if (executables.length() > 1) {
-        throw Diagnostic.error("", "which executable out of `%s`", executables);
+        throw Diagnostic
+          .error("", "which executable out of `%s`", executables.toList());
       }
       if (executables.isEmpty()) {
         throw Diagnostic.error("", "no executable in `%s`", module.name());
