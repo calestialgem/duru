@@ -49,6 +49,9 @@ public final class Checker {
       return checkModule(subject, directory);
     }
     for (var moduleBase : moduleBases) {
+      if (moduleBase.getFileName().toString().equals(name)
+        && Files.exists(moduleBase.resolve("module.duru")))
+        return checkModule(subject, moduleBase);
       var checkedDirectory = moduleBase.resolve(name);
       if (Files.exists(checkedDirectory.resolve("module.duru")))
         return checkModule(subject, checkedDirectory);

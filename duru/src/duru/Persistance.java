@@ -18,8 +18,8 @@ public final class Persistance {
     }
   }
 
-  public static Path path(String path) {
-    return Path.of(path).toAbsolutePath().normalize();
+  public static Path path(String first, String... remaining) {
+    return Path.of(first, remaining).toAbsolutePath().normalize();
   }
 
   public static void store(Object subject, Path file, Object text) {

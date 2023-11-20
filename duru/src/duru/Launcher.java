@@ -152,7 +152,7 @@ duru testCompiler
           debugger,
           subject,
           directory,
-          List.of(Persistance.path("libraries")));
+          List.of(Persistance.path("libraries", "duru")));
     Builder.build(subject, directory.resolve("art"), target);
   }
 }

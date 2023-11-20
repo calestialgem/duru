@@ -20,7 +20,7 @@ public final class Initializer {
     checkAvailability();
     name = directory.getFileName().toString();
     checkName();
-    Persistance.create(directory, directory);
+    Persistance.ensure(directory, directory);
     createConfiguration();
     createMainSource();
   }
