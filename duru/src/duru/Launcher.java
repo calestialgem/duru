@@ -4,8 +4,9 @@ import java.nio.file.Path;
 
 final class Launcher {
   public static void main(String[] arguments) {
-    if (arguments.length == 0)
+    if (arguments.length == 0) {
       printUsage();
+    }
     var launcher = new Launcher(List.of(arguments));
     launcher.launch();
   }
@@ -89,46 +90,54 @@ builds up a list depending on the flag.
       if (argument.startsWith("-")) {
         var separator = argument.indexOf('=');
         var flag      = argument;
-        if (separator != -1)
+        if (separator != -1) {
           flag = argument.substring(0, separator);
+        }
         switch (flag) {
           case "--module", "-m" -> {
-            if (separator != -1)
+            if (separator != -1) {
               modulePath = Persistance.path(argument.substring(separator + 1));
+            }
             else {
               i++;
-              if (i == arguments.length())
+              if (i == arguments.length()) {
                 throw Diagnostic
                   .error("", "expected module path after `%s`", flag);
+              }
               modulePath = Persistance.path(arguments.get(i));
             }
           }
           case "--package", "-p" -> {
-            if (separator != -1)
+            if (separator != -1) {
               packageName = Optional.present(argument.substring(separator + 1));
+            }
             else {
               i++;
-              if (i == arguments.length())
+              if (i == arguments.length()) {
                 throw Diagnostic
                   .error("", "expected package name after `%s`", flag);
+              }
               packageName = Optional.present(arguments.get(i));
             }
           }
           case "--include", "-I" -> {
-            if (separator != -1)
+            if (separator != -1) {
               moduleBases
                 .add(Persistance.path(argument.substring(separator + 1)));
+            }
             else {
               i++;
-              if (i == arguments.length())
+              if (i == arguments.length()) {
                 throw Diagnostic
                   .error("", "expected module base after `%s`", flag);
+              }
               moduleBases.add(Persistance.path(arguments.get(i)));
             }
           }
           case "--debug", "-d" -> {
-            if (separator != -1)
+            if (separator != -1) {
               throw Diagnostic.error("", "`%s` does not take value", flag);
+            }
             debugger = CompilerDebugger.active();
           }
           default -> throw Diagnostic.error("", "unknown flag `%s`", flag);
@@ -206,8 +215,9 @@ builds up a list depending on the flag.
     else {
       var executables = ListBuffer.<String>create();
       for (var package_ : module.packages().values()) {
-        if (package_ instanceof Semantic.Executable executable)
+        if (package_ instanceof Semantic.Executable executable) {
           executables.add(executable.name());
+        }
       }
       if (executables.length() > 1) {
         throw Diagnostic.error("", "which executable out of `%s`", executables);

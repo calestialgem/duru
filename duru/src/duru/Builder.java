@@ -89,8 +89,9 @@ public final class Builder {
   }
 
   private void buildSymbol(Semantic.Symbol symbol) {
-    if (built.contains(symbol.name()))
+    if (built.contains(symbol.name())) {
       return;
+    }
     built.add(symbol.name());
     switch (symbol) {
       case Semantic.Proc proc -> buildProc(proc);
@@ -100,11 +101,13 @@ public final class Builder {
   }
 
   private void buildProc(Semantic.Proc proc) {
-    for (var parameter : proc.parameters().values())
+    for (var parameter : proc.parameters().values()) {
       buildTypeDependencies(parameter);
+    }
     buildTypeDependencies(proc.returnType());
-    for (var body : proc.body())
+    for (var body : proc.body()) {
       buildStatementDependencies(body);
+    }
     buildType(proc.returnType());
     string.append(' ');
     buildAccess(proc.name());
@@ -154,20 +157,23 @@ public final class Builder {
   private void buildStatementDependencies(Semantic.Statement statement) {
     switch (statement) {
       case Semantic.Block block -> {
-        for (var innerStatement : block.innerStatements())
+        for (var innerStatement : block.innerStatements()) {
           buildStatementDependencies(innerStatement);
+        }
       }
       case Semantic.Discard discard ->
         buildExpressionDependencies(discard.discarded());
       case Semantic.If if_ -> {
         buildExpressionDependencies(if_.condition());
         buildStatementDependencies(if_.trueBranch());
-        for (var falseBranch : if_.falseBranch())
+        for (var falseBranch : if_.falseBranch()) {
           buildStatementDependencies(falseBranch);
+        }
       }
       case Semantic.Return return_ -> {
-        for (var value : return_.value())
+        for (var value : return_.value()) {
           buildExpressionDependencies(value);
+        }
       }
       case Semantic.Var var -> {
         buildTypeDependencies(var.type());
@@ -188,8 +194,9 @@ public final class Builder {
             Long.toUnsignedString(constant.value()));
       case Semantic.Invocation invocation -> {
         buildSymbol(invocation.name());
-        for (var argument : invocation.arguments())
+        for (var argument : invocation.arguments()) {
           buildExpressionDependencies(argument);
+        }
       }
       case Semantic.LessThan binary -> {
         buildExpressionDependencies(binary.left());
@@ -225,8 +232,9 @@ public final class Builder {
           buildStatement(innerStatement);
         }
         indentation--;
-        if (string.charAt(string.length() - 1) != '{')
+        if (string.charAt(string.length() - 1) != '{') {
           buildNewLine();
+        }
         string.append('}');
       }
       case Semantic.Discard discard -> {
@@ -309,7 +317,8 @@ public final class Builder {
 
   private void buildNewLine() {
     string.append(System.lineSeparator());
-    for (var i = 0; i < indentation; i++)
+    for (var i = 0; i < indentation; i++) {
       string.append(' ').append(' ');
+    }
   }
 }

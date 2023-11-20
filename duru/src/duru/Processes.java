@@ -9,8 +9,9 @@ public final class Processes {
     Object... arguments)
   {
     var combinedCommand = ListBuffer.<String>create();
-    for (var argument : arguments)
+    for (var argument : arguments) {
       combinedCommand.add(argument.toString());
+    }
     return execute(subject, showOutput, combinedCommand.toList());
   }
 

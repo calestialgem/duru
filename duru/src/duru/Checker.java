@@ -51,10 +51,13 @@ public final class Checker {
     for (var moduleBase : moduleBases) {
       if (moduleBase.getFileName().toString().equals(name)
         && Files.exists(moduleBase.resolve("module.duru")))
+      {
         return checkModule(subject, moduleBase);
+      }
       var checkedDirectory = moduleBase.resolve(name);
-      if (Files.exists(checkedDirectory.resolve("module.duru")))
+      if (Files.exists(checkedDirectory.resolve("module.duru"))) {
         return checkModule(subject, checkedDirectory);
+      }
     }
     throw Diagnostic
       .error(subject, "no module `%s` in bases `%s`", name, moduleBases);
