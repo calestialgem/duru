@@ -6,7 +6,7 @@
       "request": "launch",
       "projectName": "duru",
       "mainClass": "duru/duru.Launcher",
-      "args": ["testCompiler"]
+      "args": ["init", "walkthrough"]
     }
   ]
 }
