@@ -2,14 +2,17 @@ package duru;
 
 public final class SymbolChecker {
   public static Semantic.Symbol check(
+    SetBuffer<String> externalNames,
     Accessor<String, Semantic.Symbol> accessor,
     String packageName,
     Node.Declaration declaration)
   {
-    var checker = new SymbolChecker(accessor, packageName, declaration);
+    var checker =
+      new SymbolChecker(externalNames, accessor, packageName, declaration);
     return checker.check();
   }
 
+  private final SetBuffer<String>                 externalNames;
   private final Accessor<String, Semantic.Symbol> accessor;
   private final String                            packageName;
   private final Node.Declaration                  declaration;
@@ -18,13 +21,15 @@ public final class SymbolChecker {
   private Semantic.Type                           returnType;
 
   private SymbolChecker(
+    SetBuffer<String> externalNames,
     Accessor<String, Semantic.Symbol> accessor,
     String packageName,
     Node.Declaration declaration)
   {
-    this.accessor    = accessor;
-    this.packageName = packageName;
-    this.declaration = declaration;
+    this.externalNames = externalNames;
+    this.accessor      = accessor;
+    this.packageName   = packageName;
+    this.declaration   = declaration;
   }
 
   private Semantic.Symbol check() {
@@ -37,8 +42,7 @@ public final class SymbolChecker {
   }
 
   private Semantic.Proc checkProc(Node.Proc node) {
-    var externalName =
-      node.externalName().transform(Token.StringConstant::value);
+    var externalName = checkExternalName(node.externalName());
     var isPublic     = node.isPublic();
     var parameters   = checkParameters(node.parameters());
     returnType =
@@ -106,9 +110,26 @@ public final class SymbolChecker {
 
   private Semantic.Struct checkStruct(Node.Struct node) {
     return new Semantic.Struct(
-      node.externalName().transform(Token.StringConstant::value),
+      checkExternalName(node.externalName()),
       node.isPublic(),
       symbolName);
+  }
+
+  private Optional<String> checkExternalName(
+    Optional<Token.StringConstant> token)
+  {
+    for (var externalName : token) {
+      var value = externalName.value();
+      if (!externalNames.add(value)) {
+        throw Diagnostic
+          .error(
+            externalName.location(),
+            "redeclaration of external `%s`",
+            value);
+      }
+      return Optional.present(value);
+    }
+    return Optional.absent();
   }
 
   private Semantic.Type checkType(Node.Formula node) {

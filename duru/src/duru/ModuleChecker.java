@@ -6,15 +6,18 @@ public final class ModuleChecker {
   public static Semantic.Module check(
     CompilerDebugger debugger,
     Object subject,
+    SetBuffer<String> externalNames,
     Accessor<String, Semantic.Module> accessor,
     Path directory)
   {
-    var checker = new ModuleChecker(debugger, subject, accessor, directory);
+    var checker =
+      new ModuleChecker(debugger, subject, externalNames, accessor, directory);
     return checker.check();
   }
 
   private final CompilerDebugger                  debugger;
   private final Object                            subject;
+  private final SetBuffer<String>                 externalNames;
   private final Accessor<String, Semantic.Module> accessor;
   private final Path                              directory;
   private String                                  name;
@@ -26,13 +29,15 @@ public final class ModuleChecker {
   private ModuleChecker(
     CompilerDebugger debugger,
     Object subject,
+    SetBuffer<String> externalNames,
     Accessor<String, Semantic.Module> accessor,
     Path directory)
   {
-    this.debugger  = debugger;
-    this.subject   = subject;
-    this.accessor  = accessor;
-    this.directory = directory;
+    this.debugger      = debugger;
+    this.subject       = subject;
+    this.externalNames = externalNames;
+    this.accessor      = accessor;
+    this.directory     = directory;
   }
 
   private Semantic.Module check() {
@@ -118,6 +123,7 @@ public final class ModuleChecker {
       .check(
         debugger,
         subject,
+        externalNames,
         this::accessPackage,
         sources,
         artifacts,

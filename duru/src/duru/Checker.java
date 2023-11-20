@@ -19,6 +19,7 @@ public final class Checker {
   private final Path                            libraries;
   private String                                main;
   private AcyclicCache<String, Semantic.Module> modules;
+  private SetBuffer<String>                     externalNames;
 
   private Checker(
     CompilerDebugger debugger,
@@ -33,8 +34,9 @@ public final class Checker {
   }
 
   private Semantic.Target check() {
-    main    = directory.getFileName().toString();
-    modules = AcyclicCache.create(this::checkModule);
+    main          = directory.getFileName().toString();
+    modules       = AcyclicCache.create(this::checkModule);
+    externalNames = SetBuffer.create();
     modules.get(subject, main);
     var target = new Semantic.Target(main, modules.getAll());
     debugger.recordTarget(directory.resolve("art"), target);
@@ -50,7 +52,7 @@ public final class Checker {
 
   private Semantic.Module checkModule(Object subject, Path directory) {
     return ModuleChecker
-      .check(debugger, subject, this::accessModule, directory);
+      .check(debugger, subject, externalNames, this::accessModule, directory);
   }
 
   private Semantic.Module accessModule(Object subject, String name) {

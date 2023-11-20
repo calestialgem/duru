@@ -6,6 +6,7 @@ public final class PackageChecker {
   public static Semantic.Package check(
     CompilerDebugger debugger,
     Object subject,
+    SetBuffer<String> externalNames,
     Accessor<String, Semantic.Package> accessor,
     Path sources,
     Path artifacts,
@@ -16,6 +17,7 @@ public final class PackageChecker {
       new PackageChecker(
         debugger,
         subject,
+        externalNames,
         accessor,
         sources,
         artifacts,
@@ -26,6 +28,7 @@ public final class PackageChecker {
 
   private final CompilerDebugger                   debugger;
   private final Object                             subject;
+  private final SetBuffer<String>                  externalNames;
   private final Accessor<String, Semantic.Package> accessor;
   private final Path                               sources;
   private final Path                               artifacts;
@@ -37,19 +40,21 @@ public final class PackageChecker {
   private PackageChecker(
     CompilerDebugger debugger,
     Object subject,
+    SetBuffer<String> externalNames,
     Accessor<String, Semantic.Package> accessor,
     Path sources,
     Path artifacts,
     PackageType type,
     String name)
   {
-    this.debugger  = debugger;
-    this.subject   = subject;
-    this.accessor  = accessor;
-    this.sources   = sources;
-    this.artifacts = artifacts;
-    this.type      = type;
-    this.name      = name;
+    this.debugger      = debugger;
+    this.subject       = subject;
+    this.externalNames = externalNames;
+    this.accessor      = accessor;
+    this.sources       = sources;
+    this.artifacts     = artifacts;
+    this.type          = type;
+    this.name          = name;
   }
 
   private Semantic.Package check() {
@@ -131,7 +136,8 @@ public final class PackageChecker {
           Text.getSymbol(symbolName),
           name);
     }
-    return SymbolChecker.check(this::accessSymbol, name, checked.getFirst());
+    return SymbolChecker
+      .check(externalNames, this::accessSymbol, name, checked.getFirst());
   }
 
   private Semantic.Symbol accessSymbol(Object subject, String accessedSymbol) {
