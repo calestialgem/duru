@@ -21,3 +21,6 @@ duru$Unit testmodule$main() {
   duru$print("Hello, World!\n");
   return 0;
 }
+int main() {
+  testmodule$main();
+}

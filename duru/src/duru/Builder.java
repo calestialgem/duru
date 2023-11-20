@@ -36,8 +36,21 @@ public final class Builder {
       built.clear();
       indentation = 0;
       switch (package_) {
-        case Semantic.Executable executable ->
-          buildSymbol(executable.symbols().get("main").getFirst());
+        case Semantic.Executable executable -> {
+          var mainProcedure = "%s.main".formatted(executable.name());
+          var entrypoint    =
+            new Semantic.Discard(
+              new Semantic.Invocation(mainProcedure, List.of()));
+          buildStatementDependencies(entrypoint);
+          string.append("int main() {");
+          indentation++;
+          buildNewLine();
+          buildStatement(entrypoint);
+          indentation--;
+          buildNewLine();
+          string.append('}');
+          buildNewLine();
+        }
         case Semantic.Library library -> {}
         case Semantic.Implementation implementation -> {}
       }
