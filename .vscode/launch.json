@@ -6,7 +6,13 @@
       "request": "launch",
       "projectName": "duru",
       "mainClass": "duru/duru.Launcher",
-      "args": ["-m=walkthrough", "-I=libraries", "-d", "run"]
+      "args": [
+        "-m=walkthrough",
+        "-I=libraries",
+        "-p=walkthrough.returns2",
+        "-d",
+        "run"
+      ]
     }
   ]
 }

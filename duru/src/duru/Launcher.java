@@ -228,8 +228,7 @@ builds up a list depending on the flag.
       }
       name = executables.getFirst();
     }
-    var filename = "%s.exe".formatted(name.replace('.', '/'));
-    var binary   = artifacts.resolve(filename);
+    var binary   = artifacts.resolve("%s.exe".formatted(name));
     var exitCode = Processes.execute("", true, binary, passedArguments);
     if (exitCode != 0) {
       System.err.printf("note: `%s` exited with %d%n", binary, exitCode);
