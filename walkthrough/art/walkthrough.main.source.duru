@@ -1,0 +1,5 @@
+E1443E54
+C:\Users\Cem\duru\walkthrough\src\main.duru
+proc main() {
+  duru.print("Hello, World!\n");
+}
