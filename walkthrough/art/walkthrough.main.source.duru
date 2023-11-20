@@ -1,5 +1,5 @@
-E1443E54
+7F463892
 C:\Users\Cem\duru\walkthrough\src\main.duru
-proc main() {
+void main() {
   duru.print("Hello, World!\n");
 }

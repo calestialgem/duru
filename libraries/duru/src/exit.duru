@@ -1,2 +1,2 @@
 extern "exit"
-public proc exit(code Integer32) Noreturn;
+public noreturn exit(int32 code);

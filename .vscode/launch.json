@@ -6,7 +6,7 @@
       "request": "launch",
       "projectName": "duru",
       "mainClass": "duru/duru.Launcher",
-      "args": ["-m=compiler", "-I=libraries", "-d", "build"]
+      "args": ["-m=walkthrough", "-I=libraries", "-d", "build"]
     }
   ]
 }

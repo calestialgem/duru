@@ -1,19 +1,19 @@
-public proc print(string *Byte) {
-  var result = print_string_to_stream(string, get_error_stream());
-  if result < 0 {
+public void print(byte* string) {
+  int32 result = print_string_to_stream(string, get_error_stream());
+  if (result < 0) {
     exit(result);
   }
 }
 
 extern "FILE"
-struct Stream;
+struct stream;
 
 extern "__acrt_iob_func"
-proc get_stream(index Natural32) *Stream;
+stream* get_stream(uint32 index);
 
 extern "fputs"
-proc print_string_to_stream(string *Byte, destination *Stream) Integer32;
+int32 print_string_to_stream(byte* string, stream* destination);
 
-proc get_error_stream() *Stream {
+stream* get_error_stream() {
   return get_stream(2);
 }
