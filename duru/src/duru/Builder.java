@@ -50,15 +50,23 @@ public final class Builder {
           buildNewLine();
           string.append('}');
           buildNewLine();
+          var code   = artifacts.resolve("%s.c".formatted(package_.name()));
+          var binary = artifacts.resolve("%s.exe".formatted(package_.name()));
+          Persistance.store(subject, code, string);
+          var exitCode =
+            Processes.execute(subject, false, "clang", "-o", binary, code);
+          if (exitCode != 0) {
+            throw Diagnostic
+              .failure(
+                subject,
+                "compiler exited with %d for `%s`",
+                exitCode,
+                code);
+          }
         }
         case Semantic.Library library -> {}
         case Semantic.Implementation implementation -> {}
       }
-      Persistance
-        .store(
-          subject,
-          artifacts.resolve("%s.c".formatted(package_.name())),
-          string);
     }
   }
 
