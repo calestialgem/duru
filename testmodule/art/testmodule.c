@@ -1,23 +1,18 @@
-typedef char duru$Unit;
-typedef char duru$Byte;
-typedef int duru$Integer32;
 typedef struct FILE FILE;
-duru$Integer32 fputs(duru$Byte* string, FILE* destination);
-typedef unsigned duru$Natural32;
-FILE* __acrt_iob_func(duru$Natural32 index);
+int fputs(char* string, FILE* destination);
+FILE* __acrt_iob_func(unsigned index);
 FILE* duru$get_error_stream() {
   return __acrt_iob_func(2);
 }
-#define duru$Noreturn [[noreturn]] void
-duru$Noreturn exit(duru$Integer32 code);
-duru$Unit duru$print(duru$Byte* string) {
-  duru$Integer32 result = fputs(string, duru$get_error_stream());
+[[noreturn]] void exit(int code);
+char duru$print(char* string) {
+  int result = fputs(string, duru$get_error_stream());
   if (result < 0) {
     exit(result);
   }
   return 0;
 }
-duru$Unit testmodule$main() {
+char testmodule$main() {
   duru$print("Hello, World!\n");
   return 0;
 }

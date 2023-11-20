@@ -95,20 +95,8 @@ public final class Builder {
     switch (symbol) {
       case Semantic.Proc proc -> buildProc(proc);
       case Semantic.Struct struct -> buildStruct(struct);
-      case Semantic.Byte byte_ -> string.append("typedef char duru$Byte;");
-      case Semantic.Boolean boolean_ ->
-        string.append("typedef _Bool duru$Boolean;");
-      case Semantic.Natural32 natural32 ->
-        string.append("typedef unsigned duru$Natural32;");
-      case Semantic.Natural64 natural64 ->
-        string.append("typedef unsigned long long duru$Natural64;");
-      case Semantic.Integer32 integer32 ->
-        string.append("typedef int duru$Integer32;");
-      case Semantic.Unit unit -> string.append("typedef char duru$Unit;");
-      case Semantic.Noreturn noreturn ->
-        string.append("#define duru$Noreturn [[noreturn]] void");
+      case Semantic.Builtin builtin -> {}
     }
-    buildNewLine();
   }
 
   private void buildProc(Semantic.Proc proc) {
@@ -141,6 +129,7 @@ public final class Builder {
       string.append(' ');
       buildStatement(proc.body().getFirst());
     }
+    buildNewLine();
   }
 
   private void buildStruct(Semantic.Struct struct) {
@@ -149,6 +138,7 @@ public final class Builder {
     string.append(' ');
     buildAccess(struct.name());
     string.append(';');
+    buildNewLine();
   }
 
   private void buildTypeDependencies(Semantic.Type type) {

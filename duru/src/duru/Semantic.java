@@ -29,11 +29,12 @@ public sealed interface Semantic {
   }
 
   sealed interface Builtin extends Symbol {
+    String external();
     String identifier();
 
     @Override
     default Optional<String> externalName() {
-      return Optional.absent();
+      return Optional.present(external());
     }
 
     @Override
@@ -79,6 +80,11 @@ public sealed interface Semantic {
 
   record Byte() implements Arithmetic, Builtin {
     @Override
+    public String external() {
+      return "char";
+    }
+
+    @Override
     public String identifier() {
       return "Byte";
     }
@@ -90,6 +96,11 @@ public sealed interface Semantic {
   }
 
   record Boolean() implements Arithmetic, Builtin {
+    @Override
+    public String external() {
+      return "_Bool";
+    }
+
     @Override
     public String identifier() {
       return "Boolean";
@@ -120,6 +131,11 @@ public sealed interface Semantic {
 
   record Natural32() implements Natural, Builtin {
     @Override
+    public String external() {
+      return "unsigned";
+    }
+
+    @Override
     public long max() {
       return -1;
     }
@@ -141,6 +157,11 @@ public sealed interface Semantic {
   }
 
   record Natural64() implements Natural, Builtin {
+    @Override
+    public String external() {
+      return "unsigned long long";
+    }
+
     @Override
     public long max() {
       return -1L;
@@ -164,6 +185,11 @@ public sealed interface Semantic {
 
   record Integer32() implements Integer, Builtin {
     @Override
+    public String external() {
+      return "int";
+    }
+
+    @Override
     public long max() {
       return java.lang.Integer.MAX_VALUE;
     }
@@ -186,6 +212,11 @@ public sealed interface Semantic {
 
   record Unit() implements Type, Builtin {
     @Override
+    public String external() {
+      return "char";
+    }
+
+    @Override
     public String identifier() {
       return "Unit";
     }
@@ -197,6 +228,11 @@ public sealed interface Semantic {
   }
 
   record Noreturn() implements Type, Builtin {
+    @Override
+    public String external() {
+      return "[[noreturn]] void";
+    }
+
     @Override
     public String identifier() {
       return "Noreturn";

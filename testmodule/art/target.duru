@@ -1,10 +1,10 @@
 1F26FBEE
-public Byte `duru.Byte`
-public Boolean `duru.Boolean`
-public Natural32 `duru.Natural32`
-public Integer32 `duru.Integer32`
-public Unit `duru.Unit`
-public Noreturn `duru.Noreturn`
+extern "char" public Byte `duru.Byte`
+extern "_Bool" public Boolean `duru.Boolean`
+extern "unsigned" public Natural32 `duru.Natural32`
+extern "int" public Integer32 `duru.Integer32`
+extern "char" public Unit `duru.Unit`
+extern "[[noreturn]] void" public Noreturn `duru.Noreturn`
 extern "FILE" Struct `duru.Stream`
 extern "fputs" Proc `duru.print_string_to_stream`
 extern "__acrt_iob_func" Proc `duru.get_stream`
