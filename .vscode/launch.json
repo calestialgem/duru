@@ -6,8 +6,12 @@
       "request": "launch",
       "projectName": "duru",
       "mainClass": "duru/duru.Launcher",
-      "cwd": "${workspaceFolder}",
-      "args": ["-m=walkthrough", "run", "-I=libraries"]
+      "args": [
+        "-m=testmodule",
+        "-I=libraries",
+        "-d",
+        "testCompilerByDeletingWholeModulePath"
+      ]
     }
   ]
 }
