@@ -52,7 +52,7 @@ using duru::float32;
  * Declares `person_info` as a product type, which holds an `int` named `age`,
  * and a `float32` named `height`.
  */
-struct person_info { int age, float32 height }
+struct person_info { age int, height float32 }
 
 // Incomplete types are specified using `;`.
 
@@ -84,13 +84,13 @@ enum direction {
     struct north {}
     struct south {}
   }
-  struct unaligned { float32 x, float32 y }
+  struct unaligned { x float32, y float32 }
 }
 
 
 
-// Functions are declared with type, name, parameters and body.
-// ------------------------------------------------------------
+// `fn` keyword declares a function.
+// ---------------------------------
 
 // Parameters are listed comma-separated in `()`.
 
@@ -98,7 +98,7 @@ enum direction {
  * Declares `add`, which is a function that takes two `int`s and returns and
  * `int`.
  */
-int add(int a, int b) { return a + b; }
+fn add(a int, b int) int { return a + b; }
 
 // Function body can be omitted, which means it is a foreign interface that will
 // be provided foreign code.
@@ -111,7 +111,7 @@ int add(int a, int b) { return a + b; }
  * This refers to the `puts` function that is provided by the C Standard
  * Library.
  */
-extern "puts" int print_string(duru::byte* string);
+extern "puts" fn print_string(string *duru::byte) int;
 
 // For functions that does not return anything, the `duru::void` type should be
 // used as the return type.
@@ -119,7 +119,7 @@ extern "puts" int print_string(duru::byte* string);
 /*
  * Declares `do_it`, which is a function that does not take or return anything.
  */
-duru::void do_it() {}
+fn do_it() duru::void {}
 
 // For functions that never return, the `duru::noreturn` type should be used as
 // the return type.
@@ -131,12 +131,12 @@ duru::void do_it() {}
  * This refers to the `exit` function that is provided by the C Standard
  * Library.
  */
-extern "exit" duru::noreturn exit(int code);
+extern "exit" fn exit(code int) duru::noreturn;
 
 
 
-// Variables are declared with type, name and initial value.
-// ---------------------------------------------------------
+// `var` keyword declares a variable.
+// ----------------------------------
 
 // Initial value is specified after `=`.
 
@@ -148,7 +148,7 @@ extern "exit" duru::noreturn exit(int code);
  * would be meaningful and the values of globals when the program starts running
  * would be indeterministic between builds.
  */
-int count = 0;
+var count int = 0;
 
 // Initial value can be omitted, which means it is a foreign variable that lives
 // in a foreign binary.
@@ -163,7 +163,7 @@ int count = 0;
  * while compiling this), it would be a linking error to try storing to or
  * loading from this variable.
  */
-extern "linking_error" int should_not_be_used;
+extern "linking_error" var should_not_be_used int;
 
 
 
@@ -190,7 +190,7 @@ extern "linking_error" int should_not_be_used;
  * entrypoint. These are like library packages; however, they are only usable by
  * the packages in the same module.
  */
-duru::void main() {
+fn main() duru::void {
 
 
 
@@ -205,7 +205,7 @@ duru::void main() {
   // - they have lexical scopes,
   // - cannot be used outside the scope they are declared in.
   // - can shadow (have the same name as) global symbols,
-  int var = add(67, 17 * 58);
+  var variable int = add(67, 17 * 58);
 
 
 
@@ -219,24 +219,24 @@ duru::void main() {
   do_it();
 
   // Mutate statements change a variable's value using a trailing `++` or `--`.
-  var++; // add 1
-  var--; // subtract 1
+  variable++; // add 1
+  variable--; // subtract 1
 
   // Assign statements override a variable's value using a `=` and a value.
-  var = 90; // assign 90
+  variable = 90; // assign 90
 
   // The assignment can be compounded with an arithmetic binary operator to do
   // the binary operation on the assignee's previous value.
-  var  *= 10; // multiplies by 10
-  var  /= 10; // assigns the quotient of division by 10
-  var  %= 10; // assigns the reminder of division by 10
-  var  += 10; // adds 10
-  var  -= 10; // subtracts 10
-  var <<= 10; // shifts its bits to left by 10
-  var >>= 10; // shifts its bits to right by 10
-  var  &= 10; // ANDs its bits with bits of 10
-  var  ^= 10; // XORs its bits with bits of 10
-  var  |= 10; // ORs its bits with bits of 10
+  variable  *= 10; // multiplies by 10
+  variable  /= 10; // assigns the quotient of division by 10
+  variable  %= 10; // assigns the reminder of division by 10
+  variable  += 10; // adds 10
+  variable  -= 10; // subtracts 10
+  variable <<= 10; // shifts its bits to left by 10
+  variable >>= 10; // shifts its bits to right by 10
+  variable  &= 10; // ANDs its bits with bits of 10
+  variable  ^= 10; // XORs its bits with bits of 10
+  variable  |= 10; // ORs its bits with bits of 10
 
 
 
@@ -247,9 +247,9 @@ duru::void main() {
   // lexical scope which restricts the locals.
   {
     17 + 58;
-    int a = 17 + 58;
-    { int some_local = 5; }
-    { int some_local = 5; }
+    var a int = 17 + 58;
+    { var some_local int = 5; }
+    { var some_local int = 5; }
     { { { { { { { { {} } } } } } } } }
   }
 
@@ -261,19 +261,19 @@ duru::void main() {
   // If statements branch the control flow depending on a condition. The `if`
   // branch is taken if the condition is not zero, otherwise the `else` branch
   // is taken.
-  if (var < 58) { var *= 2; }
-  else { var -= 5; }
+  if (variable < 58) { variable *= 2; }
+  else { variable -= 5; }
 
   // The `else` branch can be omitted, which is the same as it having an empty
   // block as the body.
-  if (17 < var) { var <<= 2; }
+  if (17 < variable) { variable <<= 2; }
 
   // Any amount of declare and affect statements leading the condition. Such are
   // executed as if the `if` was in a block and these statements were just above
   // the `if` in the block.
-  if (var += 10; var < 17) { var <<= 2; }
-  if (int a = var * 2; a < 17) { var += a; }
-  else { var -= a; }
+  if (variable += 10; variable < 17) { variable <<= 2; }
+  if (var a int = variable * 2; a < 17) { variable += a; }
+  else { variable -= a; }
 
 
 
@@ -285,8 +285,8 @@ duru::void main() {
   // otherwise the `else` branch is taken. After the `for` branch is taken once,
   // it is taken many times until the condition is revaluated to zero.
   {
-    int sum = 0;
-    int n = 1;
+    var sum int = 0;
+    var n   int = 1;
     for (n <= 10) { n++; sum += n; }
     else { sum = -1; }
   }
@@ -294,10 +294,10 @@ duru::void main() {
   // The `else` branch can be omitted, which is the same as it having an empty
   // block as the body.
   {
-    int pre_leading = 0;
-    int leading = 1;
-    int fib = 1;
-    int n = 1;
+    var pre_leading int = 0;
+    var leading     int = 1;
+    var fib         int = 1;
+    var n           int = 1;
     for (n <= 10) {
       n++;
       pre_leading = leading;
@@ -308,12 +308,12 @@ duru::void main() {
 
   // An affect statement trailing the loop condition can be provided, which will
   // be executed between iterations.
-  int fib = 0;
+  var fib int = 0;
   {
     fib = 1;
-    int pre_leading = 0;
-    int leading = 1;
-    int n = 1;
+    var pre_leading int = 0;
+    var leading     int = 1;
+    var n           int = 1;
     for (n <= 10; n++) {
       pre_leading = leading;
       leading = fib;
@@ -324,7 +324,13 @@ duru::void main() {
   // Any amount of declare and affect statements leading the condition. Such are
   // executed as if the `for` was in a block and these statements were just
   // above the `for` in the block.
-  for (fib = 1; int pre_leading = 0; int leading = 1; int n = 1; n <= 10; n++) {
+  for (
+    fib = 1;
+    var pre_leading int = 0;
+    var leading     int = 1;
+    var n           int = 1;
+    n <= 10; n++)
+  {
     pre_leading = leading;
     leading = fib;
     fib += pre_leading;
@@ -336,17 +342,17 @@ duru::void main() {
   // ---------------
 
   // Used for jumping out of a loop before it terminates by its condition.
-  for (int i = 0; i < 10; i++) {
+  for (var i int = 0; i < 10; i++) {
     if (i == 5) { break; }
   }
 
   // Takes a label to specify which loop to break.
   {
-    int sum = 0;
-    int max_sum = 17;
-    combinations: for(int i = 0; i < 10; i++) {
-      for(int j = i + 1; j < 10; j++) {
-        int combination = i * 10 + j;
+    var sum     int = 0;
+    var max_sum int = 17;
+    combinations: for(var i int = 0; i < 10; i++) {
+      for(var j int = i + 1; j < 10; j++) {
+        var combination int = i * 10 + j;
         if (sum > max_sum - combination) { break combinations; }
         sum += combination;
       }
@@ -361,8 +367,8 @@ duru::void main() {
   // Used for jumping back to a loop condition before it executes all statements
   // in the body.
   {
-    int odds = 0;
-    for (int i = 0; i < 10; i++) {
+    var odds int = 0;
+    for (var i int = 0; i < 10; i++) {
       if (i % 2 == 0) { continue; }
       odds += i;
     }
@@ -370,9 +376,9 @@ duru::void main() {
 
   // Takes a label to specify which loop to continue.
   {
-    int black_squares = 0;
-    horizontal: for(int x = 0; x < 10; x++) {
-      vertical: for(int y = 0; y < 10; y++) {
+    var black_squares int = 0;
+    horizontal: for(var x int = 0; x < 10; x++) {
+      vertical: for(var y int = 0; y < 10; y++) {
         if (is_even(x + y)) { continue horizontal; }
         black_squares++;
       }
@@ -389,9 +395,9 @@ duru::void main() {
 // Functions with return type `duru::void` can reach to the end without a return
 // statement. Such functions terminate as if there was an invisible return
 // statement at the end.
-duru::void does_not_return() {}
+fn does_not_return() duru::void {}
 
-duru::bool is_even(int num) {
+fn is_even(num int) duru::bool {
   // Functions that a non-`duru::void` return type must have a return statement
   // terminating all control paths. Furthermore, these return statements must
   // have a value, which will be the value seen by the function's caller.
@@ -415,21 +421,21 @@ duru::bool is_even(int num) {
 // Constants
 // ---------
 
-duru::byte* string_constant = "Hello, Artisan!";
-duru::int32 number_constant = 1919;
+var string_constant duru::byte* = "Hello, Artisan!";
+var number_constant duru::int32 = 1919;
 
 
 
 // Compound
 // --------
 
-duru::void a_function() {
-  duru::bool    function_call  = is_even(15);
-  duru::bool    infix_call     = 15:is_even();
-  duru::int32   grouping       = (56 + 5);
-  duru::float32 cast           = duru::float32{10};
-  person_info   initialization = person_info{age = 5, height = 56};
-  duru::float32 member_access  = initialization.height;
+fn a_function() duru::void {
+  var function_call  duru::bool    = is_even(15);
+  var infix_call     duru::bool    = 15:is_even();
+  var grouping       duru::int32   = (56 + 5);
+  var cast           duru::float32 = duru::float32{10};
+  var initialization person_info   = person_info{age = 5, height = 56};
+  var member_access  duru::float32 = initialization.height;
 }
 
 
@@ -437,52 +443,52 @@ duru::void a_function() {
 // Arithmetic Operations
 // ---------------------
 
-duru::int32 promotion      = +5;
-duru::int32 negation       = -5;
+var promotion      duru::int32 = +5;
+var negation       duru::int32 = -5;
 
-duru::int32 multiplication = 5 * 5;
-duru::int32 quotient       = 5 / 5;
-duru::int32 reminder       = 5 % 5;
+var multiplication duru::int32 = 5 * 5;
+var quotient       duru::int32 = 5 / 5;
+var reminder       duru::int32 = 5 % 5;
 
-duru::int32 addition       = 5 + 5;
-duru::int32 subtraction    = 5 - 5;
+var addition       duru::int32 = 5 + 5;
+var subtraction    duru::int32 = 5 - 5;
 
 
 
 // Bitwise Operations
 // ------------------
 
-duru::uint32 bitwise_not = ~5;
+var bitwise_not duru::uint32 = ~5;
 
-duru::uint32 shift_left  = 5 << 5;
-duru::uint32 shift_right = 5 >> 5;
+var shift_left  duru::uint32 = 5 << 5;
+var shift_right duru::uint32 = 5 >> 5;
 
-duru::uint32 bitwise_and = 5  & 5;
+var bitwise_and duru::uint32 = 5  & 5;
 
-duru::uint32 bitwise_xor = 5  ^ 5;
+var bitwise_xor duru::uint32 = 5  ^ 5;
 
-duru::uint32 bitwise_or  = 5  | 5;
+var bitwise_or  duru::uint32 = 5  | 5;
 
 
 
 // Comparison Operations
 // ---------------------
 
-duru::bool less_than                = 5  < 5;
-duru::bool less_than_or_equal_to    = 5 <= 5;
-duru::bool greater_than             = 5  > 5;
-duru::bool greater_than_or_equal_to = 5 >= 5;
+var less_than                duru::bool = 5  < 5;
+var less_than_or_equal_to    duru::bool = 5 <= 5;
+var greater_than             duru::bool = 5  > 5;
+var greater_than_or_equal_to duru::bool = 5 >= 5;
 
-duru::bool equal_to                 = 5 == 5;
-duru::bool not_equal_to             = 5 != 5;
+var equal_to                 duru::bool = 5 == 5;
+var not_equal_to             duru::bool = 5 != 5;
 
 
 
 // Logical Operations
 // ------------------
 
-duru::bool logical_not = !0;
+var logical_not duru::bool = !0;
 
-duru::bool logical_and = 1 && 1;
+var logical_and duru::bool = 1 && 1;
 
-duru::bool logical_or  = 0 || 1;
+var logical_or  duru::bool = 0 || 1;
