@@ -30,16 +30,16 @@
 // ----------------------------------
 
 /*
- * Declares [real], which is an alias for [duru::c::double].
+ * Declares [int] which is an alias for [duru::int32].
  */
-using real = duru::c::double;
+using int = duru::int32;
 
 // If the name is omitted, it is the same as the aliased symbol's name.
 
 /*
- * Declares [int] which is an alias for [duru::c::int].
+ * Declares [float32], which is an alias for [duru::float32].
  */
-using duru::c::int;
+using duru::float32;
 
 
 
@@ -50,9 +50,9 @@ using duru::c::int;
 
 /*
  * Declares [person_info] as a product type, which holds an [int] named `age`,
- * and a [real] named `height`.
+ * and a [float32] named `height`.
  */
-struct person_info { int age, real height }
+struct person_info { int age, float32 height }
 
 // Incomplete types are specified using `;`.
 
@@ -84,7 +84,7 @@ enum direction {
     struct north {}
     struct south {}
   }
-  struct unaligned { real x, real y }
+  struct unaligned { float32 x, float32 y }
 }
 
 
@@ -105,13 +105,13 @@ int add(int a, int b) { return a + b; }
 
 /*
  * Declares [print_string], which is a function that takes a pointer to
- * [duru::c::char] and returns an [int]. Its definition is provided by a foreign
+ * [duru::byte] and returns an [int]. Its definition is provided by a foreign
  * binary, and its name is `puts` there.
  *
  * This refers to the `puts` function that is provided by the C Standard
  * Library.
  */
-extern "puts" int print_string(duru::c::char* string);
+extern "puts" int print_string(duru::byte* string);
 
 // For functions that does not return anything, the [duru::void] type should be
 // used as the return type.
@@ -190,7 +190,7 @@ extern "linking_error" int should_not_be_used;
  * entrypoint. These are like library packages; however, they are only usable by
  * the packages in the same module.
  */
-void main() {
+duru::void main() {
 
 
 
@@ -446,20 +446,20 @@ duru::uint32 bitwise_or  = 5  | 5;
 // Comparison Operations
 // ---------------------
 
-duru::bool less_than = 5 < 5;
-duru::bool less_than_or_equal_to = 5 <= 5;
-duru::bool greater_than = 5 > 5;
+duru::bool less_than                = 5  < 5;
+duru::bool less_than_or_equal_to    = 5 <= 5;
+duru::bool greater_than             = 5  > 5;
 duru::bool greater_than_or_equal_to = 5 >= 5;
 
-duru::bool equal_to = 5 == 5;
-duru::bool not_equal_to = 5 != 5;
+duru::bool equal_to                 = 5 == 5;
+duru::bool not_equal_to             = 5 != 5;
 
 
 
 // Logical Operations
 // ------------------
 
-duru::bool logical_not = !0;
+duru::bool logical_not =     !0;
 
 duru::bool logical_and = 1 && 1;
 
