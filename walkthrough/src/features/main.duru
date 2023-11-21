@@ -1,0 +1,466 @@
+// Showcases the features of the Duru Programming Language.
+// Copyright (C) 2023 Cem Geçgel <gecgelcem@outlook.com>
+
+// Above is a line comment, like this one.
+
+/*
+ * This is a block comment.
+ * /*
+ *  * Which can be nested.
+ *  */
+ */
+
+
+
+
+
+// =============================================================================
+//                            D E C L A R A T I O N S
+// =============================================================================
+
+// All declarations can be prefixed with `public` keyword to make them visible
+// from other packages. Another modifier is the `extern` keyword, which always
+// must be fallowed with a string constant. That string constant will be the
+// external name of the symbol as it will be represented in a C header or
+// binary.
+
+
+
+// `using` keyword declares an alias.
+// ----------------------------------
+
+/*
+ * Declares [real], which is an alias for [duru::c::double].
+ */
+using real = duru::c::double;
+
+// If the name is omitted, it is the same as the aliased symbol's name.
+
+/*
+ * Declares [int] which is an alias for [duru::c::int].
+ */
+using duru::c::int;
+
+
+
+// `struct` keyword declares a product type.
+// -----------------------------------------
+
+// Members are listed comma-separated in `{}`.
+
+/*
+ * Declares [person_info] as a product type, which holds an [int] named `age`,
+ * and a [real] named `height`.
+ */
+struct person_info { int age, real height }
+
+// Incomplete types are specified using `;`.
+
+/*
+ * Declares [stream] as an incomplete type, which is only useful for defining
+ * foreign interfaces with strongly typed pointers (instead of `void*`).
+ */
+extern "FILE" struct stream;
+
+
+
+// `enum` keyword declares a sum type.
+// -----------------------------------
+
+// Alternatives are listed in `{}`.
+
+/*
+ * Declares [direction] as a sum type, which holds one of multiple other types:
+ *  - [direction::aligned::east]
+ *  - [direction::aligned::west]
+ *  - [direction::aligned::north]
+ *  - [direction::aligned::south]
+ *  - [direction::unaligned]
+ */
+enum direction {
+  enum aligned {
+    struct east {}
+    struct west {}
+    struct north {}
+    struct south {}
+  }
+  struct unaligned { real x, real y }
+}
+
+
+
+// Functions are declared with type, name, parameters and body.
+// ------------------------------------------------------------
+
+// Parameters are listed comma-separated in `()`.
+
+/*
+ * Declares [add], which is a function that takes two [int]s and returns and
+ * [int].
+ */
+int add(int a, int b) { return a + b; }
+
+// Function body can be omitted, which means it is a foreign interface that will
+// be provided foreign code.
+
+/*
+ * Declares [print_string], which is a function that takes a pointer to
+ * [duru::c::char] and returns an [int]. Its definition is provided by a foreign
+ * binary, and its name is `puts` there.
+ *
+ * This refers to the `puts` function that is provided by the C Standard
+ * Library.
+ */
+extern "puts" int print_string(duru::c::char* string);
+
+// For functions that does not return anything, the [duru::void] type should be
+// used as the return type.
+
+/*
+ * Declares [do_it], which is a function that does not take or return anything.
+ */
+duru::void do_it() {}
+
+// For functions that never return, the [duru::noreturn] type should be used as
+// the return type.
+
+/*
+ * Declares [exit], which is a function that takes an [int] and does not return.
+ * Its definition is provided by a foreign binary and its name is `exit` there.
+ *
+ * This refers to the `exit` function that is provided by the C Standard
+ * Library.
+ */
+extern "exit" duru::noreturn exit(int code);
+
+
+
+// Variables are declared with type, name and initial value.
+// ---------------------------------------------------------
+
+// Initial value is specified after `=`.
+
+/*
+ * Declares [count], which is a global variable of type [int] and initial value
+ * `0`.
+ *
+ * Initial values must be known in compile-time, otherwise the declaration order
+ * would be meaningful and the values of globals when the program starts running
+ * would be indeterministic between builds.
+ */
+int count = 0;
+
+// Initial value can be omitted, which means it is a foreign variable that lives
+// in a foreign binary.
+
+/*
+ * Declares [value], which is a global variable of type [int] that is named as
+ * `linking_error` in the resulting binary.
+ *
+ * It is named `linking_error` because there is no global defined by the
+ * C Standard Library that can be showcased here. Since there is not an actual
+ * variable anywhere in the foreign binary (we only link to C Standard Library
+ * while compiling this), it would be a linking error to try storing to or
+ * loading from this variable.
+ */
+extern "linking_error" int should_not_be_used;
+
+
+
+
+
+// =============================================================================
+//                              S T A T E M E N T S
+// =============================================================================
+
+/*
+ * The entrypoint to this package.
+ *
+ * Packages in Duru are of 3 variants:
+ * - Library packages are visible outside the module and facilitate code reuse.
+ * They can be compiled to static libraries to be used by foreign code. (In that
+ * case, probably the library would have public symbols with external names so
+ * that foreign code can actually access these symbols.)
+ * - Executable packages get compiled to executable binaries, and must declare
+ * an entrypoint, which is a function that takes nothing and returns nothing.
+ * Taking arguments from the command line and returning an exit code are done
+ * using the functions in [duru] package if the target platform has them.
+ * - Implementation packages are all remaining packages. They are not visible
+ * outside of the module they are declared in, but also they do not have an
+ * entrypoint. These are like library packages; however, they are only usable by
+ * the packages in the same module.
+ */
+void main() {
+
+
+
+  // Declare Statement
+  // -----------------
+
+  // Declare statements create a new variable similar to how it is done outside
+  // the function body. The difference between locals and globals are that:
+  // - locals have declaration order,
+  // - cannot be used before they are declared,
+  // - can have initial values that are unknown in compile-time,
+  // - they have lexical scopes,
+  // - cannot be used outside the scope they are declared in.
+  // - can shadow (have the same name as) global symbols,
+  int var = add(67, 17 * 58);
+
+
+
+  // Affect Statement
+  // ----------------
+
+  // Affect statements are only executed for their side-effects. They mutate a
+  // variable or call a function.
+
+  // Discard statements evaluate an expression, but do not use the result.
+  do_it();
+
+  // Mutate statements change a variable's value using a trailing `++` or `--`.
+  var++; // add 1
+  var--; // subtract 1
+
+  // Assign statements override a variable's value using a `=` and a value.
+  var = 90; // assign 90
+
+  // The assignment can be compounded with an arithmetic binary operator to do
+  // the binary operation on the assignee's previous value.
+  var  *= 10; // multiplies by 10
+  var  /= 10; // assigns the quotient of division by 10
+  var  %= 10; // assigns the reminder of division by 10
+  var  += 10; // adds 10
+  var  -= 10; // subtracts 10
+  var <<= 10; // shifts its bits to left by 10
+  var >>= 10; // shifts its bits to right by 10
+  var  &= 10; // ANDs its bits with bits of 10
+  var  ^= 10; // XORs its bits with bits of 10
+  var  |= 10; // ORs its bits with bits of 10
+
+
+
+  // Block Statement
+  // ---------------
+
+  // Block statements group zero or more statements together and create a
+  // lexical scope which restricts the locals.
+  {
+    17 + 58;
+    int a = 17 + 58;
+    { int some_local = 5; }
+    { int some_local = 5; }
+    { { { { { { { { {} } } } } } } } }
+  }
+
+
+
+  // If Statement
+  // ------------
+
+  // If statements branch the control flow depending on a condition. The `if`
+  // branch is taken if the condition is not zero, otherwise the `else` branch
+  // is taken.
+  if (var < 58) { var *= 2; }
+  else { var -= 5; }
+
+  // The `else` branch can be omitted, which is the same as it having an empty
+  // block as the body.
+  if (17 < var) { var <<= 2; }
+
+  // Any amount of declare and affect statements leading the condition. Such are
+  // executed as if the `if` was in a block and these statements were just above
+  // the `if` in the block.
+  if (var += 10; var < 17) { var <<= 2; }
+  if (int a = var * 2; a < 17) { var += a; }
+  else { var -= a; }
+
+
+
+  // For Statement
+  // -------------
+
+  // For statements loop the control flow depending on a condition. In the first
+  // iteration, the `for` branch is taken if the condition is not zero,
+  // otherwise the `else` branch is taken. After the `for` branch is taken once,
+  // it is taken many times until the condition is revaluated to zero.
+  {
+    int sum = 0;
+    int n = 1;
+    for (n <= 10) { n++; sum += n; }
+    else { sum = -1; }
+  }
+
+  // The `else` branch can be omitted, which is the same as it having an empty
+  // block as the body.
+  {
+    int pre_leading = 0;
+    int leading = 1;
+    int fib = 1;
+    int n = 1;
+    for (n <= 10) {
+      n++;
+      pre_leading = leading;
+      leading = fib;
+      fib += pre_leading;
+    }
+  }
+
+  // An affect statement trailing the loop condition can be provided, which will
+  // be executed between iterations.
+  int fib = 0;
+  {
+    fib = 1;
+    int pre_leading = 0;
+    int leading = 1;
+    int n = 1;
+    for (n <= 10; n++) {
+      pre_leading = leading;
+      leading = fib;
+      fib += pre_leading;
+    }
+  }
+
+  // Any amount of declare and affect statements leading the condition. Such are
+  // executed as if the `for` was in a block and these statements were just
+  // above the `for` in the block.
+  for (fib = 1; int pre_leading = 0; int leading = 1; int n = 1; n <= 10; n++) {
+    pre_leading = leading;
+    leading = fib;
+    fib += pre_leading;
+  }
+
+
+
+  // Break Statement
+  // ---------------
+
+  // Used for jumping out of a loop before it terminates by its condition.
+  for (int i = 0; i < 10; i++) {
+    if (i == 5) { break; }
+  }
+
+  // Takes a label to specify which loop to break.
+  {
+    int sum = 0;
+    int max_sum = 17;
+    combinations: for(int i = 0; i < 10; i++) {
+      for(int j = i + 1; j < 10; j++) {
+        int combination = i * 10 + j;
+        if (sum > max_sum - combination) { break combinations; }
+        sum += combination;
+      }
+    }
+  }
+
+
+
+  // Continue Statement
+  // ------------------
+
+  // Used for jumping back to a loop condition before it executes all statements
+  // in the body.
+  {
+    int odds = 0;
+    for (int i = 0; i < 10; i++) {
+      if (i % 2 == 0) { continue; }
+      odds += i;
+    }
+  }
+
+  // Takes a label to specify which loop to continue.
+  {
+    int black_squares = 0;
+    horizontal: for(int x = 0; x < 10; x++) {
+      vertical: for(int y = 0; y < 10; y++) {
+        if (is_even(x + y)) { continue horizontal; }
+        black_squares++;
+      }
+    }
+  }
+
+  // Return Statement
+  // ----------------
+
+  // Terminates a function.
+  return;
+}
+
+// Functions with return type [duru::void] can reach to the end without a return
+// statement. Such functions terminate as if there was an invisible return
+// statement at the end.
+duru::void does_not_return() {}
+
+duru::bool is_even(int num) {
+  // Functions that a non-[duru::void] return type must have a return statement
+  // terminating all control paths. Furthermore, these return statements must
+  // have a value, which will be the value seen by the function's caller.
+  return num % 2 == 0;
+}
+
+
+
+
+
+// =============================================================================
+//                             E X P R E S S I O N S
+// =============================================================================
+
+// Constructs that denote a value when evaluated. All expressions have a type
+// that must be known in compile-time, which is the type of the value denoted by
+// it. Some expressions denote values that are known in compile-time.
+
+
+
+// Arithmetic Operations
+// ---------------------
+
+duru::int32 promotion      =    +5;
+duru::int32 negation       =    -5;
+
+duru::int32 multiplication = 5 * 5;
+duru::int32 quotient       = 5 / 5;
+duru::int32 reminder       = 5 % 5;
+
+duru::int32 addition       = 5 + 5;
+duru::int32 subtraction    = 5 - 5;
+
+
+
+// Bitwise Operations
+// ------------------
+
+duru::uint32 bitwise_not =     ~5;
+
+duru::uint32 shift_left  = 5 << 5;
+duru::uint32 shift_right = 5 >> 5;
+
+duru::uint32 bitwise_and = 5  & 5;
+
+duru::uint32 bitwise_xor = 5  ^ 5;
+
+duru::uint32 bitwise_or  = 5  | 5;
+
+
+
+// Comparison Operations
+// ---------------------
+
+duru::bool less_than = 5 < 5;
+duru::bool less_than_or_equal_to = 5 <= 5;
+duru::bool greater_than = 5 > 5;
+duru::bool greater_than_or_equal_to = 5 >= 5;
+
+duru::bool equal_to = 5 == 5;
+duru::bool not_equal_to = 5 != 5;
+
+
+
+// Logical Operations
+// ------------------
+
+duru::bool logical_not = !0;
+
+duru::bool logical_and = 1 && 1;
+
+duru::bool logical_or  = 0 || 1;
