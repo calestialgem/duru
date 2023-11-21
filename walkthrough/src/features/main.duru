@@ -30,14 +30,14 @@
 // ----------------------------------
 
 /*
- * Declares [int] which is an alias for [duru::int32].
+ * Declares `int` which is an alias for `duru::int32`.
  */
 using int = duru::int32;
 
 // If the name is omitted, it is the same as the aliased symbol's name.
 
 /*
- * Declares [float32], which is an alias for [duru::float32].
+ * Declares `float32`, which is an alias for `duru::float32`.
  */
 using duru::float32;
 
@@ -49,15 +49,15 @@ using duru::float32;
 // Members are listed comma-separated in `{}`.
 
 /*
- * Declares [person_info] as a product type, which holds an [int] named `age`,
- * and a [float32] named `height`.
+ * Declares `person_info` as a product type, which holds an `int` named `age`,
+ * and a `float32` named `height`.
  */
 struct person_info { int age, float32 height }
 
 // Incomplete types are specified using `;`.
 
 /*
- * Declares [stream] as an incomplete type, which is only useful for defining
+ * Declares `stream` as an incomplete type, which is only useful for defining
  * foreign interfaces with strongly typed pointers (instead of `void*`).
  */
 extern "FILE" struct stream;
@@ -70,12 +70,12 @@ extern "FILE" struct stream;
 // Alternatives are listed in `{}`.
 
 /*
- * Declares [direction] as a sum type, which holds one of multiple other types:
- *  - [direction::aligned::east]
- *  - [direction::aligned::west]
- *  - [direction::aligned::north]
- *  - [direction::aligned::south]
- *  - [direction::unaligned]
+ * Declares `direction` as a sum type, which holds one of multiple other types:
+ *  - `direction::aligned::east`
+ *  - `direction::aligned::west`
+ *  - `direction::aligned::north`
+ *  - `direction::aligned::south`
+ *  - `direction::unaligned`
  */
 enum direction {
   enum aligned {
@@ -95,8 +95,8 @@ enum direction {
 // Parameters are listed comma-separated in `()`.
 
 /*
- * Declares [add], which is a function that takes two [int]s and returns and
- * [int].
+ * Declares `add`, which is a function that takes two `int`s and returns and
+ * `int`.
  */
 int add(int a, int b) { return a + b; }
 
@@ -104,8 +104,8 @@ int add(int a, int b) { return a + b; }
 // be provided foreign code.
 
 /*
- * Declares [print_string], which is a function that takes a pointer to
- * [duru::byte] and returns an [int]. Its definition is provided by a foreign
+ * Declares `print_string`, which is a function that takes a pointer to
+ * `duru::byte` and returns an `int`. Its definition is provided by a foreign
  * binary, and its name is `puts` there.
  *
  * This refers to the `puts` function that is provided by the C Standard
@@ -113,19 +113,19 @@ int add(int a, int b) { return a + b; }
  */
 extern "puts" int print_string(duru::byte* string);
 
-// For functions that does not return anything, the [duru::void] type should be
+// For functions that does not return anything, the `duru::void` type should be
 // used as the return type.
 
 /*
- * Declares [do_it], which is a function that does not take or return anything.
+ * Declares `do_it`, which is a function that does not take or return anything.
  */
 duru::void do_it() {}
 
-// For functions that never return, the [duru::noreturn] type should be used as
+// For functions that never return, the `duru::noreturn` type should be used as
 // the return type.
 
 /*
- * Declares [exit], which is a function that takes an [int] and does not return.
+ * Declares `exit`, which is a function that takes an `int` and does not return.
  * Its definition is provided by a foreign binary and its name is `exit` there.
  *
  * This refers to the `exit` function that is provided by the C Standard
@@ -141,7 +141,7 @@ extern "exit" duru::noreturn exit(int code);
 // Initial value is specified after `=`.
 
 /*
- * Declares [count], which is a global variable of type [int] and initial value
+ * Declares `count`, which is a global variable of type `int` and initial value
  * `0`.
  *
  * Initial values must be known in compile-time, otherwise the declaration order
@@ -154,7 +154,7 @@ int count = 0;
 // in a foreign binary.
 
 /*
- * Declares [value], which is a global variable of type [int] that is named as
+ * Declares `value`, which is a global variable of type `int` that is named as
  * `linking_error` in the resulting binary.
  *
  * It is named `linking_error` because there is no global defined by the
@@ -184,7 +184,7 @@ extern "linking_error" int should_not_be_used;
  * - Executable packages get compiled to executable binaries, and must declare
  * an entrypoint, which is a function that takes nothing and returns nothing.
  * Taking arguments from the command line and returning an exit code are done
- * using the functions in [duru] package if the target platform has them.
+ * using the functions in `duru` package if the target platform has them.
  * - Implementation packages are all remaining packages. They are not visible
  * outside of the module they are declared in, but also they do not have an
  * entrypoint. These are like library packages; however, they are only usable by
@@ -386,13 +386,13 @@ duru::void main() {
   return;
 }
 
-// Functions with return type [duru::void] can reach to the end without a return
+// Functions with return type `duru::void` can reach to the end without a return
 // statement. Such functions terminate as if there was an invisible return
 // statement at the end.
 duru::void does_not_return() {}
 
 duru::bool is_even(int num) {
-  // Functions that a non-[duru::void] return type must have a return statement
+  // Functions that a non-`duru::void` return type must have a return statement
   // terminating all control paths. Furthermore, these return statements must
   // have a value, which will be the value seen by the function's caller.
   return num % 2 == 0;
