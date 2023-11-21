@@ -412,11 +412,33 @@ duru::bool is_even(int num) {
 
 
 
+// Constants
+// ---------
+
+duru::byte* string_constant = "Hello, Artisan!";
+duru::int32 number_constant = 1919;
+
+
+
+// Compound
+// --------
+
+duru::void a_function() {
+  duru::bool    function_call  = is_even(15);
+  duru::bool    infix_call     = 15:is_even();
+  duru::int32   grouping       = (56 + 5);
+  duru::float32 cast           = duru::float32{10};
+  person_info   initialization = person_info{age = 5, height = 56};
+  duru::float32 member_access  = initialization.height;
+}
+
+
+
 // Arithmetic Operations
 // ---------------------
 
-duru::int32 promotion      =    +5;
-duru::int32 negation       =    -5;
+duru::int32 promotion      = +5;
+duru::int32 negation       = -5;
 
 duru::int32 multiplication = 5 * 5;
 duru::int32 quotient       = 5 / 5;
@@ -430,7 +452,7 @@ duru::int32 subtraction    = 5 - 5;
 // Bitwise Operations
 // ------------------
 
-duru::uint32 bitwise_not =     ~5;
+duru::uint32 bitwise_not = ~5;
 
 duru::uint32 shift_left  = 5 << 5;
 duru::uint32 shift_right = 5 >> 5;
@@ -459,7 +481,7 @@ duru::bool not_equal_to             = 5 != 5;
 // Logical Operations
 // ------------------
 
-duru::bool logical_not =     !0;
+duru::bool logical_not = !0;
 
 duru::bool logical_and = 1 && 1;
 
