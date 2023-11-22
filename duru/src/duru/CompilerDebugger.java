@@ -300,7 +300,8 @@ public sealed interface CompilerDebugger {
       Persistance
         .store(
           "compiler-debugger",
-          directory.resolve("%s.resolution.duru".formatted(packageName)),
+          directory
+            .resolve("%s.resolution.duru".formatted(packageName.joined("."))),
           string);
     }
 

@@ -1,0 +1,46 @@
+D02B23D9
+main:0035.0007-0035.0014: Using `Integer`
+main:0042.0007-0042.0011: Using `duru`
+main:0055.0006-0055.0017: Type `Person_Info`
+main:0063.0020-0063.0026: extern "FILE" Type `Stream`
+main:0075.0007-0075.0009: Const `PI`
+main:0092.0005-0092.0010: Var `count`
+main:0107.0028-0107.0046: extern "linking_error" Var `should_not_be_used`
+main:0120.0004-0120.0007: Fn `add`
+main:0133.0018-0133.0030: extern "puts" Fn `print_string`
+main:0141.0004-0141.0009: Fn `do_it`
+main:0154.0018-0154.0022: extern "exit" Fn `exit`
+main:0181.0004-0181.0008: Fn `main`
+main:0381.0004-0381.0019: Fn `does_not_return`
+main:0383.0004-0383.0011: Fn `is_even`
+main:0407.0005-0407.0020: Var `string_constant`
+main:0408.0005-0408.0020: Var `number_constant`
+main:0415.0004-0415.0014: Fn `a_function`
+main:0429.0005-0429.0014: Var `promotion`
+main:0430.0005-0430.0013: Var `negation`
+main:0432.0005-0432.0019: Var `multiplication`
+main:0433.0005-0433.0013: Var `quotient`
+main:0434.0005-0434.0013: Var `reminder`
+main:0436.0005-0436.0013: Var `addition`
+main:0437.0005-0437.0016: Var `subtraction`
+main:0444.0005-0444.0016: Var `bitwise_not`
+main:0446.0005-0446.0015: Var `shift_left`
+main:0447.0005-0447.0016: Var `shift_right`
+main:0449.0005-0449.0016: Var `bitwise_and`
+main:0451.0005-0451.0016: Var `bitwise_xor`
+main:0453.0005-0453.0015: Var `bitwise_or`
+main:0460.0005-0460.0014: Var `less_than`
+main:0461.0005-0461.0026: Var `less_than_or_equal_to`
+main:0462.0005-0462.0017: Var `greater_than`
+main:0463.0005-0463.0029: Var `greater_than_or_equal_to`
+main:0465.0005-0465.0013: Var `equal_to`
+main:0466.0005-0466.0017: Var `not_equal_to`
+main:0473.0005-0473.0016: Var `logical_not`
+main:0475.0005-0475.0016: Var `logical_and`
+main:0477.0005-0477.0015: Var `logical_or`
+number_constants:0003.0007-0003.0019: Const `MAX_FLOAT_64`
+number_constants:0004.0007-0004.0026: Const `MIN_NORMAL_FLOAT_64`
+number_constants:0005.0007-0005.0019: Const `MIN_FLOAT_64`
+number_constants:0007.0007-0007.0023: Const `MAX_FLOAT_64_HEX`
+number_constants:0008.0007-0008.0030: Const `MIN_NORMAL_FLOAT_64_HEX`
+number_constants:0009.0007-0009.0023: Const `MIN_FLOAT_64_HEX`
