@@ -30,16 +30,16 @@
 // ----------------------------------
 
 /*
- * Declares `int` which is an alias for `duru::int32`.
+ * Declares `Integer` which is an alias for `duru::Integer_32`.
  */
-using int = duru::int32;
+using Integer = duru::Integer_32;
 
 // If the name is omitted, it is the same as the aliased symbol's name.
 
 /*
- * Declares `float32`, which is an alias for `duru::float32`.
+ * Declares `Float_32`, which is an alias for `duru::Float_32`.
  */
-using duru::float32;
+using duru::Float_32;
 
 
 
@@ -49,18 +49,18 @@ using duru::float32;
 // Members are listed comma-separated in `{}`.
 
 /*
- * Declares `person_info` as a product type, which holds an `int` named `age`,
- * and a `float32` named `height`.
+ * Declares `Person_Info` as a product type, which holds an `Integer` named
+ * `age`, and a `Float_32` named `height`.
  */
-struct person_info { age int, height float32 }
+struct Person_Info { age Integer, height Float_32 }
 
 // Incomplete types are specified using `;`.
 
 /*
- * Declares `stream` as an incomplete type, which is only useful for defining
+ * Declares `Stream` as an incomplete type, which is only useful for defining
  * foreign interfaces with strongly typed pointers (instead of `void*`).
  */
-extern "FILE" struct stream;
+extern "FILE" struct Stream;
 
 
 
@@ -70,21 +70,21 @@ extern "FILE" struct stream;
 // Alternatives are listed in `{}`.
 
 /*
- * Declares `direction` as a sum type, which holds one of multiple other types:
- *  - `direction::aligned::east`
- *  - `direction::aligned::west`
- *  - `direction::aligned::north`
- *  - `direction::aligned::south`
- *  - `direction::unaligned`
+ * Declares `Direction` as a sum type, which holds one of multiple other types:
+ *  - `Direction::Aligned::East`
+ *  - `Direction::Aligned::West`
+ *  - `Direction::Aligned::North`
+ *  - `Direction::Aligned::South`
+ *  - `Direction::Unaligned`
  */
-enum direction {
-  enum aligned {
-    struct east {}
-    struct west {}
-    struct north {}
-    struct south {}
+enum Direction {
+  enum Aligned {
+    struct East {}
+    struct West {}
+    struct North {}
+    struct South {}
   }
-  struct unaligned { x float32, y float32 }
+  struct Unaligned { x Float_32, y Float_32 }
 }
 
 
@@ -95,43 +95,44 @@ enum direction {
 // Parameters are listed comma-separated in `()`.
 
 /*
- * Declares `add`, which is a function that takes two `int`s and returns and
- * `int`.
+ * Declares `add`, which is a function that takes two `Integer`s and returns and
+ * `Integer`.
  */
-fn add(a int, b int) int { return a + b; }
+fn add(a Integer, b Integer) Integer { return a + b; }
 
 // Function body can be omitted, which means it is a foreign interface that will
 // be provided foreign code.
 
 /*
  * Declares `print_string`, which is a function that takes a pointer to
- * `duru::byte` and returns an `int`. Its definition is provided by a foreign
- * binary, and its name is `puts` there.
+ * `duru::Byte` and returns an `Integer`. Its definition is provided by a
+ * foreign binary, and its name is `puts` there.
  *
  * This refers to the `puts` function that is provided by the C Standard
  * Library.
  */
-extern "puts" fn print_string(string *duru::byte) int;
+extern "puts" fn print_string(string *duru::Byte) Integer;
 
-// For functions that does not return anything, the `duru::void` type should be
+// For functions that does not return anything, the `duru::Void` type should be
 // used as the return type.
 
 /*
  * Declares `do_it`, which is a function that does not take or return anything.
  */
-fn do_it() duru::void {}
+fn do_it() duru::Void {}
 
-// For functions that never return, the `duru::noreturn` type should be used as
+// For functions that never return, the `duru::Noreturn` type should be used as
 // the return type.
 
 /*
- * Declares `exit`, which is a function that takes an `int` and does not return.
- * Its definition is provided by a foreign binary and its name is `exit` there.
+ * Declares `exit`, which is a function that takes an `Integer` and does not
+ * return. Its definition is provided by a foreign binary and its name is
+ * `exit` there.
  *
  * This refers to the `exit` function that is provided by the C Standard
  * Library.
  */
-extern "exit" fn exit(code int) duru::noreturn;
+extern "exit" fn exit(code Integer) duru::Noreturn;
 
 
 
@@ -141,21 +142,21 @@ extern "exit" fn exit(code int) duru::noreturn;
 // Initial value is specified after `=`.
 
 /*
- * Declares `count`, which is a global variable of type `int` and initial value
- * `0`.
+ * Declares `count`, which is a global variable of type `Integer` and initial
+ * value `0`.
  *
  * Initial values must be known in compile-time, otherwise the declaration order
  * would be meaningful and the values of globals when the program starts running
  * would be indeterministic between builds.
  */
-var count int = 0;
+var count Integer = 0;
 
 // Initial value can be omitted, which means it is a foreign variable that lives
 // in a foreign binary.
 
 /*
- * Declares `value`, which is a global variable of type `int` that is named as
- * `linking_error` in the resulting binary.
+ * Declares `value`, which is a global variable of type `Integer` that is named
+ * as `linking_error` in the resulting binary.
  *
  * It is named `linking_error` because there is no global defined by the
  * C Standard Library that can be showcased here. Since there is not an actual
@@ -163,7 +164,7 @@ var count int = 0;
  * while compiling this), it would be a linking error to try storing to or
  * loading from this variable.
  */
-extern "linking_error" var should_not_be_used int;
+extern "linking_error" var should_not_be_used Integer;
 
 
 
@@ -190,7 +191,7 @@ extern "linking_error" var should_not_be_used int;
  * entrypoint. These are like library packages; however, they are only usable by
  * the packages in the same module.
  */
-fn main() duru::void {
+fn main() duru::Void {
 
 
 
@@ -205,7 +206,7 @@ fn main() duru::void {
   // - they have lexical scopes,
   // - cannot be used outside the scope they are declared in.
   // - can shadow (have the same name as) global symbols,
-  var variable int = add(67, 17 * 58);
+  var variable Integer = add(67, 17 * 58);
 
 
 
@@ -247,9 +248,9 @@ fn main() duru::void {
   // lexical scope which restricts the locals.
   {
     17 + 58;
-    var a int = 17 + 58;
-    { var some_local int = 5; }
-    { var some_local int = 5; }
+    var a Integer = 17 + 58;
+    { var some_local Integer = 5; }
+    { var some_local Integer = 5; }
     { { { { { { { { {} } } } } } } } }
   }
 
@@ -272,7 +273,7 @@ fn main() duru::void {
   // executed as if the `if` was in a block and these statements were just above
   // the `if` in the block.
   if (variable += 10; variable < 17) { variable <<= 2; }
-  if (var a int = variable * 2; a < 17) { variable += a; }
+  if (var a Integer = variable * 2; a < 17) { variable += a; }
   else { variable -= a; }
 
 
@@ -285,8 +286,8 @@ fn main() duru::void {
   // otherwise the `else` branch is taken. After the `for` branch is taken once,
   // it is taken many times until the condition is revaluated to zero.
   {
-    var sum int = 0;
-    var n   int = 1;
+    var sum Integer = 0;
+    var n   Integer = 1;
     for (n <= 10) { n++; sum += n; }
     else { sum = -1; }
   }
@@ -294,30 +295,30 @@ fn main() duru::void {
   // The `else` branch can be omitted, which is the same as it having an empty
   // block as the body.
   {
-    var pre_leading int = 0;
-    var leading     int = 1;
-    var fib         int = 1;
-    var n           int = 1;
+    var pre_leading Integer = 0;
+    var leading     Integer = 1;
+    var fib         Integer = 1;
+    var n           Integer = 1;
     for (n <= 10) {
       n++;
       pre_leading = leading;
-      leading = fib;
-      fib += pre_leading;
+      leading     = fib;
+      fib        += pre_leading;
     }
   }
 
   // An affect statement trailing the loop condition can be provided, which will
   // be executed between iterations.
-  var fib int = 0;
+  var fib Integer = 0;
   {
     fib = 1;
-    var pre_leading int = 0;
-    var leading     int = 1;
-    var n           int = 1;
+    var pre_leading Integer = 0;
+    var leading     Integer = 1;
+    var n           Integer = 1;
     for (n <= 10; n++) {
       pre_leading = leading;
-      leading = fib;
-      fib += pre_leading;
+      leading     = fib;
+      fib        += pre_leading;
     }
   }
 
@@ -326,14 +327,14 @@ fn main() duru::void {
   // above the `for` in the block.
   for (
     fib = 1;
-    var pre_leading int = 0;
-    var leading     int = 1;
-    var n           int = 1;
+    var pre_leading Integer = 0;
+    var leading     Integer = 1;
+    var n           Integer = 1;
     n <= 10; n++)
   {
     pre_leading = leading;
-    leading = fib;
-    fib += pre_leading;
+    leading     = fib;
+    fib        += pre_leading;
   }
 
 
@@ -342,17 +343,17 @@ fn main() duru::void {
   // ---------------
 
   // Used for jumping out of a loop before it terminates by its condition.
-  for (var i int = 0; i < 10; i++) {
+  for (var i Integer = 0; i < 10; i++) {
     if (i == 5) { break; }
   }
 
   // Takes a label to specify which loop to break.
   {
-    var sum     int = 0;
-    var max_sum int = 17;
-    combinations: for(var i int = 0; i < 10; i++) {
-      for(var j int = i + 1; j < 10; j++) {
-        var combination int = i * 10 + j;
+    var sum     Integer = 0;
+    var max_sum Integer = 17;
+    combinations: for(var i Integer = 0; i < 10; i++) {
+      for(var j Integer = i + 1; j < 10; j++) {
+        var combination Integer = i * 10 + j;
         if (sum > max_sum - combination) { break combinations; }
         sum += combination;
       }
@@ -367,8 +368,8 @@ fn main() duru::void {
   // Used for jumping back to a loop condition before it executes all statements
   // in the body.
   {
-    var odds int = 0;
-    for (var i int = 0; i < 10; i++) {
+    var odds Integer = 0;
+    for (var i Integer = 0; i < 10; i++) {
       if (i % 2 == 0) { continue; }
       odds += i;
     }
@@ -376,9 +377,9 @@ fn main() duru::void {
 
   // Takes a label to specify which loop to continue.
   {
-    var black_squares int = 0;
-    horizontal: for(var x int = 0; x < 10; x++) {
-      vertical: for(var y int = 0; y < 10; y++) {
+    var black_squares Integer = 0;
+    horizontal: for(var x Integer = 0; x < 10; x++) {
+      vertical: for(var y Integer = 0; y < 10; y++) {
         if (is_even(x + y)) { continue horizontal; }
         black_squares++;
       }
@@ -392,13 +393,13 @@ fn main() duru::void {
   return;
 }
 
-// Functions with return type `duru::void` can reach to the end without a return
+// Functions with return type `duru::Void` can reach to the end without a return
 // statement. Such functions terminate as if there was an invisible return
 // statement at the end.
-fn does_not_return() duru::void {}
+fn does_not_return() duru::Void {}
 
-fn is_even(num int) duru::bool {
-  // Functions that a non-`duru::void` return type must have a return statement
+fn is_even(num Integer) duru::Boolean {
+  // Functions that a non-`duru::Void` return type must have a return statement
   // terminating all control paths. Furthermore, these return statements must
   // have a value, which will be the value seen by the function's caller.
   return num % 2 == 0;
@@ -421,21 +422,21 @@ fn is_even(num int) duru::bool {
 // Constants
 // ---------
 
-var string_constant duru::byte* = "Hello, Artisan!";
-var number_constant duru::int32 = 1919;
+var string_constant duru::Byte*      = "Hello, Artisan!";
+var number_constant duru::Integer_32 = 1919;
 
 
 
 // Compound
 // --------
 
-fn a_function() duru::void {
-  var function_call  duru::bool    = is_even(15);
-  var infix_call     duru::bool    = 15:is_even();
-  var grouping       duru::int32   = (56 + 5);
-  var cast           duru::float32 = duru::float32{10};
-  var initialization person_info   = person_info{age = 5, height = 56};
-  var member_access  duru::float32 = initialization.height;
+fn a_function() duru::Void {
+  var function_call  duru::Boolean    = is_even(15);
+  var infix_call     duru::Boolean    = 15:is_even();
+  var grouping       duru::Integer_32 = (56 + 5);
+  var cast           duru::Float_32   = duru::Float_32{10};
+  var initialization Person_Info      = Person_Info{age = 5, height = 56};
+  var member_access  duru::Float_32   = initialization.height;
 }
 
 
@@ -443,52 +444,52 @@ fn a_function() duru::void {
 // Arithmetic Operations
 // ---------------------
 
-var promotion      duru::int32 = +5;
-var negation       duru::int32 = -5;
+var promotion      duru::Integer_32 = +5;
+var negation       duru::Integer_32 = -5;
 
-var multiplication duru::int32 = 5 * 5;
-var quotient       duru::int32 = 5 / 5;
-var reminder       duru::int32 = 5 % 5;
+var multiplication duru::Integer_32 = 5 * 5;
+var quotient       duru::Integer_32 = 5 / 5;
+var reminder       duru::Integer_32 = 5 % 5;
 
-var addition       duru::int32 = 5 + 5;
-var subtraction    duru::int32 = 5 - 5;
+var addition       duru::Integer_32 = 5 + 5;
+var subtraction    duru::Integer_32 = 5 - 5;
 
 
 
 // Bitwise Operations
 // ------------------
 
-var bitwise_not duru::uint32 = ~5;
+var bitwise_not duru::Natural_32 = ~5;
 
-var shift_left  duru::uint32 = 5 << 5;
-var shift_right duru::uint32 = 5 >> 5;
+var shift_left  duru::Natural_32 = 5 << 5;
+var shift_right duru::Natural_32 = 5 >> 5;
 
-var bitwise_and duru::uint32 = 5  & 5;
+var bitwise_and duru::Natural_32 = 5  & 5;
 
-var bitwise_xor duru::uint32 = 5  ^ 5;
+var bitwise_xor duru::Natural_32 = 5  ^ 5;
 
-var bitwise_or  duru::uint32 = 5  | 5;
+var bitwise_or  duru::Natural_32 = 5  | 5;
 
 
 
 // Comparison Operations
 // ---------------------
 
-var less_than                duru::bool = 5  < 5;
-var less_than_or_equal_to    duru::bool = 5 <= 5;
-var greater_than             duru::bool = 5  > 5;
-var greater_than_or_equal_to duru::bool = 5 >= 5;
+var less_than                duru::Boolean = 5  < 5;
+var less_than_or_equal_to    duru::Boolean = 5 <= 5;
+var greater_than             duru::Boolean = 5  > 5;
+var greater_than_or_equal_to duru::Boolean = 5 >= 5;
 
-var equal_to                 duru::bool = 5 == 5;
-var not_equal_to             duru::bool = 5 != 5;
+var equal_to                 duru::Boolean = 5 == 5;
+var not_equal_to             duru::Boolean = 5 != 5;
 
 
 
 // Logical Operations
 // ------------------
 
-var logical_not duru::bool = !0;
+var logical_not duru::Boolean = !0;
 
-var logical_and duru::bool = 1 && 1;
+var logical_and duru::Boolean = 1 && 1;
 
-var logical_or  duru::bool = 0 || 1;
+var logical_or  duru::Boolean = 0 || 1;
