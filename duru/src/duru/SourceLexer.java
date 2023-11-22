@@ -121,6 +121,7 @@ public final class SourceLexer {
               var separatorBegin = index;
               var character      = getCharacter();
               if (Text.isUnderscore(character)) {
+                advance();
                 if (!hasCharacter() || !Text.isDigit(getCharacter())) {
                   throw Diagnostic
                     .error(
@@ -132,6 +133,7 @@ public final class SourceLexer {
               else if (!Text.isDigit(character)) {
                 break;
               }
+              advance();
               value = value.scaleByPowerOfTen(1);
               value = value.add(BigDecimal.valueOf(character - '0'));
             }
