@@ -269,9 +269,9 @@ fn main() duru::Void {
   // block as the body.
   if (17 < variable) { variable <<= 2; }
 
-  // Any amount of declare and affect statements leading the condition. Such are
-  // executed as if the `if` was in a block and these statements were just above
-  // the `if` in the block.
+  // Any amount of declare and affect statements can lead the condition. Such
+  // are executed as if the `if` was in a block and these statements were just
+  // above the `if` in the block.
   if (variable += 10; variable < 17) { variable <<= 2; }
   if (var a Integer = variable * 2; a < 17) { variable += a; }
   else { variable -= a; }
@@ -322,8 +322,8 @@ fn main() duru::Void {
     }
   }
 
-  // Any amount of declare and affect statements leading the condition. Such are
-  // executed as if the `for` was in a block and these statements were just
+  // Any amount of declare and affect statements can lead the condition. Such
+  // are executed as if the `for` was in a block and these statements were just
   // above the `for` in the block.
   for (
     fib = 1;
