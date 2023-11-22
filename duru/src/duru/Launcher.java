@@ -73,16 +73,22 @@ builds up a list depending on the flag.
   }
 
   private final List<String> arguments;
+  private Path               modulePath;
+  private List<Path>         moduleBases;
+  private Optional<String>   packageName;
+  private List<String>       passedArguments;
+  private Path               artifacts;
+  private CompilerDebugger   debugger;
 
   private Launcher(List<String> arguments) {
     this.arguments = arguments;
   }
 
   private void launch() {
-    var modulePath      = Persistance.path(".");
-    var packageName     = Optional.<String>absent();
+    modulePath  = Persistance.path(".");
+    packageName = Optional.absent();
     var moduleBases     = ListBuffer.<Path>create();
-    var debugger        = CompilerDebugger.inactive();
+    var debug           = false;
     var command         = Optional.<String>absent();
     var passedArguments = ListBuffer.<String>create();
     for (var i = 0; i != arguments.length(); i++) {
@@ -138,7 +144,7 @@ builds up a list depending on the flag.
             if (separator != -1) {
               throw Diagnostic.error("", "`%s` does not take value", flag);
             }
-            debugger = CompilerDebugger.active();
+            debug = true;
           }
           default -> throw Diagnostic.error("", "unknown flag `%s`", flag);
         }
@@ -153,59 +159,42 @@ builds up a list depending on the flag.
     if (command.isEmpty()) {
       throw Diagnostic.error("", "there is no command");
     }
+    this.moduleBases     = moduleBases.toList();
+    this.passedArguments = passedArguments.toList();
+    artifacts            = modulePath.resolve("art");
+    Persistance.ensure("", artifacts);
+    debugger = CompilerDebugger.inactive();
+    if (debug) {
+      debugger = CompilerDebugger.active(artifacts);
+    }
     switch (command.getFirst()) {
       case "help" -> printUsage();
-      case "init" -> init(modulePath);
-      case "check" -> check(debugger, modulePath, moduleBases.toList());
-      case "build" -> build(debugger, modulePath, moduleBases.toList());
-      case "run" ->
-        run(
-          debugger,
-          modulePath,
-          moduleBases.toList(),
-          packageName,
-          passedArguments.toList());
+      case "init" -> init();
+      case "check" -> check();
+      case "build" -> build();
+      case "run" -> run();
       case "testCompilerByDeletingWholeModulePath" ->
-        testCompilerByDeletingWholeModulePath(
-          debugger,
-          modulePath,
-          moduleBases.toList());
+        testCompilerByDeletingWholeModulePath();
       default ->
         throw Diagnostic.error("", "unknown command `%s`", command.getFirst());
     }
   }
 
-  private void init(Path modulePath) {
+  private void init() {
     Initializer.initialize(modulePath);
   }
 
-  private void check(
-    CompilerDebugger debugger,
-    Path modulePath,
-    List<Path> moduleBases)
-  {
+  private void check() {
     Checker.check(debugger, "", modulePath, moduleBases);
   }
 
-  private void build(
-    CompilerDebugger debugger,
-    Path modulePath,
-    List<Path> moduleBases)
-  {
-    var artifacts = modulePath.resolve("art");
-    var target    = Checker.check(debugger, "", modulePath, moduleBases);
+  private void build() {
+    var target = Checker.check(debugger, "", modulePath, moduleBases);
     Builder.build("", artifacts, target);
   }
 
-  private void run(
-    CompilerDebugger debugger,
-    Path modulePath,
-    List<Path> moduleBases,
-    Optional<String> packageName,
-    List<String> passedArguments)
-  {
-    var artifacts = modulePath.resolve("art");
-    var target    = Checker.check(debugger, "", modulePath, moduleBases);
+  private void run() {
+    var target = Checker.check(debugger, "", modulePath, moduleBases);
     Builder.build("", artifacts, target);
     var    module = target.modules().get(target.main()).getFirst();
     String name;
@@ -235,14 +224,10 @@ builds up a list depending on the flag.
     }
   }
 
-  private void testCompilerByDeletingWholeModulePath(
-    CompilerDebugger debugger,
-    Path modulePath,
-    List<Path> moduleBases)
-  {
+  private void testCompilerByDeletingWholeModulePath() {
     Persistance.recreate("", modulePath);
     Initializer.initialize(modulePath);
     var target = Checker.check(debugger, "", modulePath, moduleBases);
-    Builder.build("", modulePath.resolve("art"), target);
+    Builder.build("", artifacts, target);
   }
 }

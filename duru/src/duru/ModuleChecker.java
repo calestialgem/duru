@@ -99,13 +99,14 @@ public final class ModuleChecker {
       new Source(
         configurationFile,
         Persistance.load(subject, configurationFile));
-    debugger.recordConfigurationSource(artifacts, configurationSource);
+    debugger.recordConfigurationSource(configurationSource, moduleIdentifier);
     var configurationTokens = ConfigurationLexer.lex(configurationSource);
-    debugger.recordConfigurationTokens(artifacts, configurationTokens);
+    debugger.recordConfigurationTokens(configurationTokens, moduleIdentifier);
     var configurationNode = ConfigurationParser.parse(configurationTokens);
-    debugger.recordConfigurationDeclarations(artifacts, configurationNode);
+    debugger
+      .recordConfigurationDeclarations(configurationNode, moduleIdentifier);
     configuration = ConfigurationResolver.resolve(configurationNode);
-    debugger.recordConfiguration(artifacts, configuration);
+    debugger.recordConfiguration(configuration, moduleIdentifier);
   }
 
   private Semantic.Package checkPackage(Object subject, Name packageName) {
@@ -126,7 +127,6 @@ public final class ModuleChecker {
         externalNames,
         this::accessPackage,
         sources,
-        artifacts,
         type,
         packageName);
   }

@@ -40,7 +40,7 @@ public final class Checker {
     externalNames = SetBuffer.create();
     modules.get(subject, main);
     var target = new Semantic.Target(main, modules.getAll());
-    debugger.recordTarget(directory.resolve("art"), target);
+    debugger.recordTarget(target);
     return target;
   }
 

@@ -7,9 +7,12 @@ import duru.Node.Declaration;
 import duru.Semantic.Target;
 
 public sealed interface CompilerDebugger {
-  record Active() implements CompilerDebugger {
+  record Active(Path directory) implements CompilerDebugger {
     @Override
-    public void recordConfigurationSource(Path artifacts, Source source) {
+    public void recordConfigurationSource(
+      Source source,
+      String moduleIdentifier)
+    {
       var string = new StringBuilder();
       string
         .append(Integer.toUnsignedString(source.hashCode(), 16).toUpperCase());
@@ -19,15 +22,16 @@ public sealed interface CompilerDebugger {
       string.append(source.contents());
       Persistance
         .store(
-          "compiler debugger",
-          artifacts.resolve("module.source.duru"),
+          "compiler-debugger",
+          directory
+            .resolve("%s-config.source.duru".formatted(moduleIdentifier)),
           string);
     }
 
     @Override
     public void recordConfigurationTokens(
-      Path artifacts,
-      List<ConfigurationToken> tokens)
+      List<ConfigurationToken> tokens,
+      String moduleIdentifier)
     {
       var string = new StringBuilder();
       string
@@ -49,15 +53,16 @@ public sealed interface CompilerDebugger {
       }
       Persistance
         .store(
-          "compiler debugger",
-          artifacts.resolve("module.tokens.duru"),
+          "compiler-debugger",
+          directory
+            .resolve("%s-config.tokens.duru".formatted(moduleIdentifier)),
           string);
     }
 
     @Override
     public void recordConfigurationDeclarations(
-      Path artifacts,
-      List<PackageDeclaration> declarations)
+      List<PackageDeclaration> declarations,
+      String moduleIdentifier)
     {
       var string = new StringBuilder();
       string
@@ -84,15 +89,16 @@ public sealed interface CompilerDebugger {
       }
       Persistance
         .store(
-          "compiler debugger",
-          artifacts.resolve("module.declarations.duru"),
+          "compiler-debugger",
+          directory
+            .resolve("%s-config.declarations.duru".formatted(moduleIdentifier)),
           string);
     }
 
     @Override
     public void recordConfiguration(
-      Path artifacts,
-      Configuration configuration)
+      Configuration configuration,
+      String moduleIdentifier)
     {
       var string = new StringBuilder();
       string
@@ -137,14 +143,14 @@ public sealed interface CompilerDebugger {
       }
       Persistance
         .store(
-          "compiler debugger",
-          artifacts.resolve("module.resolution.duru"),
+          "compiler-debugger",
+          directory
+            .resolve("%s-config.resolution.duru".formatted(moduleIdentifier)),
           string);
     }
 
     @Override
     public void recordSource(
-      Path artifacts,
       Source source,
       Name packageName,
       String sourceName)
@@ -158,17 +164,16 @@ public sealed interface CompilerDebugger {
       string.append(source.contents());
       Persistance
         .store(
-          "compiler debugger",
-          artifacts
+          "compiler-debugger",
+          directory
             .resolve(
-              "%s.%s.source.duru"
+              "%s.%s-source.duru"
                 .formatted(packageName.joined("."), sourceName)),
           string);
     }
 
     @Override
     public void recordTokens(
-      Path artifacts,
       List<Token> tokens,
       Name packageName,
       String sourceName)
@@ -193,17 +198,16 @@ public sealed interface CompilerDebugger {
       }
       Persistance
         .store(
-          "compiler debugger",
-          artifacts
+          "compiler-debugger",
+          directory
             .resolve(
-              "%s.%s.tokens.duru"
+              "%s.%s-tokens.duru"
                 .formatted(packageName.joined("."), sourceName)),
           string);
     }
 
     @Override
     public void recordDeclarations(
-      Path artifacts,
       List<Declaration> declarations,
       Name packageName,
       String sourceName)
@@ -243,17 +247,16 @@ public sealed interface CompilerDebugger {
       }
       Persistance
         .store(
-          "compiler debugger",
-          artifacts
+          "compiler-debugger",
+          directory
             .resolve(
-              "%s.%s.declarations.duru"
+              "%s.%s-declarations.duru"
                 .formatted(packageName.joined("."), sourceName)),
           string);
     }
 
     @Override
     public void recordResolution(
-      Path artifacts,
       Map<String, Declaration> resolution,
       Name packageName)
     {
@@ -296,13 +299,13 @@ public sealed interface CompilerDebugger {
       }
       Persistance
         .store(
-          "compiler debugger",
-          artifacts.resolve("%s.resolution.duru".formatted(packageName)),
+          "compiler-debugger",
+          directory.resolve("%s.resolution.duru".formatted(packageName)),
           string);
     }
 
     @Override
-    public void recordTarget(Path artifacts, Target target) {
+    public void recordTarget(Target target) {
       var string = new StringBuilder();
       string
         .append(Integer.toUnsignedString(target.hashCode(), 16).toUpperCase());
@@ -330,35 +333,37 @@ public sealed interface CompilerDebugger {
         }
       }
       Persistance
-        .store("compiler debugger", artifacts.resolve("target.duru"), string);
+        .store("compiler-debugger", directory.resolve("target.duru"), string);
     }
   }
 
   record Inactive() implements CompilerDebugger {
     @Override
-    public void recordConfigurationSource(Path artifacts, Source source) {}
+    public void recordConfigurationSource(
+      Source source,
+      String moduleIdentifier)
+    {}
 
     @Override
     public void recordConfigurationTokens(
-      Path artifacts,
-      List<ConfigurationToken> tokens)
+      List<ConfigurationToken> tokens,
+      String moduleIdentifier)
     {}
 
     @Override
     public void recordConfigurationDeclarations(
-      Path artifacts,
-      List<PackageDeclaration> declarations)
+      List<PackageDeclaration> declarations,
+      String moduleIdentifier)
     {}
 
     @Override
     public void recordConfiguration(
-      Path artifacts,
-      Configuration configuration)
+      Configuration configuration,
+      String moduleIdentifier)
     {}
 
     @Override
     public void recordSource(
-      Path artifacts,
       Source source,
       Name packageName,
       String sourceName)
@@ -366,7 +371,6 @@ public sealed interface CompilerDebugger {
 
     @Override
     public void recordTokens(
-      Path artifacts,
       List<Token> tokens,
       Name packageName,
       String sourceName)
@@ -374,7 +378,6 @@ public sealed interface CompilerDebugger {
 
     @Override
     public void recordDeclarations(
-      Path artifacts,
       List<Declaration> declarations,
       Name packageName,
       String sourceName)
@@ -382,49 +385,42 @@ public sealed interface CompilerDebugger {
 
     @Override
     public void recordResolution(
-      Path artifacts,
       Map<String, Declaration> resolution,
       Name packageName)
     {}
 
     @Override
-    public void recordTarget(Path artifacts, Target target) {}
+    public void recordTarget(Target target) {}
   }
 
-  static CompilerDebugger active() {
-    return new Active();
+  static CompilerDebugger active(Path artifacts) {
+    var directory = artifacts.resolve("compiler-debugger");
+    Persistance.recreate("compiler-debugger", directory);
+    return new Active(directory);
   }
 
   static CompilerDebugger inactive() {
     return new Inactive();
   }
 
-  void recordConfigurationSource(Path artifacts, Source source);
+  void recordConfigurationSource(Source source, String moduleIdentifier);
   void recordConfigurationTokens(
-    Path artifacts,
-    List<ConfigurationToken> tokens);
+    List<ConfigurationToken> tokens,
+    String moduleIdentifier);
   void recordConfigurationDeclarations(
-    Path artifacts,
-    List<ConfigurationNode.PackageDeclaration> declarations);
-  void recordConfiguration(Path artifacts, Configuration configuration);
-  void recordSource(
-    Path artifacts,
-    Source source,
-    Name packageName,
-    String sourceName);
-  void recordTokens(
-    Path artifacts,
-    List<Token> tokens,
-    Name packageName,
-    String sourceName);
+    List<ConfigurationNode.PackageDeclaration> declarations,
+    String moduleIdentifier);
+  void recordConfiguration(
+    Configuration configuration,
+    String moduleIdentifier);
+  void recordSource(Source source, Name packageName, String sourceName);
+  void recordTokens(List<Token> tokens, Name packageName, String sourceName);
   void recordDeclarations(
-    Path artifacts,
     List<Node.Declaration> declarations,
     Name packageName,
     String sourceName);
   void recordResolution(
-    Path artifacts,
     Map<String, Node.Declaration> resolution,
     Name packageName);
-  void recordTarget(Path artifacts, Semantic.Target target);
+  void recordTarget(Semantic.Target target);
 }

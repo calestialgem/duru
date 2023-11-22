@@ -9,7 +9,6 @@ public final class PackageChecker {
     SetBuffer<String> externalNames,
     Accessor<Name, Semantic.Package> accessor,
     Path sources,
-    Path artifacts,
     PackageType type,
     Name packageName)
   {
@@ -20,7 +19,6 @@ public final class PackageChecker {
         externalNames,
         accessor,
         sources,
-        artifacts,
         type,
         packageName);
     return checker.check();
@@ -31,7 +29,6 @@ public final class PackageChecker {
   private final SetBuffer<String>                externalNames;
   private final Accessor<Name, Semantic.Package> accessor;
   private final Path                             sources;
-  private final Path                             artifacts;
   private final PackageType                      type;
   private final Name                             packageName;
   private Map<String, Node.Declaration>          declarations;
@@ -43,7 +40,6 @@ public final class PackageChecker {
     SetBuffer<String> externalNames,
     Accessor<Name, Semantic.Package> accessor,
     Path sources,
-    Path artifacts,
     PackageType type,
     Name packageName)
   {
@@ -52,7 +48,6 @@ public final class PackageChecker {
     this.externalNames = externalNames;
     this.accessor      = accessor;
     this.sources       = sources;
-    this.artifacts     = artifacts;
     this.type          = type;
     this.packageName   = packageName;
   }
@@ -95,12 +90,11 @@ public final class PackageChecker {
       var filename =
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
       var source   = new Source(file, Persistance.load(directory, file));
-      debugger.recordSource(artifacts, source, packageName, filename);
+      debugger.recordSource(source, packageName, filename);
       var tokens = SourceLexer.lex(source);
-      debugger.recordTokens(artifacts, tokens, packageName, filename);
+      debugger.recordTokens(tokens, packageName, filename);
       var declarations = SourceParser.parse(tokens);
-      debugger
-        .recordDeclarations(artifacts, declarations, packageName, filename);
+      debugger.recordDeclarations(declarations, packageName, filename);
       for (var declaration : declarations) {
         var identifier = declaration.name().text();
         if (packageDeclarations.contains(identifier)) {
@@ -114,7 +108,7 @@ public final class PackageChecker {
       }
     }
     declarations = packageDeclarations.toMap();
-    debugger.recordResolution(artifacts, declarations, packageName);
+    debugger.recordResolution(declarations, packageName);
   }
 
   private Semantic.Symbol checkSymbol(Object subject, String identifier) {
