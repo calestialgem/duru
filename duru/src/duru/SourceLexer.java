@@ -1,7 +1,6 @@
 package duru;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.function.Function;
 
 public final class SourceLexer {
@@ -267,8 +266,7 @@ public final class SourceLexer {
                   value = value.multiply(BigDecimal.valueOf(2));
                 }
                 for (var i = 0; i > exponent; i--) {
-                  value =
-                    value.divide(BigDecimal.valueOf(2), RoundingMode.HALF_EVEN);
+                  value = value.divide(BigDecimal.valueOf(2));
                 }
               }
               catch (@SuppressWarnings("unused") ArithmeticException cause) {
