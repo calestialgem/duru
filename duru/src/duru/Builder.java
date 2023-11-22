@@ -150,9 +150,10 @@ public final class Builder {
     switch (type) {
       case Semantic.Symbol symbol -> buildSymbol(symbol);
       case Semantic.Pointer pointer -> buildTypeDependencies(pointer.pointee());
-      case Semantic.Arithmetic arithmetic ->
+      case Semantic.ConstantArithmetic constant ->
         throw Diagnostic
-          .failure(subject, "cannot build compile-time type `%s`", arithmetic);
+          .failure(subject, "cannot build compile-time type `%s`", constant);
+      default -> { /* Java compiler bug. */}
     }
   }
 
@@ -193,7 +194,7 @@ public final class Builder {
           .failure(
             subject,
             "cannot build compile-time constant `%s`",
-            Long.toUnsignedString(constant.value()));
+            constant.value());
       case Semantic.Invocation invocation -> {
         buildSymbol(invocation.name());
         for (var argument : invocation.arguments()) {
@@ -280,13 +281,13 @@ public final class Builder {
     switch (expression) {
       case Semantic.UnitConstant constant -> string.append('0');
       case Semantic.Integer32Constant constant ->
-        string.append(Integer.toUnsignedString(constant.value()));
+        string.append(constant.value());
       case Semantic.IntegralConstant constant ->
         throw Diagnostic
           .failure(
             subject,
             "cannot build compile-time constant `%s`",
-            Long.toUnsignedString(constant.value()));
+            constant.value());
       case Semantic.Invocation invocation -> {
         buildAccess(invocation.name());
         string.append('(');
@@ -309,9 +310,9 @@ public final class Builder {
       }
       case Semantic.LocalAccess access -> string.append(access.name());
       case Semantic.Natural32Constant constant ->
-        string.append(Integer.toUnsignedString(constant.value()));
+        string.append(constant.value());
       case Semantic.Natural64Constant constant ->
-        string.append(Long.toUnsignedString(constant.value()));
+        string.append(constant.value());
       case Semantic.StringConstant constant ->
         Text.quote(string, constant.value());
     }

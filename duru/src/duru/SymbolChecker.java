@@ -352,9 +352,18 @@ public final class SymbolChecker {
           procedure.returnType());
       }
       case Node.NaturalConstant naturalConstant -> {
-        yield new CheckedExpression(
-          new Semantic.IntegralConstant(naturalConstant.value().value()),
-          new Semantic.ConstantIntegral());
+        try {
+          yield new CheckedExpression(
+            new Semantic.IntegralConstant(
+              naturalConstant.value().value().toBigIntegerExact()),
+            new Semantic.ConstantIntegral());
+        }
+        catch (@SuppressWarnings("unused") ArithmeticException cause) {
+          throw Diagnostic
+            .error(
+              naturalConstant.location(),
+              "non-integral constants are not implemented yet");
+        }
       }
       case Node.StringConstant stringConstant ->
         new CheckedExpression(
@@ -384,16 +393,12 @@ public final class SymbolChecker {
         .error(
           subject,
           "constant integral `%s` cannot coerce to `%s`",
-          Long.toUnsignedString(constant.value()),
+          constant.value(),
           target);
     }
     if (!type.canRepresent(constant.value())) {
       throw Diagnostic
-        .error(
-          subject,
-          "`%s` cannot represent `%s`",
-          type,
-          Long.toUnsignedString(constant.value()));
+        .error(subject, "`%s` cannot represent `%s`", type, constant.value());
     }
     return type.constant(constant.value());
   }

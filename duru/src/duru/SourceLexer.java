@@ -1,5 +1,7 @@
 package duru;
 
+import java.math.BigDecimal;
+
 public final class SourceLexer {
   public static List<Token> lex(Source source) {
     var lexer = new SourceLexer(source);
@@ -114,8 +116,7 @@ public final class SourceLexer {
         }
         default -> {
           if (Text.isDigit(initial)) {
-            var value = 0L;
-            value += initial - '0';
+            var value = BigDecimal.valueOf(initial - '0');
             while (hasCharacter()) {
               var separatorBegin = index;
               var character      = getCharacter();
@@ -131,19 +132,10 @@ public final class SourceLexer {
               else if (!Text.isDigit(character)) {
                 break;
               }
-              var digit = character - '0';
-              if (Long.compareUnsigned(value, Long.divideUnsigned(-1L, 10))
-                > 0)
-              {
-                throw Diagnostic.error(location(), "huge number");
-              }
-              value *= 10;
-              if (Long.compareUnsigned(value, -1L - digit) > 0) {
-                throw Diagnostic.error(location(), "huge number");
-              }
-              value += digit;
+              value = value.scaleByPowerOfTen(1);
+              value = value.add(BigDecimal.valueOf(character - '0'));
             }
-            tokens.add(new Token.NaturalConstant(location(), value));
+            tokens.add(new Token.NumberConstant(location(), value));
             break;
           }
 

@@ -1,5 +1,7 @@
 package duru;
 
+import java.math.BigInteger;
+
 public sealed interface Semantic {
   record Target(String main, Map<String, Module> modules) {}
 
@@ -54,12 +56,14 @@ public sealed interface Semantic {
 
   sealed interface Arithmetic extends Type {}
 
-  sealed interface Integral extends Arithmetic {
-    long max();
-    Expression constant(long value);
+  sealed interface ConstantArithmetic extends Arithmetic {}
 
-    default boolean canRepresent(long value) {
-      return Long.compareUnsigned(value, max()) <= 0;
+  sealed interface Integral extends Arithmetic {
+    BigInteger max();
+    Expression constant(BigInteger value);
+
+    default boolean canRepresent(BigInteger value) {
+      return value.compareTo(max()) <= 0;
     }
   }
 
@@ -110,22 +114,7 @@ public sealed interface Semantic {
     }
   }
 
-  record ConstantIntegral() implements Integral {
-    @Override
-    public long max() {
-      return -1L;
-    }
-
-    @Override
-    public IntegralConstant constant(long value) {
-      return new IntegralConstant(value);
-    }
-
-    @Override
-    public String toString() {
-      return "constant integral";
-    }
-  }
+  record ConstantIntegral() implements ConstantArithmetic {}
 
   record Natural32() implements Natural, Builtin {
     @Override
@@ -134,13 +123,13 @@ public sealed interface Semantic {
     }
 
     @Override
-    public long max() {
-      return -1;
+    public BigInteger max() {
+      return BigInteger.valueOf(0xffff_ffffL);
     }
 
     @Override
-    public Natural32Constant constant(long value) {
-      return new Natural32Constant((int) value);
+    public Natural32Constant constant(BigInteger value) {
+      return new Natural32Constant(value);
     }
 
     @Override
@@ -161,12 +150,12 @@ public sealed interface Semantic {
     }
 
     @Override
-    public long max() {
-      return -1L;
+    public BigInteger max() {
+      return BigInteger.valueOf(0xffff_ffff_ffff_ffffL);
     }
 
     @Override
-    public Natural64Constant constant(long value) {
+    public Natural64Constant constant(BigInteger value) {
       return new Natural64Constant(value);
     }
 
@@ -188,13 +177,13 @@ public sealed interface Semantic {
     }
 
     @Override
-    public long max() {
-      return java.lang.Integer.MAX_VALUE;
+    public BigInteger max() {
+      return BigInteger.valueOf(0x7fff_ffffL);
     }
 
     @Override
-    public Integer32Constant constant(long value) {
-      return new Integer32Constant((int) value);
+    public Integer32Constant constant(BigInteger value) {
+      return new Integer32Constant(value);
     }
 
     @Override
@@ -291,13 +280,13 @@ public sealed interface Semantic {
 
   record UnitConstant() implements Expression {}
 
-  record IntegralConstant(long value) implements Expression {}
+  record IntegralConstant(BigInteger value) implements Expression {}
 
-  record Integer32Constant(int value) implements Expression {}
+  record Integer32Constant(BigInteger value) implements Expression {}
 
-  record Natural32Constant(int value) implements Expression {}
+  record Natural32Constant(BigInteger value) implements Expression {}
 
-  record Natural64Constant(long value) implements Expression {}
+  record Natural64Constant(BigInteger value) implements Expression {}
 
   record StringConstant(String value) implements Expression {}
 

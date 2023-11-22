@@ -1,5 +1,7 @@
 package duru;
 
+import java.math.BigDecimal;
+
 public sealed interface Token {
   record OpeningBrace(Location location) implements Token {
     @Override
@@ -141,10 +143,10 @@ public sealed interface Token {
     }
   }
 
-  record NaturalConstant(Location location, long value) implements Token {
+  record NumberConstant(Location location, BigDecimal value) implements Token {
     @Override
     public String toString() {
-      return "number `%s`".formatted(Long.toUnsignedString(value));
+      return "number `%s`".formatted(Text.format(value));
     }
   }
 

@@ -204,7 +204,7 @@ public final class SourceParser {
   }
 
   private Optional<Node.NaturalConstant> parseNaturalConstant() {
-    return parse(Token.NaturalConstant.class)
+    return parse(Token.NumberConstant.class)
       .transform(Node.NaturalConstant::new);
   }
 

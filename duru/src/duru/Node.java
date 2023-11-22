@@ -90,7 +90,7 @@ public sealed interface Node {
     List<Expression> arguments) implements Precedence00
   {}
 
-  record NaturalConstant(Token.NaturalConstant value) implements Precedence00 {
+  record NaturalConstant(Token.NumberConstant value) implements Precedence00 {
     @Override
     public Location location() {
       return value.location();

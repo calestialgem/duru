@@ -1,6 +1,22 @@
 package duru;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.math.BigDecimal;
+import java.util.Locale;
+
 public final class Text {
+  private static final DecimalFormat formatter;
+
+  static {
+    formatter = new DecimalFormat("0.#", new DecimalFormatSymbols(Locale.US));
+    formatter.setMaximumFractionDigits(Integer.MAX_VALUE);
+  }
+
+  public static String format(BigDecimal number) {
+    return formatter.format(number);
+  }
+
   public static String quote(String constant) {
     var string = new StringBuilder();
     quote(string, constant);
