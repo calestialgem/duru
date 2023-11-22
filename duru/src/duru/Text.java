@@ -47,11 +47,16 @@ public final class Text {
       case
         "extern",
         "public",
-        "proc",
-        "struct",
+        "using",
+        "type",
+        "const",
         "var",
+        "fn",
         "if",
         "else",
+        "for",
+        "break",
+        "continue",
         "return" ->
         true;
       default -> false;
