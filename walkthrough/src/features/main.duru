@@ -64,6 +64,50 @@ extern "FILE" type Stream;
 
 
 
+// `const` keyword declares a constant.
+// ------------------------------------
+
+// Value is specified after `=`.
+
+/*
+ * Declares `PI`, which is a constant of type `Float_32` and value `3.14`.
+ */
+const PI Float_32 = 3.14;
+
+
+
+// `var` keyword declares a variable.
+// ----------------------------------
+
+// Initial value is specified after `=`.
+
+/*
+ * Declares `count`, which is a global variable of type `Integer` and initial
+ * value `0`.
+ *
+ * Initial values must be known in compile-time, otherwise the declaration order
+ * would be meaningful and the values of globals when the program starts running
+ * would be indeterministic between builds.
+ */
+var count Integer = 0;
+
+// Initial value can be omitted, which means it is a foreign variable that lives
+// in a foreign binary.
+
+/*
+ * Declares `value`, which is a global variable of type `Integer` that is named
+ * as `linking_error` in the resulting binary.
+ *
+ * It is named `linking_error` because there is no global defined by the
+ * C Standard Library that can be showcased here. Since there is not an actual
+ * variable anywhere in the foreign binary (we only link to C Standard Library
+ * while compiling this), it would be a linking error to try storing to or
+ * loading from this variable.
+ */
+extern "linking_error" var should_not_be_used Integer;
+
+
+
 // `fn` keyword declares a function.
 // ---------------------------------
 
@@ -108,38 +152,6 @@ fn do_it() duru::Void {}
  * Library.
  */
 extern "exit" fn exit(code Integer) duru::Noreturn;
-
-
-
-// `var` keyword declares a variable.
-// ----------------------------------
-
-// Initial value is specified after `=`.
-
-/*
- * Declares `count`, which is a global variable of type `Integer` and initial
- * value `0`.
- *
- * Initial values must be known in compile-time, otherwise the declaration order
- * would be meaningful and the values of globals when the program starts running
- * would be indeterministic between builds.
- */
-var count Integer = 0;
-
-// Initial value can be omitted, which means it is a foreign variable that lives
-// in a foreign binary.
-
-/*
- * Declares `value`, which is a global variable of type `Integer` that is named
- * as `linking_error` in the resulting binary.
- *
- * It is named `linking_error` because there is no global defined by the
- * C Standard Library that can be showcased here. Since there is not an actual
- * variable anywhere in the foreign binary (we only link to C Standard Library
- * while compiling this), it would be a linking error to try storing to or
- * loading from this variable.
- */
-extern "linking_error" var should_not_be_used Integer;
 
 
 
