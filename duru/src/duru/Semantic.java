@@ -3,29 +3,27 @@ package duru;
 public sealed interface Semantic {
   record Target(String main, Map<String, Module> modules) {}
 
-  record Module(String name, Map<String, Package> packages)
-    implements Semantic
-  {}
+  record Module(String name, Map<Name, Package> packages) implements Semantic {}
 
   sealed interface Package extends Semantic {
-    String name();
+    Name name();
     Map<String, Symbol> symbols();
   }
 
-  record Executable(String name, Map<String, Symbol> symbols)
+  record Executable(Name name, Map<String, Symbol> symbols)
     implements Package
   {}
 
-  record Library(String name, Map<String, Symbol> symbols) implements Package {}
+  record Library(Name name, Map<String, Symbol> symbols) implements Package {}
 
-  record Implementation(String name, Map<String, Symbol> symbols)
+  record Implementation(Name name, Map<String, Symbol> symbols)
     implements Package
   {}
 
   sealed interface Symbol extends Semantic {
     Optional<String> externalName();
     boolean isPublic();
-    String name();
+    Name name();
   }
 
   sealed interface Builtin extends Symbol {
@@ -43,8 +41,8 @@ public sealed interface Semantic {
     }
 
     @Override
-    default String name() {
-      return "duru.%s".formatted(identifier());
+    default Name name() {
+      return Name.of("duru", identifier());
     }
   }
 
@@ -69,12 +67,12 @@ public sealed interface Semantic {
 
   sealed interface Natural extends Integral {}
 
-  record Struct(Optional<String> externalName, boolean isPublic, String name)
+  record Struct(Optional<String> externalName, boolean isPublic, Name name)
     implements Type, Symbol
   {
     @Override
     public String toString() {
-      return name();
+      return name().toString();
     }
   }
 
@@ -91,7 +89,7 @@ public sealed interface Semantic {
 
     @Override
     public String toString() {
-      return name();
+      return name().toString();
     }
   }
 
@@ -108,7 +106,7 @@ public sealed interface Semantic {
 
     @Override
     public String toString() {
-      return name();
+      return name().toString();
     }
   }
 
@@ -152,7 +150,7 @@ public sealed interface Semantic {
 
     @Override
     public String toString() {
-      return name();
+      return name().toString();
     }
   }
 
@@ -179,7 +177,7 @@ public sealed interface Semantic {
 
     @Override
     public String toString() {
-      return name();
+      return name().toString();
     }
   }
 
@@ -206,7 +204,7 @@ public sealed interface Semantic {
 
     @Override
     public String toString() {
-      return name();
+      return name().toString();
     }
   }
 
@@ -223,7 +221,7 @@ public sealed interface Semantic {
 
     @Override
     public String toString() {
-      return name();
+      return name().toString();
     }
   }
 
@@ -240,7 +238,7 @@ public sealed interface Semantic {
 
     @Override
     public String toString() {
-      return name();
+      return name().toString();
     }
   }
 
@@ -259,7 +257,7 @@ public sealed interface Semantic {
   record Proc(
     Optional<String> externalName,
     boolean isPublic,
-    String name,
+    Name name,
     Map<String, Type> parameters,
     Type returnType,
     Optional<Statement> body) implements Procedure, Symbol
@@ -287,7 +285,7 @@ public sealed interface Semantic {
 
   record LessThan(Expression left, Expression right) implements Expression {}
 
-  record Invocation(String name, List<Expression> arguments)
+  record Invocation(Name name, List<Expression> arguments)
     implements Expression
   {}
 

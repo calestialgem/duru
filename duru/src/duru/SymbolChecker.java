@@ -3,8 +3,8 @@ package duru;
 public final class SymbolChecker {
   public static Semantic.Symbol check(
     SetBuffer<String> externalNames,
-    Accessor<String, Semantic.Symbol> accessor,
-    String packageName,
+    Accessor<Name, Semantic.Symbol> accessor,
+    Name packageName,
     Node.Declaration declaration)
   {
     var checker =
@@ -12,18 +12,18 @@ public final class SymbolChecker {
     return checker.check();
   }
 
-  private final SetBuffer<String>                 externalNames;
-  private final Accessor<String, Semantic.Symbol> accessor;
-  private final String                            packageName;
-  private final Node.Declaration                  declaration;
-  private String                                  symbolName;
-  private MapBuffer<String, Semantic.Type>        locals;
-  private Semantic.Type                           returnType;
+  private final SetBuffer<String>               externalNames;
+  private final Accessor<Name, Semantic.Symbol> accessor;
+  private final Name                            packageName;
+  private final Node.Declaration                declaration;
+  private Name                                  symbolName;
+  private MapBuffer<String, Semantic.Type>      locals;
+  private Semantic.Type                         returnType;
 
   private SymbolChecker(
     SetBuffer<String> externalNames,
-    Accessor<String, Semantic.Symbol> accessor,
-    String packageName,
+    Accessor<Name, Semantic.Symbol> accessor,
+    Name packageName,
     Node.Declaration declaration)
   {
     this.externalNames = externalNames;
@@ -33,7 +33,7 @@ public final class SymbolChecker {
   }
 
   private Semantic.Symbol check() {
-    symbolName = "%s.%s".formatted(packageName, declaration.name().text());
+    symbolName = packageName.scope(declaration.name().text());
     locals     = MapBuffer.create();
     return switch (declaration) {
       case Node.Proc proc -> checkProc(proc);
@@ -120,6 +120,11 @@ public final class SymbolChecker {
   {
     for (var externalName : token) {
       var value = externalName.value();
+      if (value.indexOf('$') != -1)
+        throw Diagnostic
+          .error(
+            externalName.location(),
+            "illegal character `$` in external name");
       if (!externalNames.add(value)) {
         throw Diagnostic
           .error(
@@ -302,8 +307,8 @@ public final class SymbolChecker {
           Semantic.BOOLEAN);
       }
       case Node.Access access -> {
-        if (access.mention().subspaces().isEmpty()) {
-          var name  = access.mention().name().text();
+        if (access.mention().identifiers().length() == 1) {
+          var name  = access.mention().identifiers().getFirst().text();
           var local = locals.get(name);
           if (!local.isEmpty()) {
             yield new CheckedExpression(
@@ -359,13 +364,7 @@ public final class SymbolChecker {
   }
 
   private Semantic.Symbol accessGlobal(Node.Mention mention) {
-    var string = new StringBuilder();
-    for (var subspace : mention.subspaces()) {
-      string.append(subspace.text());
-      string.append('.');
-    }
-    string.append(mention.name().text());
-    return accessor.access(mention.location(), string.toString());
+    return accessor.access(mention.location(), mention.toName());
   }
 
   private Semantic.Expression coerce(

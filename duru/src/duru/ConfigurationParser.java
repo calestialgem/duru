@@ -60,15 +60,17 @@ public final class ConfigurationParser {
     if (name.isEmpty()) {
       return Optional.absent();
     }
-    var subspaces = ListBuffer.<ConfigurationToken.Identifier>create();
-    subspaces.add(name.getLast());
+    var identifiers = ListBuffer.<ConfigurationToken.Identifier>create();
+    identifiers.add(name.getLast());
     while (!parse(ConfigurationToken.ColonColon.class).isEmpty()) {
-      var subspace = expect(ConfigurationToken.Identifier.class, "name");
-      subspaces.add(subspace);
+      var subspace = expect(ConfigurationToken.Identifier.class, "identifier");
+      identifiers.add(subspace);
     }
     return Optional
       .present(
-        new ConfigurationNode.PackageName(location(begin), subspaces.toList()));
+        new ConfigurationNode.PackageName(
+          location(begin),
+          identifiers.toList()));
   }
 
   private Location location(int begin) {

@@ -36,6 +36,13 @@ public sealed interface Token {
     }
   }
 
+  record ColonColon(Location location) implements Token {
+    @Override
+    public String toString() {
+      return "punctuation `::`";
+    }
+  }
+
   record Dot(Location location) implements Token {
     @Override
     public String toString() {

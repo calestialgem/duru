@@ -213,7 +213,7 @@ builds up a list depending on the flag.
       name = packageName.getFirst();
     }
     else {
-      var executables = ListBuffer.<String>create();
+      var executables = ListBuffer.<Name>create();
       for (var package_ : module.packages().values()) {
         if (package_ instanceof Semantic.Executable executable) {
           executables.add(executable.name());
@@ -226,7 +226,7 @@ builds up a list depending on the flag.
       if (executables.isEmpty()) {
         throw Diagnostic.error("", "no executable in `%s`", module.name());
       }
-      name = executables.getFirst();
+      name = executables.getFirst().joined(".");
     }
     var binary   = artifacts.resolve("%s.exe".formatted(name));
     var exitCode = Processes.execute("", true, binary, passedArguments);

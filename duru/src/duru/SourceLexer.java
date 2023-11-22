@@ -62,6 +62,12 @@ public final class SourceLexer {
         case '(' -> tokens.add(new Token.OpeningParenthesis(location()));
         case ')' -> tokens.add(new Token.ClosingParenthesis(location()));
         case ';' -> tokens.add(new Token.Semicolon(location()));
+        case ':' -> {
+          if (!hasCharacter() && getCharacter() != ':')
+            throw Diagnostic.error(location(), "incomplete scope token");
+          advance();
+          tokens.add(new Token.ColonColon(location()));
+        }
         case '.' -> tokens.add(new Token.Dot(location()));
         case ',' -> tokens.add(new Token.Comma(location()));
         case '=' -> tokens.add(new Token.Equal(location()));

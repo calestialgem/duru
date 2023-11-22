@@ -230,19 +230,19 @@ public final class SourceParser {
   }
 
   private Optional<Node.Mention> parseMention() {
-    var begin   = index;
-    var portion = parse(Token.Identifier.class);
-    if (portion.isEmpty()) {
+    var begin = index;
+    var name  = parse(Token.Identifier.class);
+    if (name.isEmpty()) {
       return Optional.absent();
     }
-    var name      = portion.getFirst();
-    var subspaces = ListBuffer.<Token.Identifier>create();
-    while (take(Token.Dot.class)) {
-      subspaces.add(name);
-      name = expect(Token.Identifier.class, "name");
+    var identifiers = ListBuffer.<Token.Identifier>create();
+    identifiers.add(name.getLast());
+    while (!parse(Token.ColonColon.class).isEmpty()) {
+      var subspace = expect(Token.Identifier.class, "identifier");
+      identifiers.add(subspace);
     }
     return Optional
-      .present(new Node.Mention(location(begin), subspaces.toList(), name));
+      .present(new Node.Mention(location(begin), identifiers.toList()));
   }
 
   private Location location(int begin) {

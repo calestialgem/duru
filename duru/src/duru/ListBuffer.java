@@ -39,6 +39,13 @@ public final class ListBuffer<Element> implements ListLike<Element> {
     return new ListBuffer<>(elements, length);
   }
 
+  @Override
+  public ListBuffer<Element> sublist(int begin, int end) {
+    return new ListBuffer<>(
+      Arrays.copyOfRange(elements, begin, end),
+      end - begin);
+  }
+
   public List<Element> toList() {
     return List.of(0, length, elements);
   }

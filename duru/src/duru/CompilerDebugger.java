@@ -146,7 +146,7 @@ public sealed interface CompilerDebugger {
     public void recordSource(
       Path artifacts,
       Source source,
-      String packageName,
+      Name packageName,
       String sourceName)
     {
       var string = new StringBuilder();
@@ -160,7 +160,9 @@ public sealed interface CompilerDebugger {
         .store(
           "compiler debugger",
           artifacts
-            .resolve("%s.%s.source.duru".formatted(packageName, sourceName)),
+            .resolve(
+              "%s.%s.source.duru"
+                .formatted(packageName.joined("."), sourceName)),
           string);
     }
 
@@ -168,7 +170,7 @@ public sealed interface CompilerDebugger {
     public void recordTokens(
       Path artifacts,
       List<Token> tokens,
-      String packageName,
+      Name packageName,
       String sourceName)
     {
       var string = new StringBuilder();
@@ -193,7 +195,9 @@ public sealed interface CompilerDebugger {
         .store(
           "compiler debugger",
           artifacts
-            .resolve("%s.%s.tokens.duru".formatted(packageName, sourceName)),
+            .resolve(
+              "%s.%s.tokens.duru"
+                .formatted(packageName.joined("."), sourceName)),
           string);
     }
 
@@ -201,7 +205,7 @@ public sealed interface CompilerDebugger {
     public void recordDeclarations(
       Path artifacts,
       List<Declaration> declarations,
-      String packageName,
+      Name packageName,
       String sourceName)
     {
       var string = new StringBuilder();
@@ -242,7 +246,8 @@ public sealed interface CompilerDebugger {
           "compiler debugger",
           artifacts
             .resolve(
-              "%s.%s.declarations.duru".formatted(packageName, sourceName)),
+              "%s.%s.declarations.duru"
+                .formatted(packageName.joined("."), sourceName)),
           string);
     }
 
@@ -250,7 +255,7 @@ public sealed interface CompilerDebugger {
     public void recordResolution(
       Path artifacts,
       Map<String, Declaration> resolution,
-      String packageName)
+      Name packageName)
     {
       var string = new StringBuilder();
       string
@@ -355,7 +360,7 @@ public sealed interface CompilerDebugger {
     public void recordSource(
       Path artifacts,
       Source source,
-      String packageName,
+      Name packageName,
       String sourceName)
     {}
 
@@ -363,7 +368,7 @@ public sealed interface CompilerDebugger {
     public void recordTokens(
       Path artifacts,
       List<Token> tokens,
-      String packageName,
+      Name packageName,
       String sourceName)
     {}
 
@@ -371,7 +376,7 @@ public sealed interface CompilerDebugger {
     public void recordDeclarations(
       Path artifacts,
       List<Declaration> declarations,
-      String packageName,
+      Name packageName,
       String sourceName)
     {}
 
@@ -379,7 +384,7 @@ public sealed interface CompilerDebugger {
     public void recordResolution(
       Path artifacts,
       Map<String, Declaration> resolution,
-      String packageName)
+      Name packageName)
     {}
 
     @Override
@@ -405,21 +410,21 @@ public sealed interface CompilerDebugger {
   void recordSource(
     Path artifacts,
     Source source,
-    String packageName,
+    Name packageName,
     String sourceName);
   void recordTokens(
     Path artifacts,
     List<Token> tokens,
-    String packageName,
+    Name packageName,
     String sourceName);
   void recordDeclarations(
     Path artifacts,
     List<Node.Declaration> declarations,
-    String packageName,
+    Name packageName,
     String sourceName);
   void recordResolution(
     Path artifacts,
     Map<String, Node.Declaration> resolution,
-    String packageName);
+    Name packageName);
   void recordTarget(Path artifacts, Semantic.Target target);
 }

@@ -7,11 +7,11 @@ public final class PackageChecker {
     CompilerDebugger debugger,
     Object subject,
     SetBuffer<String> externalNames,
-    Accessor<String, Semantic.Package> accessor,
+    Accessor<Name, Semantic.Package> accessor,
     Path sources,
     Path artifacts,
     PackageType type,
-    String name)
+    Name packageName)
   {
     var checker =
       new PackageChecker(
@@ -22,30 +22,30 @@ public final class PackageChecker {
         sources,
         artifacts,
         type,
-        name);
+        packageName);
     return checker.check();
   }
 
-  private final CompilerDebugger                   debugger;
-  private final Object                             subject;
-  private final SetBuffer<String>                  externalNames;
-  private final Accessor<String, Semantic.Package> accessor;
-  private final Path                               sources;
-  private final Path                               artifacts;
-  private final PackageType                        type;
-  private final String                             name;
-  private Map<String, Node.Declaration>            declarations;
-  private AcyclicCache<String, Semantic.Symbol>    symbols;
+  private final CompilerDebugger                 debugger;
+  private final Object                           subject;
+  private final SetBuffer<String>                externalNames;
+  private final Accessor<Name, Semantic.Package> accessor;
+  private final Path                             sources;
+  private final Path                             artifacts;
+  private final PackageType                      type;
+  private final Name                             packageName;
+  private Map<String, Node.Declaration>          declarations;
+  private AcyclicCache<String, Semantic.Symbol>  symbols;
 
   private PackageChecker(
     CompilerDebugger debugger,
     Object subject,
     SetBuffer<String> externalNames,
-    Accessor<String, Semantic.Package> accessor,
+    Accessor<Name, Semantic.Package> accessor,
     Path sources,
     Path artifacts,
     PackageType type,
-    String name)
+    Name packageName)
   {
     this.debugger      = debugger;
     this.subject       = subject;
@@ -54,13 +54,13 @@ public final class PackageChecker {
     this.sources       = sources;
     this.artifacts     = artifacts;
     this.type          = type;
-    this.name          = name;
+    this.packageName   = packageName;
   }
 
   private Semantic.Package check() {
     resolveDeclarations();
     symbols = AcyclicCache.create(this::checkSymbol);
-    if (name.equals("duru")) {
+    if (packageName.equals(Name.of("duru"))) {
       var builtins =
         List.<Semantic
           .Builtin>of(
@@ -78,26 +78,15 @@ public final class PackageChecker {
       symbols.get(declaration.value().location(), declaration.key());
     }
     return switch (type) {
-      case EXECUTABLE -> new Semantic.Executable(name, symbols.getAll());
-      case LIBRARY -> new Semantic.Library(name, symbols.getAll());
+      case EXECUTABLE -> new Semantic.Executable(packageName, symbols.getAll());
+      case LIBRARY -> new Semantic.Library(packageName, symbols.getAll());
       case IMPLEMENTATION ->
-        new Semantic.Implementation(name, symbols.getAll());
+        new Semantic.Implementation(packageName, symbols.getAll());
     };
   }
 
   private void resolveDeclarations() {
-    var directory = sources;
-    var index     = name.indexOf('.');
-    while (index != -1) {
-      var next = name.indexOf('.', index + 1);
-      if (next == -1) {
-        directory = directory.resolve(name.substring(index + 1));
-      }
-      else {
-        directory = directory.resolve(name.substring(index + 1, next));
-      }
-      index = next;
-    }
+    var directory           = packageName.resolve(sources);
     var packageDeclarations = MapBuffer.<String, Node.Declaration>create();
     for (var file : Persistance.list(subject, directory)) {
       var fullFilename = file.getFileName().toString();
@@ -106,65 +95,62 @@ public final class PackageChecker {
       var filename =
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
       var source   = new Source(file, Persistance.load(directory, file));
-      debugger.recordSource(artifacts, source, name, filename);
+      debugger.recordSource(artifacts, source, packageName, filename);
       var tokens = SourceLexer.lex(source);
-      debugger.recordTokens(artifacts, tokens, name, filename);
+      debugger.recordTokens(artifacts, tokens, packageName, filename);
       var declarations = SourceParser.parse(tokens);
-      debugger.recordDeclarations(artifacts, declarations, name, filename);
+      debugger
+        .recordDeclarations(artifacts, declarations, packageName, filename);
       for (var declaration : declarations) {
         var identifier = declaration.name().text();
         if (packageDeclarations.contains(identifier)) {
           throw Diagnostic
             .error(
               declaration.name().location(),
-              "redeclaration of `%s.%s`",
-              name,
-              identifier);
+              "redeclaration of `%s`",
+              packageName.scope(identifier));
         }
         packageDeclarations.add(identifier, declaration);
       }
     }
     declarations = packageDeclarations.toMap();
-    debugger.recordResolution(artifacts, declarations, name);
+    debugger.recordResolution(artifacts, declarations, packageName);
   }
 
-  private Semantic.Symbol checkSymbol(Object subject, String symbolName) {
-    var checked = declarations.get(symbolName);
+  private Semantic.Symbol checkSymbol(Object subject, String identifier) {
+    var checked = declarations.get(identifier);
     if (checked.isEmpty()) {
       throw Diagnostic
         .error(
           subject,
-          "there is no symbol `%s` in package `%s`",
-          Text.getSymbol(symbolName),
-          name);
+          "there is no symbol `%s`",
+          packageName.scope(identifier));
     }
     return SymbolChecker
-      .check(externalNames, this::accessSymbol, name, checked.getFirst());
+      .check(
+        externalNames,
+        this::accessSymbol,
+        packageName,
+        checked.getFirst());
   }
 
-  private Semantic.Symbol accessSymbol(Object subject, String accessedSymbol) {
-    var symbolName = Text.getSymbol(accessedSymbol);
-    if (accessedSymbol.equals(symbolName)) {
-      return symbols.get(subject, symbolName);
+  private Semantic.Symbol accessSymbol(Object subject, Name mention) {
+    var mentionedSymbol = mention.getSymbol();
+    if (!mention.isScoped()) {
+      return symbols.get(subject, mentionedSymbol);
     }
-    var accessedPackage = Text.getPackage(accessedSymbol);
-    if (accessedPackage.equals(name)) {
-      return symbols.get(subject, symbolName);
+    var mentionedPackage = mention.getPackage();
+    if (mentionedPackage.equals(packageName))
+      return symbols.get(subject, mentionedSymbol);
+    var accessedSymbol =
+      accessor.access(subject, mentionedPackage).symbols().get(mentionedSymbol);
+    if (accessedSymbol.isEmpty()) {
+      throw Diagnostic.error(subject, "there is no symbol `%s`", mention);
     }
-    var accessed =
-      accessor.access(subject, accessedPackage).symbols().get(symbolName);
-    if (accessed.isEmpty()) {
+    if (!accessedSymbol.getFirst().isPublic()) {
       throw Diagnostic
-        .error(
-          subject,
-          "there is no symbol `%s` in package `%s`",
-          symbolName,
-          accessedPackage);
+        .error(subject, "accessed symbol `%s` is not public", mention);
     }
-    if (!accessed.getFirst().isPublic()) {
-      throw Diagnostic
-        .error(subject, "accessed symbol `%s` is not public", accessedSymbol);
-    }
-    return accessed.getFirst();
+    return accessedSymbol.getFirst();
   }
 }

@@ -20,11 +20,11 @@ public final class ModuleChecker {
   private final SetBuffer<String>                 externalNames;
   private final Accessor<String, Semantic.Module> accessor;
   private final Path                              directory;
-  private String                                  name;
+  private String                                  moduleIdentifier;
   private Path                                    sources;
   private Path                                    artifacts;
   private Configuration                           configuration;
-  private AcyclicCache<String, Semantic.Package>  packages;
+  private AcyclicCache<Name, Semantic.Package>    packages;
 
   private ModuleChecker(
     CompilerDebugger debugger,
@@ -41,14 +41,14 @@ public final class ModuleChecker {
   }
 
   private Semantic.Module check() {
-    name      = directory.getFileName().toString();
-    sources   = directory.resolve("src");
-    artifacts = directory.resolve("art");
+    moduleIdentifier = directory.getFileName().toString();
+    sources          = directory.resolve("src");
+    artifacts        = directory.resolve("art");
     Persistance.ensure(directory, artifacts);
     resolveConfiguration();
     packages = AcyclicCache.create(this::checkPackage);
     checkPackageDeclarations();
-    return new Semantic.Module(name, packages.getAll());
+    return new Semantic.Module(moduleIdentifier, packages.getAll());
   }
 
   private void checkPackageDeclarations() {
@@ -108,7 +108,7 @@ public final class ModuleChecker {
     debugger.recordConfiguration(artifacts, configuration);
   }
 
-  private Semantic.Package checkPackage(Object subject, String packageName) {
+  private Semantic.Package checkPackage(Object subject, Name packageName) {
     PackageType type;
     if (configuration.executables().contains(packageName)) {
       type = PackageType.EXECUTABLE;
@@ -133,37 +133,36 @@ public final class ModuleChecker {
 
   private Semantic.Package accessPackage(
     Object subject,
-    String accessedPackage)
+    Name mentionedPackage)
   {
-    var accessedModule = Text.getModule(accessedPackage);
-    if (accessedModule.equals(name)) {
+    var mentionedModule = mentionedPackage.getModule();
+    if (mentionedModule.equals(moduleIdentifier)) {
       if (!(packages
-        .get(subject, accessedPackage) instanceof Semantic.Library library))
+        .get(subject, mentionedPackage) instanceof Semantic.Library library))
       {
         throw Diagnostic
           .error(
             subject,
             "accessed package `%s` is not a library",
-            accessedPackage);
+            mentionedPackage);
       }
       return library;
     }
-    var accessed =
-      accessor.access(subject, accessedModule).packages().get(accessedPackage);
-    if (accessed.isEmpty()) {
+    var accessedPackage =
+      accessor
+        .access(subject, mentionedModule)
+        .packages()
+        .get(mentionedPackage);
+    if (accessedPackage.isEmpty()) {
       throw Diagnostic
-        .error(
-          subject,
-          "there is no package `%s` in module `%s`",
-          accessedPackage,
-          accessedModule);
+        .error(subject, "there is no package `%s`", mentionedPackage);
     }
-    if (!(accessed.getFirst() instanceof Semantic.Library library)) {
+    if (!(accessedPackage.getFirst() instanceof Semantic.Library library)) {
       throw Diagnostic
         .error(
           subject,
           "accessed package `%s` is not a library",
-          accessedPackage);
+          mentionedPackage);
     }
     return library;
   }

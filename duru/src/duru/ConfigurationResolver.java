@@ -9,8 +9,8 @@ public final class ConfigurationResolver {
   }
 
   private final List<ConfigurationNode.PackageDeclaration> declarations;
-  private MapBuffer<String, Location>                      executables;
-  private MapBuffer<String, Location>                      libraries;
+  private MapBuffer<Name, Location>                        executables;
+  private MapBuffer<Name, Location>                        libraries;
 
   private ConfigurationResolver(
     List<ConfigurationNode.PackageDeclaration> declarations)
@@ -24,28 +24,28 @@ public final class ConfigurationResolver {
     for (var declaration : declarations) {
       switch (declaration) {
         case ConfigurationNode.Executable executable -> {
-          var text = executable.name().toString();
-          checkUniqueness(text, executable.name().location());
-          executables.add(text, executable.name().location());
+          var name = executable.name().toName();
+          checkUniqueness(name, executable.name().location());
+          executables.add(name, executable.name().location());
         }
         case ConfigurationNode.Library library -> {
-          var text = library.name().toString();
-          checkUniqueness(text, library.name().location());
-          libraries.add(text, library.name().location());
+          var name = library.name().toName();
+          checkUniqueness(name, library.name().location());
+          libraries.add(name, library.name().location());
         }
       }
     }
     return new Configuration(executables.toMap(), libraries.toMap());
   }
 
-  private void checkUniqueness(String text, Location location) {
-    if (executables.contains(text)) {
+  private void checkUniqueness(Name name, Location location) {
+    if (executables.contains(name)) {
       throw Diagnostic
-        .error(location, "redefinition of executable package `%s`", text);
+        .error(location, "redefinition of executable package `%s`", name);
     }
-    if (libraries.contains(text)) {
+    if (libraries.contains(name)) {
       throw Diagnostic
-        .error(location, "redefinition of library package `%s`", text);
+        .error(location, "redefinition of library package `%s`", name);
     }
   }
 }

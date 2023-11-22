@@ -104,11 +104,13 @@ public sealed interface Node {
     }
   }
 
-  record Mention(
-    Location location,
-    List<Token.Identifier> subspaces,
-    Token.Identifier name) implements Node
-  {}
+  record Mention(Location location, List<Token.Identifier> identifiers)
+    implements Node
+  {
+    public Name toName() {
+      return new Name(identifiers.transform(Token.Identifier::text));
+    }
+  }
 
   Location location();
 }

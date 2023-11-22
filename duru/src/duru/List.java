@@ -1,5 +1,6 @@
 package duru;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 public final class List<Element>
@@ -47,6 +48,11 @@ public final class List<Element>
       elements[i] = transformer.apply(get(i));
     }
     return new List<>(elements);
+  }
+
+  @Override
+  public List<Element> sublist(int begin, int end) {
+    return new List<>(Arrays.copyOfRange(elements, begin, end));
   }
 
   @Override

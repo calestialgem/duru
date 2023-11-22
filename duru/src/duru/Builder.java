@@ -18,7 +18,7 @@ public final class Builder {
   private final Path            artifacts;
   private final Semantic.Target target;
   private StringBuilder         string;
-  private SetBuffer<String>     built;
+  private SetBuffer<Name>       built;
   private int                   indentation;
 
   private Builder(Object subject, Path artifacts, Semantic.Target target) {
@@ -37,7 +37,7 @@ public final class Builder {
       indentation = 0;
       switch (package_) {
         case Semantic.Executable executable -> {
-          var mainProcedure = "%s.main".formatted(executable.name());
+          var mainProcedure = executable.name().scope("main");
           var entrypoint    =
             new Semantic.Discard(
               new Semantic.Invocation(mainProcedure, List.of()));
@@ -70,21 +70,23 @@ public final class Builder {
     }
   }
 
-  private void buildAccess(String name) {
+  private void buildAccess(Name name) {
     var symbol = accessSymbol(name);
-    string
-      .append(
-        symbol.externalName().getOrElse(() -> symbol.name().replace('.', '$')));
+    for (var externalName : symbol.externalName()) {
+      string.append(externalName);
+      return;
+    }
+    name.joined("$");
   }
 
-  private void buildSymbol(String name) {
+  private void buildSymbol(Name name) {
     buildSymbol(accessSymbol(name));
   }
 
-  private Symbol accessSymbol(String name) {
-    var module   = target.modules().get(Text.getModule(name)).getFirst();
-    var package_ = module.packages().get(Text.getPackage(name)).getFirst();
-    var symbol   = package_.symbols().get(Text.getSymbol(name)).getFirst();
+  private Symbol accessSymbol(Name name) {
+    var module   = target.modules().get(name.getModule()).getFirst();
+    var package_ = module.packages().get(name.getPackage()).getFirst();
+    var symbol   = package_.symbols().get(name.getSymbol()).getFirst();
     return symbol;
   }
 
