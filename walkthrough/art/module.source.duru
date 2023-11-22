@@ -1,4 +1,3 @@
-7871DA3B
+2A3A481D
 C:\Users\Cem\duru\walkthrough\module.duru
-executable walkthrough;
-executable walkthrough.returns2;
+executable walkthrough::features;

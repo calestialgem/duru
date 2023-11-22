@@ -1,5 +1,0 @@
-7F463892
-C:\Users\Cem\duru\walkthrough\src\main.duru
-void main() {
-  duru.print("Hello, World!\n");
-}

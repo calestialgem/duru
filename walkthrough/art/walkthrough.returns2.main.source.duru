@@ -1,5 +1,0 @@
-BB993193
-C:\Users\Cem\duru\walkthrough\src\returns2\main.duru
-proc main() {
-  duru.exit(2);
-}
