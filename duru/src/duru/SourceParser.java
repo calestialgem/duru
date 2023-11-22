@@ -34,7 +34,7 @@ public final class SourceParser {
         Optional.present(expect(Token.StringConstant.class, "external name"));
     }
     var isPublic = take(Token.Public.class);
-    if (take(Token.Proc.class)) {
+    if (take(Token.Fn.class)) {
       var name = expect(Token.Identifier.class, "procedure name");
       expect(Token.OpeningParenthesis.class, "`(` of parameter list");
       var parameters = parseSeparated(this::parseParameter);
@@ -55,7 +55,7 @@ public final class SourceParser {
             returnType,
             body));
     }
-    if (take(Token.Struct.class)) {
+    if (take(Token.Type.class)) {
       var name = expect(Token.Identifier.class, "structure name");
       expect(Token.Semicolon.class, "`;` of structure declaration");
       return Optional

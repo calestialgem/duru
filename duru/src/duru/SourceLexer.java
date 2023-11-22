@@ -1,6 +1,7 @@
 package duru;
 
 import java.math.BigDecimal;
+import java.util.function.Function;
 
 public final class SourceLexer {
   public static List<Token> lex(Source source) {
@@ -28,15 +29,25 @@ public final class SourceLexer {
       switch (initial) {
         case ' ', '\r', '\n' -> {}
         case '/' -> {
-          if (hasCharacter() && getCharacter() == '/') {
+          if (!hasCharacter()) {
+            lex(Token.Slash::new);
+            break;
+          }
+          if (getCharacter() == '/') {
             advance();
             while (hasCharacter() && getCharacter() != '\n') {
               advance();
             }
             break;
           }
-          if (!hasCharacter() || getCharacter() != '*') {
-            throw Diagnostic.error(location(), "incomplete comment");
+          if (getCharacter() == '=') {
+            advance();
+            lex(Token.SlashEqual::new);
+            break;
+          }
+          if (getCharacter() != '*') {
+            lex(Token.Slash::new);
+            break;
           }
           advance();
           var blockComments = 1;
@@ -59,22 +70,53 @@ public final class SourceLexer {
             throw Diagnostic.error(location(), "incomplete block comment");
           }
         }
-        case '{' -> tokens.add(new Token.OpeningBrace(location()));
-        case '}' -> tokens.add(new Token.ClosingBrace(location()));
-        case '(' -> tokens.add(new Token.OpeningParenthesis(location()));
-        case ')' -> tokens.add(new Token.ClosingParenthesis(location()));
-        case ';' -> tokens.add(new Token.Semicolon(location()));
-        case ':' -> {
-          if (!hasCharacter() && getCharacter() != ':')
-            throw Diagnostic.error(location(), "incomplete scope token");
-          advance();
-          tokens.add(new Token.ColonColon(location()));
-        }
-        case '.' -> tokens.add(new Token.Dot(location()));
-        case ',' -> tokens.add(new Token.Comma(location()));
-        case '=' -> tokens.add(new Token.Equal(location()));
-        case '*' -> tokens.add(new Token.Star(location()));
-        case '<' -> tokens.add(new Token.Left(location()));
+        case '{' -> lex(Token.OpeningBrace::new);
+        case '}' -> lex(Token.ClosingBrace::new);
+        case '(' -> lex(Token.OpeningParenthesis::new);
+        case ')' -> lex(Token.ClosingParenthesis::new);
+        case ';' -> lex(Token.Semicolon::new);
+        case '.' -> lex(Token.Dot::new);
+        case ',' -> lex(Token.Comma::new);
+        case '~' -> lex(Token.Tilde::new);
+        case ':' -> lexRepeatable(Token.Colon::new, Token.ColonColon::new);
+        case '=' -> lexRepeatable(Token.Equal::new, Token.EqualEqual::new);
+        case '*' -> lexExtensible(Token.Star::new, Token.StarEqual::new);
+        case '%' -> lexExtensible(Token.Percent::new, Token.PercentEqual::new);
+        case '^' -> lexExtensible(Token.Caret::new, Token.CaretEqual::new);
+        case '!' ->
+          lexExtensible(Token.Exclamation::new, Token.ExclamationEqual::new);
+        case '+' ->
+          lexRepeatableOrExtensible(
+            Token.Plus::new,
+            Token.PlusPlus::new,
+            Token.PlusEqual::new);
+        case '-' ->
+          lexRepeatableOrExtensible(
+            Token.Minus::new,
+            Token.MinusMinus::new,
+            Token.MinusEqual::new);
+        case '&' ->
+          lexRepeatableOrExtensible(
+            Token.Ampersand::new,
+            Token.AmpersandAmpersand::new,
+            Token.AmpersandEqual::new);
+        case '|' ->
+          lexRepeatableOrExtensible(
+            Token.Pipe::new,
+            Token.PipePipe::new,
+            Token.PipeEqual::new);
+        case '<' ->
+          lexRepeatableAndExtensible(
+            Token.Left::new,
+            Token.LeftLeft::new,
+            Token.LeftEqual::new,
+            Token.LeftLeftEqual::new);
+        case '>' ->
+          lexRepeatableAndExtensible(
+            Token.Right::new,
+            Token.RightRight::new,
+            Token.RightEqual::new,
+            Token.RightRightEqual::new);
         case '"' -> {
           var value = new StringBuilder();
           while (true) {
@@ -147,14 +189,19 @@ public final class SourceLexer {
             }
             var text = source.contents().substring(begin, index);
             switch (text) {
-              case "extern" -> tokens.add(new Token.Extern(location()));
-              case "public" -> tokens.add(new Token.Public(location()));
-              case "proc" -> tokens.add(new Token.Proc(location()));
-              case "struct" -> tokens.add(new Token.Struct(location()));
-              case "var" -> tokens.add(new Token.Var(location()));
-              case "if" -> tokens.add(new Token.If(location()));
-              case "else" -> tokens.add(new Token.Else(location()));
-              case "return" -> tokens.add(new Token.Return(location()));
+              case "extern" -> lex(Token.Extern::new);
+              case "public" -> lex(Token.Public::new);
+              case "using" -> lex(Token.Using::new);
+              case "type" -> lex(Token.Type::new);
+              case "const" -> lex(Token.Const::new);
+              case "var" -> lex(Token.Var::new);
+              case "fn" -> lex(Token.Fn::new);
+              case "if" -> lex(Token.If::new);
+              case "else" -> lex(Token.Else::new);
+              case "for" -> lex(Token.For::new);
+              case "break" -> lex(Token.Break::new);
+              case "continue" -> lex(Token.Continue::new);
+              case "return" -> lex(Token.Return::new);
               default -> tokens.add(new Token.Identifier(location(), text));
             }
             break;
@@ -164,6 +211,61 @@ public final class SourceLexer {
       }
     }
     return tokens.toList();
+  }
+
+  private void lex(Function<Location, Token> singleLexer) {
+    tokens.add(singleLexer.apply(location()));
+  }
+
+  private void lexRepeatable(
+    Function<Location, Token> singleLexer,
+    Function<Location, Token> repeatedLexer)
+  {
+    if (hasCharacter() && getCharacter() == initial) {
+      advance();
+      lex(repeatedLexer);
+      return;
+    }
+    lex(singleLexer);
+  }
+
+  private void lexExtensible(
+    Function<Location, Token> singleLexer,
+    Function<Location, Token> extendedLexer)
+  {
+    if (hasCharacter() && getCharacter() == '=') {
+      advance();
+      lex(extendedLexer);
+      return;
+    }
+    lex(singleLexer);
+  }
+
+  private void lexRepeatableOrExtensible(
+    Function<Location, Token> singleLexer,
+    Function<Location, Token> repeatedLexer,
+    Function<Location, Token> extendedLexer)
+  {
+    if (hasCharacter() && getCharacter() == initial) {
+      advance();
+      lex(repeatedLexer);
+      return;
+    }
+    lexExtensible(singleLexer, extendedLexer);
+  }
+
+  private void lexRepeatableAndExtensible(
+    Function<Location, Token> singleLexer,
+    Function<Location, Token> repeatedLexer,
+    Function<Location, Token> extendedLexer,
+    Function<Location, Token> repeatedAndExtendedLexer)
+  {
+    if (hasCharacter() && getCharacter() == initial) {
+      advance();
+      lexExtensible(repeatedLexer, repeatedAndExtendedLexer);
+      return;
+    }
+    lexExtensible(singleLexer, extendedLexer);
   }
 
   private Location location() {
