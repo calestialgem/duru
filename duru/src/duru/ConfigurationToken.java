@@ -8,10 +8,10 @@ public sealed interface ConfigurationToken {
     }
   }
 
-  record Dot(Location location) implements ConfigurationToken {
+  record ColonColon(Location location) implements ConfigurationToken {
     @Override
     public String toString() {
-      return "punctuation `.`";
+      return "punctuation `::`";
     }
   }
 

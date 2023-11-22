@@ -22,7 +22,8 @@ public sealed interface ConfigurationNode {
       var string = new StringBuilder();
       string.append(subspaces.getFirst().text());
       for (var i = 1; i < subspaces.length(); i++) {
-        string.append('.');
+        string.append(':');
+        string.append(':');
         string.append(subspaces.get(i).text());
       }
       return string.toString();

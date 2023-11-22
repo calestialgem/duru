@@ -58,7 +58,12 @@ public final class ConfigurationLexer {
           }
         }
         case ';' -> tokens.add(new ConfigurationToken.Semicolon(location()));
-        case '.' -> tokens.add(new ConfigurationToken.Dot(location()));
+        case ':' -> {
+          if (!hasCharacter() && getCharacter() != ':')
+            throw Diagnostic.error(location(), "incomplete scope token");
+          advance();
+          tokens.add(new ConfigurationToken.ColonColon(location()));
+        }
         default -> {
           if (Text.isIdentifierInitial(initial)) {
             while (hasCharacter() && Text.isIdentifierBody(getCharacter())) {

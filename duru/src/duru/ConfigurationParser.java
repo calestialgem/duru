@@ -62,7 +62,7 @@ public final class ConfigurationParser {
     }
     var subspaces = ListBuffer.<ConfigurationToken.Identifier>create();
     subspaces.add(name.getLast());
-    while (!parse(ConfigurationToken.Dot.class).isEmpty()) {
+    while (!parse(ConfigurationToken.ColonColon.class).isEmpty()) {
       var subspace = expect(ConfigurationToken.Identifier.class, "name");
       subspaces.add(subspace);
     }
