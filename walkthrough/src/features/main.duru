@@ -43,16 +43,16 @@ using duru::Float_32;
 
 
 
-// `struct` keyword declares a product type.
-// -----------------------------------------
+// `type` keyword declares a type.
+// -------------------------------
 
-// Members are listed comma-separated in `{}`.
+// Product types are specified using `{}`.
 
 /*
  * Declares `Person_Info` as a product type, which holds an `Integer` named
  * `age`, and a `Float_32` named `height`.
  */
-struct Person_Info { age Integer, height Float_32 }
+type Person_Info { age Integer, height Float_32 }
 
 // Incomplete types are specified using `;`.
 
@@ -60,32 +60,7 @@ struct Person_Info { age Integer, height Float_32 }
  * Declares `Stream` as an incomplete type, which is only useful for defining
  * foreign interfaces with strongly typed pointers (instead of `void*`).
  */
-extern "FILE" struct Stream;
-
-
-
-// `enum` keyword declares a sum type.
-// -----------------------------------
-
-// Alternatives are listed in `{}`.
-
-/*
- * Declares `Direction` as a sum type, which holds one of multiple other types:
- *  - `Direction::Aligned::East`
- *  - `Direction::Aligned::West`
- *  - `Direction::Aligned::North`
- *  - `Direction::Aligned::South`
- *  - `Direction::Unaligned`
- */
-enum Direction {
-  enum Aligned {
-    struct East {}
-    struct West {}
-    struct North {}
-    struct South {}
-  }
-  struct Unaligned { x Float_32, y Float_32 }
-}
+extern "FILE" type Stream;
 
 
 
