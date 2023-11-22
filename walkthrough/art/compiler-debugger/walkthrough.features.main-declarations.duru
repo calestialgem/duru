@@ -1,0 +1,40 @@
+9F6047DE
+0035.0007-0035.0014: Using `Integer`
+0042.0007-0042.0011: Using `duru`
+0055.0006-0055.0017: Type `Person_Info`
+0063.0020-0063.0026: extern "FILE" Type `Stream`
+0075.0007-0075.0009: Const `PI`
+0092.0005-0092.0010: Var `count`
+0107.0028-0107.0046: extern "linking_error" Var `should_not_be_used`
+0120.0004-0120.0007: Fn `add`
+0133.0018-0133.0030: extern "puts" Fn `print_string`
+0141.0004-0141.0009: Fn `do_it`
+0154.0018-0154.0022: extern "exit" Fn `exit`
+0181.0004-0181.0008: Fn `main`
+0381.0004-0381.0019: Fn `does_not_return`
+0383.0004-0383.0011: Fn `is_even`
+0407.0005-0407.0020: Var `string_constant`
+0408.0005-0408.0020: Var `number_constant`
+0415.0004-0415.0014: Fn `a_function`
+0429.0005-0429.0014: Var `promotion`
+0430.0005-0430.0013: Var `negation`
+0432.0005-0432.0019: Var `multiplication`
+0433.0005-0433.0013: Var `quotient`
+0434.0005-0434.0013: Var `reminder`
+0436.0005-0436.0013: Var `addition`
+0437.0005-0437.0016: Var `subtraction`
+0444.0005-0444.0016: Var `bitwise_not`
+0446.0005-0446.0015: Var `shift_left`
+0447.0005-0447.0016: Var `shift_right`
+0449.0005-0449.0016: Var `bitwise_and`
+0451.0005-0451.0016: Var `bitwise_xor`
+0453.0005-0453.0015: Var `bitwise_or`
+0460.0005-0460.0014: Var `less_than`
+0461.0005-0461.0026: Var `less_than_or_equal_to`
+0462.0005-0462.0017: Var `greater_than`
+0463.0005-0463.0029: Var `greater_than_or_equal_to`
+0465.0005-0465.0013: Var `equal_to`
+0466.0005-0466.0017: Var `not_equal_to`
+0473.0005-0473.0016: Var `logical_not`
+0475.0005-0475.0016: Var `logical_and`
+0477.0005-0477.0015: Var `logical_or`

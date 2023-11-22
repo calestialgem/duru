@@ -36,20 +36,17 @@ public final class SymbolChecker {
     symbolName = packageName.scope(declaration.name().text());
     locals     = MapBuffer.create();
     return switch (declaration) {
-      case Node.Proc proc -> checkProc(proc);
-      case Node.Struct struct -> checkStruct(struct);
+      case Node.Type struct -> checkStruct(struct);
+      case Node.Fn proc -> checkProc(proc);
+      default -> throw Diagnostic.unimplemented(declaration.location());
     };
   }
 
-  private Semantic.Proc checkProc(Node.Proc node) {
+  private Semantic.Proc checkProc(Node.Fn node) {
     var externalName = checkExternalName(node.externalName());
     var isPublic     = node.isPublic();
     var parameters   = checkParameters(node.parameters());
-    returnType =
-      node
-        .returnType()
-        .transform(this::checkType)
-        .getOrElse(Semantic.Unit::new);
+    returnType = checkType(node.returnType());
     for (var bodyNode : node.body()) {
       var checkedBody = checkStatement(bodyNode);
       var body        = checkedBody.statement();
@@ -57,7 +54,7 @@ public final class SymbolChecker {
         if (!(returnType instanceof Semantic.Unit)) {
           throw Diagnostic
             .error(
-              node.returnType().getFirst().location(),
+              node.returnType().location(),
               "procedure `%s` must return a `%s`",
               symbolName,
               returnType);
@@ -89,9 +86,7 @@ public final class SymbolChecker {
       Optional.absent());
   }
 
-  private Map<String, Semantic.Type> checkParameters(
-    List<Node.Parameter> nodes)
-  {
+  private Map<String, Semantic.Type> checkParameters(List<Node.Binding> nodes) {
     var parameters = MapBuffer.<String, Semantic.Type>create();
     for (var parameter : nodes) {
       var name = parameter.name().text();
@@ -108,7 +103,7 @@ public final class SymbolChecker {
     return parameters.toMap();
   }
 
-  private Semantic.Struct checkStruct(Node.Struct node) {
+  private Semantic.Struct checkStruct(Node.Type node) {
     return new Semantic.Struct(
       checkExternalName(node.externalName()),
       node.isPublic(),
@@ -169,7 +164,7 @@ public final class SymbolChecker {
           control);
       }
       case Node.Discard discard -> {
-        var discarded = checkExpression(discard.discarded());
+        var discarded = checkExpression(discard.source());
         yield new CheckedStatement(
           new Semantic.Discard(discarded.expression()),
           discarded.type() instanceof Semantic.Noreturn
@@ -223,7 +218,7 @@ public final class SymbolChecker {
                 v -> coerce(return_.value().getFirst(), v, returnType))),
           Control.RETURNS);
       }
-      case Node.Var var -> {
+      case Node.Declare var -> {
         var name           = var.name().text();
         var typeAnnotation = var.type().transform(this::checkType);
         var initialValue   = checkExpression(var.initialValue());
@@ -251,25 +246,26 @@ public final class SymbolChecker {
             coerce(var.initialValue().location(), initialValue, type)),
           Control.FLOWS);
       }
+      default -> throw Diagnostic.unimplemented(node.location());
     };
   }
 
   private CheckedExpression checkExpression(Node.Expression node) {
     return switch (node) {
       case Node.LessThan binary -> {
-        var left  = checkExpression(binary.left());
-        var right = checkExpression(binary.right());
+        var left  = checkExpression(binary.leftOperand());
+        var right = checkExpression(binary.rightOperand());
         if (!(left.type() instanceof Semantic.Arithmetic)) {
           throw Diagnostic
             .error(
-              binary.left().location(),
+              binary.leftOperand().location(),
               "`%s` is not arithmetic",
               left.type());
         }
         if (!(right.type() instanceof Semantic.Arithmetic)) {
           throw Diagnostic
             .error(
-              binary.right().location(),
+              binary.rightOperand().location(),
               "`%s` is not arithmetic",
               right.type());
         }
@@ -283,7 +279,7 @@ public final class SymbolChecker {
           }
           yield new CheckedExpression(
             new Semantic.LessThan(
-              coerce(binary.left().location(), left, right.type()),
+              coerce(binary.leftOperand().location(), left, right.type()),
               right.expression()),
             Semantic.BOOLEAN);
         }
@@ -291,7 +287,7 @@ public final class SymbolChecker {
           yield new CheckedExpression(
             new Semantic.LessThan(
               left.expression(),
-              coerce(binary.right().location(), right, left.type())),
+              coerce(binary.rightOperand().location(), right, left.type())),
             Semantic.BOOLEAN);
         }
         if (!left.type().equals(right.type())) {
@@ -319,39 +315,39 @@ public final class SymbolChecker {
         accessGlobal(access.mention());
         throw Diagnostic.unimplemented(access.location());
       }
-      case Node.Invocation invocation -> {
-        var accessed = accessGlobal(invocation.procedure());
-        if (!(accessed instanceof Semantic.Procedure procedure)) {
-          throw Diagnostic
-            .error(
-              invocation.procedure().location(),
-              "`%s` is not procedure",
-              accessed.name());
-        }
-        if (invocation.arguments().length()
-          != procedure.parameters().length())
-        {
-          throw Diagnostic
-            .error(
-              invocation.location(),
-              "`%s` takes %d parameters but %d arguments were given",
-              accessed.name(),
-              procedure.parameters().length(),
-              invocation.arguments().length());
-        }
-        var arguments = ListBuffer.<Semantic.Expression>create();
-        for (var i = 0; i < invocation.arguments().length(); i++) {
-          var argument  = invocation.arguments().get(i);
-          var parameter = procedure.parameters().values().get(i);
-          var checked   = checkExpression(argument);
-          var coerced   = coerce(argument.location(), checked, parameter);
-          arguments.add(coerced);
-        }
-        yield new CheckedExpression(
-          new Semantic.Invocation(accessed.name(), arguments.toList()),
-          procedure.returnType());
-      }
-      case Node.NaturalConstant naturalConstant -> {
+      // case Node.PostfixCall invocation -> {
+      // var accessed = accessGlobal(invocation.procedure());
+      // if (!(accessed instanceof Semantic.Procedure procedure)) {
+      // throw Diagnostic
+      // .error(
+      // invocation.procedure().location(),
+      // "`%s` is not procedure",
+      // accessed.name());
+      // }
+      // if (invocation.arguments().length()
+      // != procedure.parameters().length())
+      // {
+      // throw Diagnostic
+      // .error(
+      // invocation.location(),
+      // "`%s` takes %d parameters but %d arguments were given",
+      // accessed.name(),
+      // procedure.parameters().length(),
+      // invocation.arguments().length());
+      // }
+      // var arguments = ListBuffer.<Semantic.Expression>create();
+      // for (var i = 0; i < invocation.arguments().length(); i++) {
+      // var argument = invocation.arguments().get(i);
+      // var parameter = procedure.parameters().values().get(i);
+      // var checked = checkExpression(argument);
+      // var coerced = coerce(argument.location(), checked, parameter);
+      // arguments.add(coerced);
+      // }
+      // yield new CheckedExpression(
+      // new Semantic.Invocation(accessed.name(), arguments.toList()),
+      // procedure.returnType());
+      // }
+      case Node.NumberConstant naturalConstant -> {
         try {
           yield new CheckedExpression(
             new Semantic.IntegralConstant(
@@ -369,6 +365,7 @@ public final class SymbolChecker {
         new CheckedExpression(
           new Semantic.StringConstant(stringConstant.value().value()),
           new Semantic.Pointer(new Semantic.Byte()));
+      default -> throw Diagnostic.unimplemented(node.location());
     };
   }
 

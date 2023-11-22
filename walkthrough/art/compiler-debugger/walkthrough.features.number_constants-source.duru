@@ -1,0 +1,11 @@
+A8713CA0
+C:\Users\Cem\duru\walkthrough\src\features\number_constants.duru
+// Showcases number constant syntax.
+
+const MAX_FLOAT_64        duru::Float_64 = 1.797_693_134_862_315_7E+308;
+const MIN_NORMAL_FLOAT_64 duru::Float_64 = 2.225_073_858_507_201_4E-308;
+const MIN_FLOAT_64        duru::Float_64 = 4.900_000_000_000_000_0E-324;
+
+const MAX_FLOAT_64_HEX        duru::Float_64 = 0x1.ffff_ffff_ffff_fP+1023;
+const MIN_NORMAL_FLOAT_64_HEX duru::Float_64 = 0x1.0000_0000_0000_0P-1022;
+const MIN_FLOAT_64_HEX        duru::Float_64 = 0x0.0000_0000_0000_1P-1022;

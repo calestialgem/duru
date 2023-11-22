@@ -256,10 +256,7 @@ fn main() duru::Void {
   // block as the body.
   if (17 < variable) { variable <<= 2; }
 
-  // Any amount of declare and affect statements can lead the condition. Such
-  // are executed as if the `if` was in a block and these statements were just
-  // above the `if` in the block.
-  if (variable += 10; variable < 17) { variable <<= 2; }
+  // Local variables can be declared before the condition.
   if (var a Integer = variable * 2; a < 17) { variable += a; }
   else { variable -= a; }
 
@@ -309,11 +306,9 @@ fn main() duru::Void {
     }
   }
 
-  // Any amount of declare and affect statements can lead the condition. Such
-  // are executed as if the `for` was in a block and these statements were just
-  // above the `for` in the block.
+  // Local variables can be declared before the condition.
+  fib = 1;
   for (
-    fib = 1;
     var pre_leading Integer = 0;
     var leading     Integer = 1;
     var n           Integer = 1;
@@ -409,7 +404,7 @@ fn is_even(num Integer) duru::Boolean {
 // Constants
 // ---------
 
-var string_constant duru::Byte*      = "Hello, Artisan!";
+var string_constant *duru::Byte      = "Hello, Artisan!";
 var number_constant duru::Integer_32 = 1919;
 
 
