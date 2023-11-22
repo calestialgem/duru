@@ -1,6 +1,7 @@
 package duru;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.function.Function;
 
 public final class SourceLexer {
@@ -14,6 +15,8 @@ public final class SourceLexer {
   private int               index;
   private int               begin;
   private int               initial;
+  private int               base;
+  private BigDecimal        value;
 
   private SourceLexer(Source source) {
     this.source = source;
@@ -158,26 +161,119 @@ public final class SourceLexer {
         }
         default -> {
           if (Text.isDigit(initial)) {
-            var value = BigDecimal.valueOf(initial - '0');
-            while (hasCharacter()) {
-              var separatorBegin = index;
-              var character      = getCharacter();
-              if (Text.isUnderscore(character)) {
+            value = BigDecimal.valueOf(initial - '0');
+            base  = 10;
+            if (initial == '0' && hasCharacter()) {
+              int givenBase = switch (getCharacter()) {
+                case 'b', 'B' -> 2;
+                case 'o', 'O' -> 8;
+                case 'd', 'D' -> 10;
+                case 'x', 'X' -> 16;
+                default -> -1;
+              };
+              if (givenBase != -1) {
+                base = givenBase;
                 advance();
-                if (!hasCharacter() || !Text.isDigit(getCharacter())) {
-                  throw Diagnostic
-                    .error(
-                      location(separatorBegin),
-                      "expected digit after separator");
-                }
-                character = getCharacter();
+                value = BigDecimal.valueOf(enforceDigit());
               }
-              else if (!Text.isDigit(character)) {
+            }
+            while (hasCharacter()) {
+              if (Text.isUnderscore(getCharacter())) {
+                advance();
+                appendDigit(enforceDigit());
+                continue;
+              }
+              var digit = lexDigit();
+              if (digit.isEmpty())
                 break;
+              appendDigit(digit.getFirst());
+            }
+            var fractionLength = 0;
+            if (take('.')) {
+              while (hasCharacter()) {
+                if (Text.isUnderscore(getCharacter())) {
+                  advance();
+                  appendDigit(enforceDigit());
+                  fractionLength++;
+                  continue;
+                }
+                var digit = lexDigit();
+                if (digit.isEmpty())
+                  break;
+                appendDigit(digit.getFirst());
+                fractionLength++;
               }
-              advance();
-              value = value.scaleByPowerOfTen(1);
-              value = value.add(BigDecimal.valueOf(character - '0'));
+            }
+            var exponent                 = 0;
+            var exponentSeparator        = base == 10 ? 'e' : 'p';
+            var capitalExponentSeparator = exponentSeparator + 'A' - 'a';
+            if (take(exponentSeparator) || take(capitalExponentSeparator)) {
+              var isNegative = take('-');
+              if (!isNegative)
+                take('+');
+              while (hasCharacter()) {
+                if (Text.isUnderscore(getCharacter())) {
+                  advance();
+                  var digit = enforceDigit();
+                  if (exponent > Integer.MAX_VALUE / 10)
+                    throw Diagnostic.error(location(), "huge exponent");
+                  exponent *= 10;
+                  if (exponent > Integer.MAX_VALUE - digit)
+                    throw Diagnostic.error(location(), "huge exponent");
+                  exponent += digit;
+                  continue;
+                }
+                var digit = lexDigit();
+                if (digit.isEmpty())
+                  break;
+                if (exponent > Integer.MAX_VALUE / 10)
+                  throw Diagnostic.error(location(), "huge exponent");
+                exponent *= 10;
+                if (exponent > Integer.MAX_VALUE - digit.getFirst())
+                  throw Diagnostic.error(location(), "huge exponent");
+                exponent += digit.getFirst();
+              }
+              if (isNegative)
+                exponent = -exponent;
+            }
+            if (base == 10) {
+              if (exponent < Integer.MIN_VALUE + fractionLength) {
+                throw Diagnostic.error(location(), "too precise");
+              }
+              exponent -= fractionLength;
+              try {
+                value = value.scaleByPowerOfTen(exponent);
+              }
+              catch (@SuppressWarnings("unused") ArithmeticException cause) {
+                throw Diagnostic.error(location(), "too precise");
+              }
+            }
+            else {
+              var power = switch (base) {
+                case 2 -> 1;
+                case 8 -> 3;
+                case 16 -> 4;
+                default -> -1;
+              };
+              if (fractionLength > Integer.MAX_VALUE / power)
+                throw Diagnostic.error(location(), "too precise");
+              fractionLength *= power;
+              if (exponent < Integer.MIN_VALUE + fractionLength) {
+                throw Diagnostic.error(location(), "too precise");
+              }
+              exponent -= fractionLength;
+              try {
+                for (var i = 0; i < exponent; i++) {
+                  value = value.multiply(BigDecimal.valueOf(2));
+                }
+                for (var i = 0; i > exponent; i--) {
+                  value =
+                    value.divide(BigDecimal.valueOf(2), RoundingMode.HALF_EVEN);
+                }
+              }
+              catch (@SuppressWarnings("unused") ArithmeticException cause) {
+                throw Diagnostic.error(location(), "too precise");
+              }
             }
             tokens.add(new Token.NumberConstant(location(), value));
             break;
@@ -268,12 +364,78 @@ public final class SourceLexer {
     lexExtensible(singleLexer, extendedLexer);
   }
 
+  private void appendDigit(int digit) {
+    try {
+      value = value.multiply(BigDecimal.valueOf(base));
+      value = value.add(BigDecimal.valueOf(digit));
+    }
+    catch (@SuppressWarnings("unused") ArithmeticException cause) {
+      throw Diagnostic.error(location(), "huge number");
+    }
+  }
+
+  private int enforceDigit() {
+    var digit = lexDigit();
+    if (!digit.isEmpty()) {
+      return digit.getFirst();
+    }
+    if (hasCharacter()) {
+      throw Diagnostic
+        .failure(
+          location(),
+          "expected base-%d digit instead of `%c`",
+          base,
+          getCharacter());
+    }
+    throw Diagnostic
+      .failure(location(), "expected base-%d digit at end of file", base);
+  }
+
+  private Optional<Integer> lexDigit() {
+    if (!hasCharacter())
+      return Optional.absent();
+    var character = getCharacter();
+    return switch (base) {
+      case 2, 8, 10 -> {
+        var digit = character - '0';
+        if (digit >= 0 && digit < base) {
+          advance();
+          yield Optional.present(digit);
+        }
+        yield Optional.absent();
+      }
+      case 16 -> {
+        if (character >= '0' && character <= '9') {
+          advance();
+          yield Optional.present(character - '0');
+        }
+        if (character >= 'a' && character <= 'f') {
+          advance();
+          yield Optional.present(character - 'a');
+        }
+        if (character >= 'A' && character <= 'F') {
+          advance();
+          yield Optional.present(character - 'A');
+        }
+        yield Optional.absent();
+      }
+      default -> Optional.absent();
+    };
+  }
+
   private Location location() {
     return location(begin);
   }
 
   private Location location(int begin) {
     return Location.at(source, begin, index);
+  }
+
+  private boolean take(int character) {
+    if (!hasCharacter() || getCharacter() != character)
+      return false;
+    advance();
+    return true;
   }
 
   private boolean hasCharacter() {

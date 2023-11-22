@@ -1,4 +1,4 @@
-DA06A27B
+CC19804A
 0035.0001-0035.0006: keyword `using`
 0035.0007-0035.0014: identifier `Integer`
 0035.0015-0035.0016: punctuation `=`
@@ -29,9 +29,7 @@ DA06A27B
 0075.0007-0075.0009: identifier `PI`
 0075.0010-0075.0018: identifier `Float_32`
 0075.0019-0075.0020: punctuation `=`
-0075.0021-0075.0022: number `3`
-0075.0022-0075.0023: punctuation `.`
-0075.0023-0075.0025: number `14`
+0075.0021-0075.0025: number `3.14`
 0075.0025-0075.0026: punctuation `;`
 0092.0001-0092.0004: keyword `var`
 0092.0005-0092.0010: identifier `count`
