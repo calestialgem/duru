@@ -59,6 +59,16 @@ public final class Checker {
         return checkModule(subject, checkedDirectory);
       }
     }
+    if (name.equals("duru")) {
+      var symbols = MapBuffer.<String, Semantic.Symbol>create();
+      for (var builtin : Semantic.BUILTINS) {
+        symbols.add(builtin.identifier(), builtin);
+      }
+      var package_ = new Semantic.Library(Name.of(name), symbols.toMap());
+      var packages = MapBuffer.<Name, Semantic.Package>create();
+      packages.add(package_.name(), package_);
+      return new Semantic.Module(name, packages.toMap());
+    }
     throw Diagnostic
       .error(subject, "no module `%s` in bases `%s`", name, moduleBases);
   }
