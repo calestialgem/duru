@@ -163,7 +163,7 @@ public final class SourceLexer {
             value = BigDecimal.valueOf(initial - '0');
             base  = 10;
             if (initial == '0' && hasCharacter()) {
-              int givenBase = switch (getCharacter()) {
+              var givenBase = switch (getCharacter()) {
                 case 'b', 'B' -> 2;
                 case 'o', 'O' -> 8;
                 case 'd', 'D' -> 10;
@@ -183,8 +183,9 @@ public final class SourceLexer {
                 continue;
               }
               var digit = lexDigit();
-              if (digit.isEmpty())
+              if (digit.isEmpty()) {
                 break;
+              }
               appendDigit(digit.getFirst());
             }
             var fractionLength = 0;
@@ -197,8 +198,9 @@ public final class SourceLexer {
                   continue;
                 }
                 var digit = lexDigit();
-                if (digit.isEmpty())
+                if (digit.isEmpty()) {
                   break;
+                }
                 appendDigit(digit.getFirst());
                 fractionLength++;
               }
@@ -208,32 +210,39 @@ public final class SourceLexer {
             var capitalExponentSeparator = exponentSeparator + 'A' - 'a';
             if (take(exponentSeparator) || take(capitalExponentSeparator)) {
               var isNegative = take('-');
-              if (!isNegative)
+              if (!isNegative) {
                 take('+');
+              }
               while (hasCharacter()) {
                 if (Text.isUnderscore(getCharacter())) {
                   advance();
                   var digit = enforceDigit();
-                  if (exponent > Integer.MAX_VALUE / 10)
+                  if (exponent > Integer.MAX_VALUE / 10) {
                     throw Diagnostic.error(location(), "huge exponent");
+                  }
                   exponent *= 10;
-                  if (exponent > Integer.MAX_VALUE - digit)
+                  if (exponent > Integer.MAX_VALUE - digit) {
                     throw Diagnostic.error(location(), "huge exponent");
+                  }
                   exponent += digit;
                   continue;
                 }
                 var digit = lexDigit();
-                if (digit.isEmpty())
+                if (digit.isEmpty()) {
                   break;
-                if (exponent > Integer.MAX_VALUE / 10)
+                }
+                if (exponent > Integer.MAX_VALUE / 10) {
                   throw Diagnostic.error(location(), "huge exponent");
+                }
                 exponent *= 10;
-                if (exponent > Integer.MAX_VALUE - digit.getFirst())
+                if (exponent > Integer.MAX_VALUE - digit.getFirst()) {
                   throw Diagnostic.error(location(), "huge exponent");
+                }
                 exponent += digit.getFirst();
               }
-              if (isNegative)
+              if (isNegative) {
                 exponent = -exponent;
+              }
             }
             if (base == 10) {
               if (exponent < Integer.MIN_VALUE + fractionLength) {
@@ -254,8 +263,9 @@ public final class SourceLexer {
                 case 16 -> 4;
                 default -> -1;
               };
-              if (fractionLength > Integer.MAX_VALUE / power)
+              if (fractionLength > Integer.MAX_VALUE / power) {
                 throw Diagnostic.error(location(), "too precise");
+              }
               fractionLength *= power;
               if (exponent < Integer.MIN_VALUE + fractionLength) {
                 throw Diagnostic.error(location(), "too precise");
@@ -390,8 +400,9 @@ public final class SourceLexer {
   }
 
   private Optional<Integer> lexDigit() {
-    if (!hasCharacter())
+    if (!hasCharacter()) {
       return Optional.absent();
+    }
     var character = getCharacter();
     return switch (base) {
       case 2, 8, 10 -> {
@@ -430,8 +441,9 @@ public final class SourceLexer {
   }
 
   private boolean take(int character) {
-    if (!hasCharacter() || getCharacter() != character)
+    if (!hasCharacter() || getCharacter() != character) {
       return false;
+    }
     advance();
     return true;
   }

@@ -31,8 +31,9 @@ public record Name(List<String> identifiers) {
   }
 
   public Path resolve(Path root) {
-    for (var i = 1; i < identifiers.length(); i++)
+    for (var i = 1; i < identifiers.length(); i++) {
       root = root.resolve(identifiers.get(i));
+    }
     return root;
   }
 

@@ -115,11 +115,12 @@ public final class SymbolChecker {
   {
     for (var externalName : token) {
       var value = externalName.value();
-      if (value.indexOf('$') != -1)
+      if (value.indexOf('$') != -1) {
         throw Diagnostic
           .error(
             externalName.location(),
             "illegal character `$` in external name");
+      }
       if (!externalNames.add(value)) {
         throw Diagnostic
           .error(

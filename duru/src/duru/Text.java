@@ -1,8 +1,8 @@
 package duru;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.math.BigDecimal;
 import java.util.Locale;
 
 public final class Text {

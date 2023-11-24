@@ -263,8 +263,9 @@ public final class SourceParser {
 
   private Optional<Node.Break> parseBreak() {
     var begin = index;
-    if (!take(Token.Break.class))
+    if (!take(Token.Break.class)) {
       return Optional.absent();
+    }
     var label = parse(Token.Identifier.class);
     expect(Token.Semicolon.class, "`;` of break statement");
     return Optional.present(new Node.Break(location(begin), label));
@@ -272,8 +273,9 @@ public final class SourceParser {
 
   private Optional<Node.Continue> parseContinue() {
     var begin = index;
-    if (!take(Token.Continue.class))
+    if (!take(Token.Continue.class)) {
       return Optional.absent();
+    }
     var label = parse(Token.Identifier.class);
     expect(Token.Semicolon.class, "`;` of continue statement");
     return Optional.present(new Node.Continue(location(begin), label));
@@ -493,8 +495,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseLogicalOr() {
     var begin = index;
     var and   = parseLogicalAnd();
-    if (and.isEmpty())
+    if (and.isEmpty()) {
       return Optional.absent();
+    }
     var or = and.getFirst();
     while (true) {
       if (take(Token.PipePipe.class)) {
@@ -510,8 +513,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseLogicalAnd() {
     var begin    = index;
     var equality = parseEquality();
-    if (equality.isEmpty())
+    if (equality.isEmpty()) {
       return Optional.absent();
+    }
     var and = equality.getFirst();
     while (true) {
       if (take(Token.AmpersandAmpersand.class)) {
@@ -527,8 +531,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseEquality() {
     var begin    = index;
     var relation = parseRelation();
-    if (relation.isEmpty())
+    if (relation.isEmpty()) {
       return Optional.absent();
+    }
     var equality = relation.getFirst();
     while (true) {
       if (take(Token.EqualEqual.class)) {
@@ -550,8 +555,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseRelation() {
     var begin = index;
     var or    = parseBitwiseOr();
-    if (or.isEmpty())
+    if (or.isEmpty()) {
       return Optional.absent();
+    }
     var relation = or.getFirst();
     while (true) {
       if (take(Token.Left.class)) {
@@ -591,8 +597,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseBitwiseOr() {
     var begin = index;
     var xor   = parseBitwiseXor();
-    if (xor.isEmpty())
+    if (xor.isEmpty()) {
       return Optional.absent();
+    }
     var or = xor.getFirst();
     while (true) {
       if (take(Token.Pipe.class)) {
@@ -608,8 +615,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseBitwiseXor() {
     var begin = index;
     var and   = parseBitwiseAnd();
-    if (and.isEmpty())
+    if (and.isEmpty()) {
       return Optional.absent();
+    }
     var xor = and.getFirst();
     while (true) {
       if (take(Token.Caret.class)) {
@@ -625,8 +633,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseBitwiseAnd() {
     var begin = index;
     var shift = parseShift();
-    if (shift.isEmpty())
+    if (shift.isEmpty()) {
       return Optional.absent();
+    }
     var and = shift.getFirst();
     while (true) {
       if (take(Token.Ampersand.class)) {
@@ -642,8 +651,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseShift() {
     var begin    = index;
     var additive = parseAdditive();
-    if (additive.isEmpty())
+    if (additive.isEmpty()) {
       return Optional.absent();
+    }
     var shift = additive.getFirst();
     while (true) {
       if (take(Token.LeftLeft.class)) {
@@ -665,8 +675,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseAdditive() {
     var begin          = index;
     var multiplicative = parseMultiplicative();
-    if (multiplicative.isEmpty())
+    if (multiplicative.isEmpty()) {
       return Optional.absent();
+    }
     var additive = multiplicative.getFirst();
     while (true) {
       if (take(Token.Plus.class)) {
@@ -689,8 +700,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseMultiplicative() {
     var begin = index;
     var unary = parseUnary();
-    if (unary.isEmpty())
+    if (unary.isEmpty()) {
       return Optional.absent();
+    }
     var multiplicative = unary.getFirst();
     while (true) {
       if (take(Token.Star.class)) {
@@ -745,8 +757,9 @@ public final class SourceParser {
   private Optional<Node.Expression> parseSuffix() {
     var begin   = index;
     var primary = parsePrimary();
-    if (primary.isEmpty())
+    if (primary.isEmpty()) {
       return Optional.absent();
+    }
     var suffix = primary.getFirst();
     while (true) {
       if (take(Token.OpeningParenthesis.class)) {
@@ -786,8 +799,9 @@ public final class SourceParser {
         this::parseNumberConstant,
         this::parseGrouping);
     }
-    if (!take(Token.OpeningBrace.class))
+    if (!take(Token.OpeningBrace.class)) {
       return Optional.present(new Node.Access(mention.getFirst()));
+    }
     if (take(Token.ClosingBrace.class)) {
       return Optional
         .present(
@@ -818,8 +832,9 @@ public final class SourceParser {
   private Optional<Node.MemberInitialization> parseMemberInitialization() {
     var begin  = index;
     var member = parse(Token.Identifier.class);
-    if (member.isEmpty())
+    if (member.isEmpty()) {
       return Optional.absent();
+    }
     expect(Token.Equal.class, "`=` of member initialization");
     var value = expect(this::parseExpression, "member initial value");
     return Optional
@@ -832,8 +847,9 @@ public final class SourceParser {
 
   private Optional<Node.Grouping> parseGrouping() {
     var begin = index;
-    if (!take(Token.OpeningParenthesis.class))
+    if (!take(Token.OpeningParenthesis.class)) {
       return Optional.absent();
+    }
     var grouped = expect(this::parseExpression, "grouped expression");
     expect(Token.ClosingParenthesis.class, "`)` of groping");
     return Optional.present(new Node.Grouping(location(begin), grouped));

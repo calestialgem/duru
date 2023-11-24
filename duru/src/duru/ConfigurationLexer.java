@@ -59,8 +59,9 @@ public final class ConfigurationLexer {
         }
         case ';' -> tokens.add(new ConfigurationToken.Semicolon(location()));
         case ':' -> {
-          if (!hasCharacter() && getCharacter() != ':')
+          if (!hasCharacter() && getCharacter() != ':') {
             throw Diagnostic.error(location(), "incomplete scope token");
+          }
           advance();
           tokens.add(new ConfigurationToken.ColonColon(location()));
         }
