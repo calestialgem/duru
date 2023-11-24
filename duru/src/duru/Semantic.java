@@ -52,6 +52,27 @@ public sealed interface Semantic {
 
   sealed interface ConstantArithmetic extends Arithmetic {}
 
+  sealed interface Real extends Arithmetic {}
+
+  sealed interface Float extends Real {}
+
+  record Float32() implements Float, Builtin {
+     @Override
+    public String external() {
+      return "float";
+    }
+
+    @Override
+    public String identifier() {
+      return "Float_32";
+    }
+
+    @Override
+    public String toString() {
+      return name().toString();
+    }
+  }
+
   sealed interface Integral extends Arithmetic {
     BigInteger max();
     Expression constant(BigInteger value);
@@ -120,7 +141,7 @@ public sealed interface Semantic {
 
     @Override
     public String identifier() {
-      return "Natural32";
+      return "Natural_32";
     }
 
     @Override
@@ -147,7 +168,7 @@ public sealed interface Semantic {
 
     @Override
     public String identifier() {
-      return "Natural64";
+      return "Natural_64";
     }
 
     @Override
@@ -174,7 +195,7 @@ public sealed interface Semantic {
 
     @Override
     public String identifier() {
-      return "Integer32";
+      return "Integer_32";
     }
 
     @Override
@@ -547,6 +568,7 @@ public sealed interface Semantic {
 
   Byte BYTE = new Byte();
   Boolean BOOLEAN = new Boolean();
+  Float32 FLOAT_32 = new Float32();
   Natural32 NATURAL_32 = new Natural32();
   Integer32 INTEGER_32 = new Integer32();
   Void VOID = new Void();
@@ -555,6 +577,7 @@ public sealed interface Semantic {
   List<Builtin> BUILTINS = List.of(
     BYTE,
     BOOLEAN,
+    FLOAT_32,
     NATURAL_32,
     INTEGER_32,
     VOID,
