@@ -74,7 +74,7 @@ public final class List<Element>
       return false;
     }
     for (var i = 0; i < length(); i++) {
-      if (get(i).equals(otherList.get(i))) {
+      if (!get(i).equals(otherList.get(i))) {
         return false;
       }
     }
