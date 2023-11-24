@@ -1,42 +1,41 @@
-BC519047
+1DFD49F6
 main:0035.0007-0035.0014: Using `Integer`
 main:0042.0007-0042.0011: Using `duru`
 main:0055.0008-0055.0019: Struct `Person_Info`
 main:0067.0007-0067.0009: Const `PI`
 main:0084.0005-0084.0010: Var `count`
-main:0099.0028-0099.0046: extern "linking_error" Var `should_not_be_used`
-main:0112.0004-0112.0007: Fn `add`
-main:0125.0018-0125.0030: extern "puts" Fn `print_string`
-main:0133.0004-0133.0009: Fn `do_it`
-main:0146.0018-0146.0022: extern "exit" Fn `exit`
-main:0173.0004-0173.0008: Fn `main`
-main:0373.0004-0373.0019: Fn `does_not_return`
-main:0375.0004-0375.0011: Fn `is_even`
-main:0399.0005-0399.0020: Var `string_constant`
-main:0400.0005-0400.0020: Var `number_constant`
-main:0407.0004-0407.0014: Fn `a_function`
-main:0421.0005-0421.0014: Var `promotion`
-main:0422.0005-0422.0013: Var `negation`
-main:0424.0005-0424.0019: Var `multiplication`
-main:0425.0005-0425.0013: Var `quotient`
-main:0426.0005-0426.0013: Var `reminder`
-main:0428.0005-0428.0013: Var `addition`
-main:0429.0005-0429.0016: Var `subtraction`
-main:0436.0005-0436.0016: Var `bitwise_not`
-main:0438.0005-0438.0015: Var `shift_left`
-main:0439.0005-0439.0016: Var `shift_right`
-main:0441.0005-0441.0016: Var `bitwise_and`
-main:0443.0005-0443.0016: Var `bitwise_xor`
-main:0445.0005-0445.0015: Var `bitwise_or`
-main:0452.0005-0452.0014: Var `less_than`
-main:0453.0005-0453.0026: Var `less_than_or_equal_to`
-main:0454.0005-0454.0017: Var `greater_than`
-main:0455.0005-0455.0029: Var `greater_than_or_equal_to`
-main:0457.0005-0457.0013: Var `equal_to`
-main:0458.0005-0458.0017: Var `not_equal_to`
-main:0465.0005-0465.0016: Var `logical_not`
-main:0467.0005-0467.0016: Var `logical_and`
-main:0469.0005-0469.0015: Var `logical_or`
+main:0097.0004-0097.0007: Fn `add`
+main:0110.0018-0110.0030: extern "puts" Fn `print_string`
+main:0118.0004-0118.0009: Fn `do_it`
+main:0131.0018-0131.0022: extern "exit" Fn `exit`
+main:0158.0004-0158.0008: Fn `main`
+main:0358.0004-0358.0019: Fn `does_not_return`
+main:0360.0004-0360.0011: Fn `is_even`
+main:0384.0005-0384.0020: Var `string_constant`
+main:0385.0005-0385.0020: Var `number_constant`
+main:0392.0004-0392.0014: Fn `a_function`
+main:0406.0005-0406.0014: Var `promotion`
+main:0407.0005-0407.0013: Var `negation`
+main:0409.0005-0409.0019: Var `multiplication`
+main:0410.0005-0410.0013: Var `quotient`
+main:0411.0005-0411.0013: Var `reminder`
+main:0413.0005-0413.0013: Var `addition`
+main:0414.0005-0414.0016: Var `subtraction`
+main:0421.0005-0421.0016: Var `bitwise_not`
+main:0423.0005-0423.0015: Var `shift_left`
+main:0424.0005-0424.0016: Var `shift_right`
+main:0426.0005-0426.0016: Var `bitwise_and`
+main:0428.0005-0428.0016: Var `bitwise_xor`
+main:0430.0005-0430.0015: Var `bitwise_or`
+main:0437.0005-0437.0014: Var `less_than`
+main:0438.0005-0438.0026: Var `less_than_or_equal_to`
+main:0439.0005-0439.0017: Var `greater_than`
+main:0440.0005-0440.0029: Var `greater_than_or_equal_to`
+main:0442.0005-0442.0013: Var `equal_to`
+main:0443.0005-0443.0017: Var `not_equal_to`
+main:0450.0005-0450.0016: Var `logical_not`
+main:0452.0005-0452.0016: Var `logical_and`
+main:0454.0005-0454.0015: Var `logical_or`
 number_constants:0003.0007-0003.0019: Const `MAX_FLOAT_64`
 number_constants:0004.0007-0004.0026: Const `MIN_NORMAL_FLOAT_64`
 number_constants:0005.0007-0005.0019: Const `MIN_FLOAT_64`

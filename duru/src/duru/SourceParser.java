@@ -95,17 +95,6 @@ public final class SourceParser {
     if (take(Token.Var.class)) {
       var name = expect(Token.Identifier.class, "variable name");
       var type = expect(this::parseFormula, "variable type");
-      if (take(Token.Semicolon.class)) {
-        return Optional
-          .present(
-            new Node.Var(
-              location(begin),
-              externalName,
-              isPublic,
-              name,
-              type,
-              Optional.absent()));
-      }
       expect(Token.Equal.class, "`=` of variable declaration");
       var initialValue = expect(this::parseExpression, "initial value");
       expect(Token.Semicolon.class, "`;` of variable declaration");
@@ -117,7 +106,7 @@ public final class SourceParser {
             isPublic,
             name,
             type,
-            Optional.present(initialValue)));
+            initialValue));
     }
     if (take(Token.Fn.class)) {
       var name = expect(Token.Identifier.class, "function name");

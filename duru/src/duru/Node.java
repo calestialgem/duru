@@ -45,7 +45,7 @@ public sealed interface Node {
     boolean isPublic,
     Token.Identifier name,
     Formula type,
-    Optional<Expression> initialValue) implements Declaration
+    Expression initialValue) implements Declaration
   {}
 
   record Fn(
