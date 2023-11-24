@@ -1,5 +1,6 @@
 package duru;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public sealed interface Semantic {
@@ -57,7 +58,7 @@ public sealed interface Semantic {
   sealed interface Float extends Real {}
 
   record Float32() implements Float, Builtin {
-     @Override
+    @Override
     public String external() {
       return "float";
     }
@@ -121,6 +122,7 @@ public sealed interface Semantic {
   }
 
   record ConstantReal() implements ConstantArithmetic {}
+
   record ConstantIntegral() implements ConstantArithmetic {}
 
   record Natural32() implements Natural, Builtin {
@@ -257,7 +259,10 @@ public sealed interface Semantic {
     Name name,
     Name aliased) implements Symbol
   {
-    @Override public String toString() { return name.toString(); }
+    @Override
+    public String toString() {
+      return name.toString();
+    }
   }
 
   record Struct(
@@ -266,11 +271,13 @@ public sealed interface Semantic {
     Name name,
     Map<String, Type> members) implements Symbol, Type
   {
-    @Override public String toString() { return name.toString(); }
+    @Override
+    public String toString() {
+      return name.toString();
+    }
   }
 
   sealed interface GlobalVariable extends Symbol {
-    Name name();
     Type type();
   }
 
@@ -281,7 +288,10 @@ public sealed interface Semantic {
     Type type,
     Expression value) implements GlobalVariable
   {
-    @Override public String toString() { return name.toString(); }
+    @Override
+    public String toString() {
+      return name.toString();
+    }
   }
 
   record Var(
@@ -291,7 +301,10 @@ public sealed interface Semantic {
     Type type,
     Expression initialValue) implements GlobalVariable
   {
-    @Override public String toString() { return name.toString(); }
+    @Override
+    public String toString() {
+      return name.toString();
+    }
   }
 
   record Fn(
@@ -302,14 +315,15 @@ public sealed interface Semantic {
     Type returnType,
     Optional<Statement> body) implements Symbol
   {
-    @Override public String toString() { return name.toString(); }
+    @Override
+    public String toString() {
+      return name.toString();
+    }
   }
 
   sealed interface Statement extends Semantic {}
 
-  record Block(List<Statement> innerStatements)
-    implements Statement
-  {}
+  record Block(List<Statement> innerStatements) implements Statement {}
 
   record If(
     List<Declare> initializationStatements,
@@ -327,22 +341,14 @@ public sealed interface Semantic {
     Optional<Statement> falseBranch) implements Statement
   {}
 
-  record Break(Optional<String> label)
-    implements Statement
-  {}
+  record Break(Optional<String> label) implements Statement {}
 
-  record Continue(Optional<String> label)
-    implements Statement
-  {}
+  record Continue(Optional<String> label) implements Statement {}
 
-  record Return(Optional<Expression> value)
-    implements Statement
-  {}
+  record Return(Optional<Expression> value) implements Statement {}
 
-  record Declare(
-    String name,
-    Type type,
-    Expression initialValue) implements Statement
+  record Declare(String name, Type type, Expression initialValue)
+    implements Statement
   {}
 
   sealed interface Affect extends Statement {}
@@ -362,9 +368,7 @@ public sealed interface Semantic {
     Expression source();
   }
 
-  record Assign(Expression target, Expression source)
-    implements BaseAssign
-  {}
+  record Assign(Expression target, Expression source) implements BaseAssign {}
 
   record MultiplyAssign(Expression target, Expression source)
     implements BaseAssign
@@ -386,14 +390,12 @@ public sealed interface Semantic {
     implements BaseAssign
   {}
 
-  record ShiftLeftAssign(
-    Expression target,
-    Expression source) implements BaseAssign
+  record ShiftLeftAssign(Expression target, Expression source)
+    implements BaseAssign
   {}
 
-  record ShiftRightAssign(
-    Expression target,
-    Expression source) implements BaseAssign
+  record ShiftRightAssign(Expression target, Expression source)
+    implements BaseAssign
   {}
 
   record AndAssign(Expression target, Expression source)
@@ -404,9 +406,7 @@ public sealed interface Semantic {
     implements BaseAssign
   {}
 
-  record OrAssign(Expression target, Expression source)
-    implements BaseAssign
-  {}
+  record OrAssign(Expression target, Expression source) implements BaseAssign {}
 
   sealed interface Expression extends Semantic {}
 
@@ -415,120 +415,91 @@ public sealed interface Semantic {
     Expression rightOperand();
   }
 
-  record LogicalOr(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record LogicalOr(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record LogicalAnd(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record LogicalAnd(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record NotEqualTo(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record NotEqualTo(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record EqualTo(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record EqualTo(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record GreaterThanOrEqualTo(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record GreaterThanOrEqualTo(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record GreaterThan(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record GreaterThan(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record LessThanOrEqualTo(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record LessThanOrEqualTo(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record LessThan(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record LessThan(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record BitwiseOr(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record BitwiseOr(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record BitwiseXor(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record BitwiseXor(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record BitwiseAnd(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record BitwiseAnd(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record RightShift(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record RightShift(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record LeftShift(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record LeftShift(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record Subtraction(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record Subtraction(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record Addition(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record Addition(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record Reminder(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record Reminder(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record Quotient(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record Quotient(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
-  record Multiplication(
-    Expression leftOperand,
-    Expression rightOperand) implements BinaryOperator
+  record Multiplication(Expression leftOperand, Expression rightOperand)
+    implements BinaryOperator
   {}
 
   sealed interface UnaryOperator extends Expression {
     Expression operand();
   }
 
-  record LogicalNot(Expression operand)
-    implements UnaryOperator
-  {}
+  record LogicalNot(Expression operand) implements UnaryOperator {}
 
-  record BitwiseNot(Expression operand)
-    implements UnaryOperator
-  {}
+  record BitwiseNot(Expression operand) implements UnaryOperator {}
 
-  record Negation(Expression operand)
-    implements UnaryOperator
-  {}
+  record Negation(Expression operand) implements UnaryOperator {}
 
-  record Promotion(Expression operand)
-    implements UnaryOperator
-  {}
+  record Promotion(Expression operand) implements UnaryOperator {}
 
-  record MemberAccess(
-    Expression object,
-    String member) implements Expression
-  {}
+  record MemberAccess(Expression object, String member) implements Expression {}
 
   record InfixCall(
     Expression firstArgument,
@@ -536,23 +507,19 @@ public sealed interface Semantic {
     List<Expression> remainingArguments) implements Expression
   {}
 
-  record PostfixCall(
-    Expression callee,
-    List<Expression> arguments) implements Expression
+  record PostfixCall(Expression callee, List<Expression> arguments)
+    implements Expression
   {}
 
-  record Initialization(
-    Type type,
-    List<Expression> members) implements Expression
+  record Initialization(Type type, List<Expression> members)
+    implements Expression
   {}
 
   record GlobalAccess(Name name) implements Expression {}
 
   record LocalAccess(String name) implements Expression {}
 
-  record Grouping(Expression grouped)
-    implements Expression
-  {}
+  record Grouping(Expression grouped) implements Expression {}
 
   record RealConstant(BigDecimal value) implements Expression {}
 
@@ -566,25 +533,16 @@ public sealed interface Semantic {
 
   record StringConstant(String value) implements Expression {}
 
-  Byte BYTE = new Byte();
-  Boolean BOOLEAN = new Boolean();
-  Float32 FLOAT_32 = new Float32();
-  Natural32 NATURAL_32 = new Natural32();
-  Integer32 INTEGER_32 = new Integer32();
-  Void VOID = new Void();
-  Noreturn NORETURN = new Noreturn();
-
-  List<Builtin> BUILTINS = List.of(
-    BYTE,
-    BOOLEAN,
-    FLOAT_32,
-    NATURAL_32,
-    INTEGER_32,
-    VOID,
-    NORETURN
-  );
-
-  Pointer BYTE_POINTER = new Pointer(BYTE);
+  Byte             BYTE              = new Byte();
+  Boolean          BOOLEAN           = new Boolean();
+  Float32          FLOAT_32          = new Float32();
+  Natural32        NATURAL_32        = new Natural32();
+  Integer32        INTEGER_32        = new Integer32();
+  Void             VOID              = new Void();
+  Noreturn         NORETURN          = new Noreturn();
+  List<Builtin>    BUILTINS          =
+    List.of(BYTE, BOOLEAN, FLOAT_32, NATURAL_32, INTEGER_32, VOID, NORETURN);
+  Pointer          BYTE_POINTER      = new Pointer(BYTE);
   ConstantIntegral CONSTANT_INTEGRAL = new ConstantIntegral();
-  ConstantReal CONSTANT_REAL = new ConstantReal();
+  ConstantReal     CONSTANT_REAL     = new ConstantReal();
 }
