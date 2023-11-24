@@ -58,36 +58,36 @@ public final class ModuleChecker {
           .get(executable.value(), executable.key())
           .symbols()
           .get("main");
-      if (main.isEmpty() || !(main.getFirst() instanceof Semantic.Proc proc)) {
+      if (main.isEmpty() || !(main.getFirst() instanceof Semantic.Fn fn)) {
         throw Diagnostic
           .error(
             executable.value(),
-            "executable package `%s` does not have a main procedure",
+            "executable package `%s` does not have a main function",
             executable);
       }
-      if (!proc.parameters().isEmpty()) {
+      if (!fn.parameters().isEmpty()) {
         throw Diagnostic
           .error(
             executable.value(),
-            "executable package `%s` has a main procedure with parameters",
+            "executable package `%s` has a main function with parameters",
             executable);
       }
-      if (!(proc.returnType() instanceof Semantic.Unit)) {
+      if (!(fn.returnType() instanceof Semantic.Void)) {
         throw Diagnostic
           .error(
             executable.value(),
-            "executable package `%s` has a main procedure with a non-unit return type",
+            "executable package `%s` has a main function with a non-void return type",
             executable);
       }
     }
     for (var library : configuration.libraries()) {
       var main =
         packages.get(library.value(), library.key()).symbols().get("main");
-      if (!main.isEmpty() && main.getFirst() instanceof Semantic.Proc) {
+      if (!main.isEmpty() && main.getFirst() instanceof Semantic.Fn) {
         throw Diagnostic
           .error(
             library.value(),
-            "library package `%s` has a main procedure",
+            "library package `%s` has a main function",
             library);
       }
     }

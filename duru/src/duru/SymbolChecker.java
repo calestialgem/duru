@@ -1,5 +1,8 @@
 package duru;
 
+import java.util.function.Function;
+import java.util.function.BiFunction;
+
 public final class SymbolChecker {
   public static Semantic.Symbol check(
     SetBuffer<String> externalNames,
@@ -35,102 +38,115 @@ public final class SymbolChecker {
   private Semantic.Symbol check() {
     symbolName = packageName.scope(declaration.name().text());
     locals     = MapBuffer.create();
+    var externalName = Optional.<String>absent();
+    if (!declaration.externalName().isEmpty()) {
+      var token = declaration.externalName().getFirst();
+      if (token.value().indexOf('$') != -1) {
+        throw Diagnostic
+          .error(token.location(), "illegal character `$` in external name");
+      }
+      if (!externalNames.add(token.value())) {
+        throw Diagnostic
+          .error(
+            token.location(),
+            "redeclaration of external `%s`",
+            token.value());
+      }
+      externalName = Optional.present(token.value());
+    }
+    var isPublic = declaration.isPublic();
     return switch (declaration) {
-      case Node.Type struct -> checkStruct(struct);
-      case Node.Fn proc -> checkProc(proc);
-      default -> throw Diagnostic.unimplemented(declaration.location());
-    };
-  }
-
-  private Semantic.Proc checkProc(Node.Fn node) {
-    var externalName = checkExternalName(node.externalName());
-    var isPublic     = node.isPublic();
-    var parameters   = checkParameters(node.parameters());
-    returnType = checkType(node.returnType());
-    for (var bodyNode : node.body()) {
-      var checkedBody = checkStatement(bodyNode);
-      var body        = checkedBody.statement();
-      if (checkedBody.control() == Control.FLOWS) {
-        if (!(returnType instanceof Semantic.Unit)) {
+      case Node.Using using ->
+        new Semantic.Using(
+          externalName,
+          isPublic,
+          symbolName,
+          accessGlobal(using.aliased()).name());
+      case Node.Struct struct -> {
+        var members = MapBuffer.<String, Semantic.Type>create();
+        for (var member : struct.members()) {
+          var name = member.name().text();
+          var type = checkType(member.type());
+          if (!members.add(name, type)) {
+            throw Diagnostic
+              .error(
+                member.name().location(),
+                "redeclaration of member `%s::%s`",
+                symbolName,
+                name);
+          }
+        }
+        yield new Semantic.Struct(
+          externalName,
+          isPublic,
+          symbolName,
+          members.toMap());
+      }
+      case Node.Const global -> {
+        var type  = checkType(global.type());
+        var value = checkExpression(global.value());
+        yield new Semantic.Const(
+          externalName,
+          isPublic,
+          symbolName,
+          type,
+          coerce(global.value().location(), value, type));
+      }
+      case Node.Var global -> {
+        var type         = checkType(global.type());
+        var initialValue = checkExpression(global.initialValue());
+        yield new Semantic.Var(
+          externalName,
+          isPublic,
+          symbolName,
+          type,
+          coerce(global.initialValue().location(), initialValue, type));
+      }
+      case Node.Fn fn -> {
+        var parameters = MapBuffer.<String, Semantic.Type>create();
+        for (var parameter : fn.parameters()) {
+          var name = parameter.name().text();
+          var type = checkType(parameter.type());
+          if (!parameters.add(name, type) || !locals.add(name, type)) {
+            throw Diagnostic
+              .error(
+                parameter.name().location(),
+                "redeclaration of parameter `%s.%s`",
+                symbolName,
+                name);
+          }
+        }
+        returnType = checkType(fn.returnType());
+        if (fn.body().isEmpty()) {
+          yield new Semantic.Fn(
+            externalName,
+            isPublic,
+            symbolName,
+            parameters.toMap(),
+            returnType,
+            Optional.absent());
+        }
+        var checkedBody = checkStatement(fn.body().getFirst());
+        if (checkedBody.control() == Control.FLOWS
+          && !(returnType instanceof Semantic.Void))
+        {
           throw Diagnostic
             .error(
-              node.returnType().location(),
-              "procedure `%s` must return a `%s`",
+              fn.returnType().location(),
+              "function `%s` must return `%s`",
               symbolName,
               returnType);
         }
-        if (body instanceof Semantic.Block block) {
-          var innerStatements = ListBuffer.<Semantic.Statement>create();
-          innerStatements.addAll(block.innerStatements());
-          innerStatements.add(Semantic.UNIT_RETURN);
-          body = new Semantic.Block(innerStatements.toList());
-        }
-        else {
-          body = new Semantic.Block(List.of(body, Semantic.UNIT_RETURN));
-        }
+        yield new Semantic.Fn(
+          externalName,
+          isPublic,
+          symbolName,
+          parameters.toMap(),
+          returnType,
+          Optional.present(checkedBody.statement()));
       }
-      return new Semantic.Proc(
-        externalName,
-        isPublic,
-        symbolName,
-        parameters,
-        returnType,
-        Optional.present(body));
-    }
-    return new Semantic.Proc(
-      externalName,
-      isPublic,
-      symbolName,
-      parameters,
-      returnType,
-      Optional.absent());
-  }
-
-  private Map<String, Semantic.Type> checkParameters(List<Node.Binding> nodes) {
-    var parameters = MapBuffer.<String, Semantic.Type>create();
-    for (var parameter : nodes) {
-      var name = parameter.name().text();
-      var type = checkType(parameter.type());
-      if (!parameters.add(name, type) || !locals.add(name, type)) {
-        throw Diagnostic
-          .error(
-            parameter.name().location(),
-            "redeclaration of parameter `%s.%s`",
-            symbolName,
-            name);
-      }
-    }
-    return parameters.toMap();
-  }
-
-  private Semantic.Struct checkStruct(Node.Type node) {
-    return new Semantic.Struct(
-      checkExternalName(node.externalName()),
-      node.isPublic(),
-      symbolName);
-  }
-
-  private Optional<String> checkExternalName(
-    Optional<Token.StringConstant> token)
-  {
-    for (var externalName : token) {
-      var value = externalName.value();
-      if (value.indexOf('$') != -1) {
-        throw Diagnostic
-          .error(
-            externalName.location(),
-            "illegal character `$` in external name");
-      }
-      if (!externalNames.add(value)) {
-        throw Diagnostic
-          .error(
-            externalName.location(),
-            "redeclaration of external `%s`",
-            value);
-      }
-      return Optional.present(value);
-    }
-    return Optional.absent();
+      default -> throw Diagnostic.unimplemented(declaration.location());
+    };
   }
 
   private Semantic.Type checkType(Node.Formula node) {
@@ -141,7 +157,7 @@ public final class SymbolChecker {
         var symbol = accessGlobal(base.name());
         if (!(symbol instanceof Semantic.Type type)) {
           throw Diagnostic
-            .error(base.name().location(), "`%s` is not a type", symbol.name());
+            .error(base.name().location(), "`%s` is not type", symbol.name());
         }
         yield type;
       }
@@ -253,56 +269,89 @@ public final class SymbolChecker {
 
   private CheckedExpression checkExpression(Node.Expression node) {
     return switch (node) {
-      case Node.LessThan binary -> {
-        var left  = checkExpression(binary.leftOperand());
-        var right = checkExpression(binary.rightOperand());
-        if (!(left.type() instanceof Semantic.Arithmetic)) {
+      case Node.LogicalOr op ->
+        checkLogicalOperation(op, Semantic.LogicalOr::new);
+      case Node.LogicalAnd op ->
+        checkLogicalOperation(op, Semantic.LogicalAnd::new);
+      case Node.NotEqualTo op ->
+        checkComparisonOperation(op, Semantic.NotEqualTo::new);
+      case Node.EqualTo op ->
+        checkComparisonOperation(op, Semantic.EqualTo::new);
+      case Node.GreaterThanOrEqualTo op ->
+        checkComparisonOperation(op, Semantic.GreaterThanOrEqualTo::new);
+      case Node.GreaterThan op ->
+        checkComparisonOperation(op, Semantic.GreaterThan::new);
+      case Node.LessThanOrEqualTo op ->
+        checkComparisonOperation(op, Semantic.LessThanOrEqualTo::new);
+      case Node.LessThan op ->
+        checkComparisonOperation(op, Semantic.LessThan::new);
+      case Node.BitwiseOr op ->
+        checkBitwiseOperation(op, Semantic.BitwiseOr::new);
+      case Node.BitwiseXor op ->
+        checkBitwiseOperation(op, Semantic.BitwiseXor::new);
+      case Node.BitwiseAnd op ->
+        checkBitwiseOperation(op, Semantic.BitwiseAnd::new);
+      case Node.RightShift op ->
+        checkBitwiseOperation(op, Semantic.RightShift::new);
+      case Node.LeftShift op ->
+        checkBitwiseOperation(op, Semantic.LeftShift::new);
+      case Node.Subtraction op ->
+        checkArithmeticOperation(op, Semantic.Subtraction::new);
+      case Node.Addition op ->
+        checkArithmeticOperation(op, Semantic.Addition::new);
+      case Node.Reminder op ->
+        checkArithmeticOperation(op, Semantic.Reminder::new);
+      case Node.Quotient op ->
+        checkArithmeticOperation(op, Semantic.Quotient::new);
+      case Node.Multiplication op ->
+        checkArithmeticOperation(op, Semantic.Multiplication::new);
+      case Node.LogicalNot op ->
+        checkLogicalOperation(op, Semantic.LogicalNot::new);
+      case Node.BitwiseNot op ->
+        checkBitwiseOperation(op, Semantic.BitwiseNot::new);
+      case Node.Negation op ->
+        checkArithmeticOperation(op, Semantic.Negation::new);
+      case Node.Promotion op ->
+        checkArithmeticOperation(op, Semantic.Promotion::new);
+      case Node.MemberAccess memberAccess ->
+        throw Diagnostic.unimplemented(memberAccess.location());
+      case Node.InfixCall infixCall ->
+        throw Diagnostic.unimplemented(infixCall.location());
+      case Node.PostfixCall invocation -> {
+        var accessed = accessGlobal(invocation.procedure());
+        if (!(accessed instanceof Semantic.Procedure procedure)) {
           throw Diagnostic
             .error(
-              binary.leftOperand().location(),
-              "`%s` is not arithmetic",
-              left.type());
+              invocation.procedure().location(),
+              "`%s` is not procedure",
+              accessed.name());
         }
-        if (!(right.type() instanceof Semantic.Arithmetic)) {
+        if (invocation.arguments().length()
+          != procedure.parameters().length())
+        {
           throw Diagnostic
             .error(
-              binary.rightOperand().location(),
-              "`%s` is not arithmetic",
-              right.type());
+              invocation.location(),
+              "`%s` takes %d parameters but %d arguments were given",
+              accessed.name(),
+              procedure.parameters().length(),
+              invocation.arguments().length());
         }
-        if (left.expression() instanceof Semantic.IntegralConstant cl) {
-          if (right.expression() instanceof Semantic.IntegralConstant cr) {
-            yield new CheckedExpression(
-              new Semantic.LessThan(
-                new Semantic.Natural64Constant(cl.value()),
-                new Semantic.Natural64Constant(cr.value())),
-              Semantic.BOOLEAN);
-          }
-          yield new CheckedExpression(
-            new Semantic.LessThan(
-              coerce(binary.leftOperand().location(), left, right.type()),
-              right.expression()),
-            Semantic.BOOLEAN);
-        }
-        if (right.expression() instanceof Semantic.IntegralConstant cr) {
-          yield new CheckedExpression(
-            new Semantic.LessThan(
-              left.expression(),
-              coerce(binary.rightOperand().location(), right, left.type())),
-            Semantic.BOOLEAN);
-        }
-        if (!left.type().equals(right.type())) {
-          throw Diagnostic
-            .error(
-              binary.location(),
-              "`%s` and `%s` cannot be operated",
-              left.type(),
-              right.type());
+        var arguments = ListBuffer.<Semantic.Expression>create();
+        for (var i = 0; i < invocation.arguments().length(); i++) {
+          var argument  = invocation.arguments().get(i);
+          var parameter = procedure.parameters().values().get(i);
+          var checked   = checkExpression(argument);
+          var coerced   = coerce(argument.location(), checked, parameter);
+          arguments.add(coerced);
         }
         yield new CheckedExpression(
-          new Semantic.LessThan(left.expression(), right.expression()),
-          Semantic.BOOLEAN);
+          new Semantic.Invocation(accessed.name(), arguments.toList()),
+          procedure.returnType());
       }
+      case Node.Initialization initialization ->
+        throw Diagnostic.unimplemented(initialization.location());
+      case Node.Cast cast -> throw Diagnostic.unimplemented(cast.location());
       case Node.Access access -> {
         if (access.mention().identifiers().length() == 1) {
           var name  = access.mention().identifiers().getFirst().text();
@@ -313,61 +362,133 @@ public final class SymbolChecker {
               local.getFirst());
           }
         }
-        accessGlobal(access.mention());
-        throw Diagnostic.unimplemented(access.location());
+        var symbol = accessGlobal(access.mention());
+        if (!(symbol instanceof Semantic.GlobalVariable global)) {
+          throw Diagnostic
+            .error(access.location(), "`%s` is not variable", symbol);
+        }
+        return new CheckedExpression(
+          new Semantic.GlobalAccess(accessed.name()),
+          accessed.type());
       }
-      // case Node.PostfixCall invocation -> {
-      // var accessed = accessGlobal(invocation.procedure());
-      // if (!(accessed instanceof Semantic.Procedure procedure)) {
-      // throw Diagnostic
-      // .error(
-      // invocation.procedure().location(),
-      // "`%s` is not procedure",
-      // accessed.name());
-      // }
-      // if (invocation.arguments().length()
-      // != procedure.parameters().length())
-      // {
-      // throw Diagnostic
-      // .error(
-      // invocation.location(),
-      // "`%s` takes %d parameters but %d arguments were given",
-      // accessed.name(),
-      // procedure.parameters().length(),
-      // invocation.arguments().length());
-      // }
-      // var arguments = ListBuffer.<Semantic.Expression>create();
-      // for (var i = 0; i < invocation.arguments().length(); i++) {
-      // var argument = invocation.arguments().get(i);
-      // var parameter = procedure.parameters().values().get(i);
-      // var checked = checkExpression(argument);
-      // var coerced = coerce(argument.location(), checked, parameter);
-      // arguments.add(coerced);
-      // }
-      // yield new CheckedExpression(
-      // new Semantic.Invocation(accessed.name(), arguments.toList()),
-      // procedure.returnType());
-      // }
-      case Node.NumberConstant naturalConstant -> {
+      case Node.Grouping grouping -> checkExpression(grouping.grouped());
+      case Node.NumberConstant numberConstant -> {
         try {
           yield new CheckedExpression(
             new Semantic.IntegralConstant(
-              naturalConstant.value().value().toBigIntegerExact()),
-            new Semantic.ConstantIntegral());
+              numberConstant.value().value().toBigIntegerExact()),
+            CONSTANT_INTEGRAL);
         }
         catch (@SuppressWarnings("unused") ArithmeticException cause) {
-          throw Diagnostic
-            .error(
-              naturalConstant.location(),
-              "non-integral constants are not implemented yet");
+          yield new CheckedExpression(
+            new Semantic.RealConstant(numberConstant.value().value()),
+            CONSTANT_REAL);
         }
       }
       case Node.StringConstant stringConstant ->
         new CheckedExpression(
           new Semantic.StringConstant(stringConstant.value().value()),
-          new Semantic.Pointer(new Semantic.Byte()));
-      default -> throw Diagnostic.unimplemented(node.location());
+          Semantic.BYTE_POINTER);
     };
+  }
+
+  private CheckedExpression checkArithmeticOperation(
+    Node.UnaryOperator node,
+    Function<Semantic.Expression, Semantic.Expression> creator)
+  {
+    throw Diagnostic.unimplemented(node.location());
+  }
+
+  private CheckedExpression checkBitwiseOperation(
+    Node.UnaryOperator node,
+    Function<Semantic.Expression, Semantic.Expression> creator)
+  {
+    throw Diagnostic.unimplemented(node.location());
+  }
+
+  private CheckedExpression checkLogicalOperation(
+    Node.UnaryOperator node,
+    Function<Semantic.Expression, Semantic.Expression> creator)
+  {
+    throw Diagnostic.unimplemented(node.location());
+  }
+
+  private CheckedExpression checkArithmeticOperation(
+    Node.BinaryOperator node,
+    BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
+  {
+    throw Diagnostic.unimplemented(node.location());
+  }
+
+  private CheckedExpression checkBitwiseOperation(
+    Node.BinaryOperator node,
+    BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
+  {
+    throw Diagnostic.unimplemented(node.location());
+  }
+
+  private CheckedExpression checkComparisonOperation(
+    Node.BinaryOperator node,
+    BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
+  {
+    var left  = checkExpression(node.leftOperand());
+    var right = checkExpression(node.rightOperand());
+    if (!(left.type() instanceof Semantic.Arithmetic)) {
+      throw Diagnostic
+        .error(
+          node.leftOperand().location(),
+          "`%s` is not arithmetic",
+          left.type());
+    }
+    if (!(right.type() instanceof Semantic.Arithmetic)) {
+      throw Diagnostic
+        .error(
+          node.rightOperand().location(),
+          "`%s` is not arithmetic",
+          right.type());
+    }
+    if (left.expression() instanceof Semantic.IntegralConstant cl) {
+      if (right.expression() instanceof Semantic.IntegralConstant cr) {
+        return new CheckedExpression(
+          creator
+            .apply(
+              new Semantic.Natural64Constant(cl.value()),
+              new Semantic.Natural64Constant(cr.value())),
+          Semantic.BOOLEAN);
+      }
+      return new CheckedExpression(
+        creator
+          .apply(
+            coerce(node.leftOperand().location(), left, right.type()),
+            right.expression()),
+        Semantic.BOOLEAN);
+    }
+    if (right.expression() instanceof Semantic.IntegralConstant cr) {
+      return new CheckedExpression(
+        creator
+          .apply(
+            left.expression(),
+            coerce(node.rightOperand().location(), right, left.type())),
+        Semantic.BOOLEAN);
+    }
+    if (!left.type().equals(right.type())) {
+      throw Diagnostic
+        .error(
+          node.location(),
+          "`%s` and `%s` cannot be operated",
+          left.type(),
+          right.type());
+    }
+    return new CheckedExpression(
+      creator.apply(left.expression(), right.expression()),
+      Semantic.BOOLEAN);
+  }
+
+  private CheckedExpression checkLogicalOperation(
+    Node.BinaryOperator node,
+    BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
+  {
+    throw Diagnostic.unimplemented(node.location());
   }
 
   private Semantic.Symbol accessGlobal(Node.Mention mention) {

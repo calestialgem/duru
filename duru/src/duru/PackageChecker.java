@@ -56,16 +56,7 @@ public final class PackageChecker {
     resolveDeclarations();
     symbols = AcyclicCache.create(this::checkSymbol);
     if (packageName.equals(Name.of("duru"))) {
-      var builtins =
-        List.<Semantic
-          .Builtin>of(
-            new Semantic.Byte(),
-            new Semantic.Boolean(),
-            new Semantic.Natural32(),
-            new Semantic.Integer32(),
-            new Semantic.Unit(),
-            new Semantic.Noreturn());
-      for (var builtin : builtins) {
+      for (var builtin : Semantic.BUILTINS) {
         symbols.add(builtin.identifier(), builtin);
       }
     }

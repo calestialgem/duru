@@ -22,12 +22,6 @@ public sealed interface Semantic {
     implements Package
   {}
 
-  sealed interface Symbol extends Semantic {
-    Optional<String> externalName();
-    boolean isPublic();
-    Name name();
-  }
-
   sealed interface Builtin extends Symbol {
     String external();
     String identifier();
@@ -71,15 +65,6 @@ public sealed interface Semantic {
 
   sealed interface Natural extends Integral {}
 
-  record Struct(Optional<String> externalName, boolean isPublic, Name name)
-    implements Type, Symbol
-  {
-    @Override
-    public String toString() {
-      return name().toString();
-    }
-  }
-
   record Byte() implements Arithmetic, Builtin {
     @Override
     public String external() {
@@ -114,6 +99,7 @@ public sealed interface Semantic {
     }
   }
 
+  record ConstantReal() implements ConstantArithmetic {}
   record ConstantIntegral() implements ConstantArithmetic {}
 
   record Natural32() implements Natural, Builtin {
@@ -197,15 +183,15 @@ public sealed interface Semantic {
     }
   }
 
-  record Unit() implements Type, Builtin {
+  record Void() implements Type, Builtin {
     @Override
     public String external() {
-      return "char";
+      return "void";
     }
 
     @Override
     public String identifier() {
-      return "Unit";
+      return "Void";
     }
 
     @Override
@@ -238,47 +224,316 @@ public sealed interface Semantic {
     }
   }
 
-  sealed interface Procedure extends Semantic {
-    Map<String, Type> parameters();
-    Type returnType();
+  sealed interface Symbol extends Semantic {
+    Optional<String> externalName();
+    boolean isPublic();
+    Name name();
   }
 
-  record Proc(
+  record Using(
+    Optional<String> externalName,
+    boolean isPublic,
+    Name name,
+    Name aliased) implements Symbol
+  {
+    @Override public String toString() { return name.toString(); }
+  }
+
+  record Struct(
+    Optional<String> externalName,
+    boolean isPublic,
+    Name name,
+    Map<String, Type> members) implements Symbol, Type
+  {
+    @Override public String toString() { return name.toString(); }
+  }
+
+  sealed interface GlobalVariable extends Symbol {
+    Name name();
+    Type type();
+  }
+
+  record Const(
+    Optional<String> externalName,
+    boolean isPublic,
+    Name name,
+    Type type,
+    Expression value) implements GlobalVariable
+  {
+    @Override public String toString() { return name.toString(); }
+  }
+
+  record Var(
+    Optional<String> externalName,
+    boolean isPublic,
+    Name name,
+    Type type,
+    Expression initialValue) implements GlobalVariable
+  {
+    @Override public String toString() { return name.toString(); }
+  }
+
+  record Fn(
     Optional<String> externalName,
     boolean isPublic,
     Name name,
     Map<String, Type> parameters,
     Type returnType,
-    Optional<Statement> body) implements Procedure, Symbol
-  {}
+    Optional<Statement> body) implements Symbol
+  {
+    @Override public String toString() { return name.toString(); }
+  }
 
   sealed interface Statement extends Semantic {}
 
-  record Block(List<Statement> innerStatements) implements Statement {}
+  record Block(List<Statement> innerStatements)
+    implements Statement
+  {}
 
   record If(
+    List<Declare> initializationStatements,
     Expression condition,
     Statement trueBranch,
     Optional<Statement> falseBranch) implements Statement
   {}
 
-  record Return(Optional<Expression> value) implements Statement {}
+  record For(
+    Optional<String> label,
+    List<Declare> initializationStatements,
+    Expression condition,
+    Optional<Affect> interleavedStatement,
+    Statement loopBranch,
+    Optional<Statement> falseBranch) implements Statement
+  {}
 
-  record Var(String name, Type type, Expression initialValue)
+  record Break(Optional<String> label)
     implements Statement
   {}
 
-  record Discard(Expression discarded) implements Statement {}
+  record Continue(Optional<String> label)
+    implements Statement
+  {}
+
+  record Return(Optional<Expression> value)
+    implements Statement
+  {}
+
+  record Declare(
+    String name,
+    Type type,
+    Expression initialValue) implements Statement
+  {}
+
+  sealed interface Affect extends Statement {}
+
+  record Discard(Expression source) implements Affect {}
+
+  sealed interface Mutate extends Affect {
+    Expression target();
+  }
+
+  record Increment(Expression target) implements Mutate {}
+
+  record Decrement(Expression target) implements Mutate {}
+
+  sealed interface BaseAssign extends Affect {
+    Expression target();
+    Expression source();
+  }
+
+  record Assign(Expression target, Expression source)
+    implements BaseAssign
+  {}
+
+  record MultiplyAssign(Expression target, Expression source)
+    implements BaseAssign
+  {}
+
+  record QuotientAssign(Expression target, Expression source)
+    implements BaseAssign
+  {}
+
+  record ReminderAssign(Expression target, Expression source)
+    implements BaseAssign
+  {}
+
+  record AddAssign(Expression target, Expression source)
+    implements BaseAssign
+  {}
+
+  record SubtractAssign(Expression target, Expression source)
+    implements BaseAssign
+  {}
+
+  record ShiftLeftAssign(
+    Expression target,
+    Expression source) implements BaseAssign
+  {}
+
+  record ShiftRightAssign(
+    Expression target,
+    Expression source) implements BaseAssign
+  {}
+
+  record AndAssign(Expression target, Expression source)
+    implements BaseAssign
+  {}
+
+  record XorAssign(Expression target, Expression source)
+    implements BaseAssign
+  {}
+
+  record OrAssign(Expression target, Expression source)
+    implements BaseAssign
+  {}
 
   sealed interface Expression extends Semantic {}
 
-  record LessThan(Expression left, Expression right) implements Expression {}
+  sealed interface BinaryOperator extends Expression {
+    Expression leftOperand();
+    Expression rightOperand();
+  }
 
-  record Invocation(Name name, List<Expression> arguments)
+  record LogicalOr(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record LogicalAnd(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record NotEqualTo(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record EqualTo(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record GreaterThanOrEqualTo(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record GreaterThan(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record LessThanOrEqualTo(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record LessThan(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record BitwiseOr(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record BitwiseXor(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record BitwiseAnd(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record RightShift(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record LeftShift(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record Subtraction(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record Addition(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record Reminder(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record Quotient(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  record Multiplication(
+    Expression leftOperand,
+    Expression rightOperand) implements BinaryOperator
+  {}
+
+  sealed interface UnaryOperator extends Expression {
+    Expression operand();
+  }
+
+  record LogicalNot(Expression operand)
+    implements UnaryOperator
+  {}
+
+  record BitwiseNot(Expression operand)
+    implements UnaryOperator
+  {}
+
+  record Negation(Expression operand)
+    implements UnaryOperator
+  {}
+
+  record Promotion(Expression operand)
+    implements UnaryOperator
+  {}
+
+  record MemberAccess(
+    Expression object,
+    String member) implements Expression
+  {}
+
+  record InfixCall(
+    Expression firstArgument,
+    Name callee,
+    List<Expression> remainingArguments) implements Expression
+  {}
+
+  record PostfixCall(
+    Expression callee,
+    List<Expression> arguments) implements Expression
+  {}
+
+  record Initialization(
+    Type type,
+    List<Expression> members) implements Expression
+  {}
+
+  record GlobalAccess(Name name) implements Expression {}
+
+  record LocalAccess(String name) implements Expression {}
+
+  record Grouping(Expression grouped)
     implements Expression
   {}
 
-  record UnitConstant() implements Expression {}
+  record RealConstant(BigDecimal value) implements Expression {}
 
   record IntegralConstant(BigInteger value) implements Expression {}
 
@@ -290,9 +545,23 @@ public sealed interface Semantic {
 
   record StringConstant(String value) implements Expression {}
 
-  record LocalAccess(String name) implements Expression {}
+  Byte BYTE = new Byte();
+  Boolean BOOLEAN = new Boolean();
+  Natural32 NATURAL_32 = new Natural32();
+  Integer32 INTEGER_32 = new Integer32();
+  Void VOID = new Void();
+  Noreturn NORETURN = new Noreturn();
 
-  Boolean      BOOLEAN       = new Boolean();
-  UnitConstant UNIT_CONSTANT = new UnitConstant();
-  Return       UNIT_RETURN   = new Return(Optional.present(UNIT_CONSTANT));
+  List<Builtin> BUILTINS = List.of(
+    BYTE,
+    BOOLEAN,
+    NATURAL_32,
+    INTEGER_32,
+    VOID,
+    NORETURN
+  );
+
+  Pointer BYTE_POINTER = new Pointer(BYTE);
+  ConstantIntegral CONSTANT_INTEGRAL = new ConstantIntegral();
+  ConstantReal CONSTANT_REAL = new ConstantReal();
 }
