@@ -492,7 +492,11 @@ public final class SymbolChecker {
   }
 
   private Semantic.Symbol accessGlobal(Node.Mention mention) {
-    return accessor.access(mention.location(), mention.toName());
+    var symbol = accessor.access(mention.location(), mention.toName());
+    while ((symbol instanceof Semantic.Using using)) {
+      symbol = accessor.access(mention.location(), using.aliased());
+    }
+    return symbol;
   }
 
   private Semantic.Expression coerce(
