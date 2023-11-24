@@ -296,7 +296,7 @@ public final class SourceLexer {
               case "extern" -> lex(Token.Extern::new);
               case "public" -> lex(Token.Public::new);
               case "using" -> lex(Token.Using::new);
-              case "type" -> lex(Token.Type::new);
+              case "struct" -> lex(Token.Struct::new);
               case "const" -> lex(Token.Const::new);
               case "var" -> lex(Token.Var::new);
               case "fn" -> lex(Token.Fn::new);

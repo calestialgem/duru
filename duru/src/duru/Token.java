@@ -24,10 +24,10 @@ public sealed interface Token {
     }
   }
 
-  record Type(Location location) implements Token {
+  record Struct(Location location) implements Token {
     @Override
     public String toString() {
-      return "keyword `type`";
+      return "keyword `struct`";
     }
   }
 

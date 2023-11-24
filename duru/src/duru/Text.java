@@ -48,7 +48,7 @@ public final class Text {
         "extern",
         "public",
         "using",
-        "type",
+        "struct",
         "const",
         "var",
         "fn",

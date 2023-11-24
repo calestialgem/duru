@@ -22,12 +22,12 @@ public sealed interface Node {
     }
   }
 
-  record Type(
+  record Struct(
     Location location,
     Optional<Token.StringConstant> externalName,
     boolean isPublic,
     Token.Identifier name,
-    Optional<List<Binding>> members) implements Declaration
+    List<Binding> members) implements Declaration
   {}
 
   record Const(

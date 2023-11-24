@@ -43,24 +43,16 @@ using duru::Float_32;
 
 
 
-// `type` keyword declares a type.
-// -------------------------------
+// `struct` keyword declares a product type.
+// -----------------------------------------
 
-// Product types are specified using `{}`.
+// Members are listed comma-separated in `{}`.
 
 /*
  * Declares `Person_Info` as a product type, which holds an `Integer` named
  * `age`, and a `Float_32` named `height`.
  */
-type Person_Info { age Integer, height Float_32 }
-
-// Incomplete types are specified using `;`.
-
-/*
- * Declares `Stream` as an incomplete type, which is only useful for defining
- * foreign interfaces with strongly typed pointers (instead of `void*`).
- */
-extern "FILE" type Stream;
+struct Person_Info { age Integer, height Float_32 }
 
 
 

@@ -62,29 +62,19 @@ public final class SourceParser {
             Optional.present(newName),
             aliased));
     }
-    if (take(Token.Type.class)) {
-      var name = expect(Token.Identifier.class, "type name");
-      if (take(Token.Semicolon.class)) {
-        return Optional
-          .present(
-            new Node.Type(
-              location(begin),
-              externalName,
-              isPublic,
-              name,
-              Optional.absent()));
-      }
+    if (take(Token.Struct.class)) {
+      var name = expect(Token.Identifier.class, "struct name");
       expect(Token.OpeningBrace.class, "`{` of member list");
       var members = parseSeparated(this::parseBinding);
       expect(Token.ClosingBrace.class, "`}` of member list");
       return Optional
         .present(
-          new Node.Type(
+          new Node.Struct(
             location(begin),
             externalName,
             isPublic,
             name,
-            Optional.present(members)));
+            members));
     }
     if (take(Token.Const.class)) {
       var name = expect(Token.Identifier.class, "constant name");
