@@ -18,7 +18,7 @@ public sealed interface Node {
   {
     @Override
     public Identifier name() {
-      return newName.getOrElse(aliased.identifiers.getFirst());
+      return newName.getOrElse(aliased.identifiers.getLast());
     }
   }
 

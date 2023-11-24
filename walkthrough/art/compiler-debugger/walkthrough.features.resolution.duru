@@ -1,6 +1,6 @@
-1DFD49F6
+E156C308
 main:0035.0007-0035.0014: Using `Integer`
-main:0042.0007-0042.0011: Using `duru`
+main:0042.0013-0042.0021: Using `Float_32`
 main:0055.0008-0055.0019: Struct `Person_Info`
 main:0067.0007-0067.0009: Const `PI`
 main:0084.0005-0084.0010: Var `count`
