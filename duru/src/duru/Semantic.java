@@ -537,4 +537,5 @@ public sealed interface Semantic {
   Pointer          BYTE_POINTER      = new Pointer(BYTE);
   ConstantIntegral CONSTANT_INTEGRAL = new ConstantIntegral();
   ConstantReal     CONSTANT_REAL     = new ConstantReal();
+  IntegralConstant ZERO              = new IntegralConstant(BigInteger.ZERO);
 }

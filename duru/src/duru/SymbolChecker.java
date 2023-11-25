@@ -1,7 +1,7 @@
 package duru;
 
-import java.util.function.Function;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public final class SymbolChecker {
   public static Semantic.Symbol check(
@@ -443,8 +443,30 @@ public final class SymbolChecker {
         checkArithmeticOperation(op, Semantic.Negation::new);
       case Node.Promotion op ->
         checkArithmeticOperation(op, Semantic.Promotion::new);
-      case Node.MemberAccess memberAccess ->
-        throw Diagnostic.unimplemented(memberAccess.location());
+      case Node.MemberAccess memberAccess -> {
+        var object = checkExpression(memberAccess.object());
+        if (!(object.type() instanceof Semantic.Struct struct)) {
+          throw Diagnostic
+            .error(
+              memberAccess.object().location(),
+              "`%s` is not struct",
+              object.type());
+        }
+        var type = struct.members().get(memberAccess.member().text());
+        if (type.isEmpty()) {
+          throw Diagnostic
+            .error(
+              memberAccess.member().location(),
+              "`%s` does not have member `%s`",
+              struct,
+              memberAccess.member().text());
+        }
+        yield new CheckedExpression(
+          new Semantic.MemberAccess(
+            object.expression(),
+            memberAccess.member().text()),
+          type.getFirst());
+      }
       case Node.InfixCall infixCall -> {
         var arguments = ListBuffer.<Node.Expression>create();
         arguments.add(infixCall.firstArgument());
@@ -459,8 +481,52 @@ public final class SymbolChecker {
           postfixCall.location(),
           postfixCall.callee(),
           postfixCall.arguments());
-      case Node.Initialization initialization ->
-        throw Diagnostic.unimplemented(initialization.location());
+      case Node.Initialization initialization -> {
+        var initialized = accessGlobal(initialization.type());
+        if (!(initialized instanceof Semantic.Struct struct)) {
+          throw Diagnostic
+            .error(
+              initialization.type().location(),
+              "`%s` is not struct",
+              initialized);
+        }
+        var memberInitializations =
+          MapBuffer.<String, Semantic.Expression>create();
+        for (var member : initialization.memberInitializations()) {
+          var name = member.member().text();
+          var type = struct.members().get(name);
+          if (type.isEmpty()) {
+            throw Diagnostic
+              .error(
+                member.member().location(),
+                "member `%s::%s` does not exist",
+                struct,
+                name);
+          }
+          if (memberInitializations.contains(name)) {
+            throw Diagnostic
+              .error(
+                member.member().location(),
+                "reinitialization of `%s::%s`",
+                struct,
+                name);
+          }
+          var value =
+            coerce(
+              member.value().location(),
+              checkExpression(member.value()),
+              type.getFirst());
+          memberInitializations.add(name, value);
+        }
+        var members = ListBuffer.<Semantic.Expression>create();
+        for (var member : struct.members().keys()) {
+          var value = memberInitializations.get(member);
+          members.add(value.getOrElse(Semantic.ZERO));
+        }
+        yield new CheckedExpression(
+          new Semantic.Initialization(struct, members.toList()),
+          struct);
+      }
       case Node.Cast cast -> throw Diagnostic.unimplemented(cast.location());
       case Node.Access access -> {
         if (access.mention().identifiers().length() == 1) {
