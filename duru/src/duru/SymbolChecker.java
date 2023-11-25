@@ -555,11 +555,17 @@ public final class SymbolChecker {
           struct);
       }
       case Node.Cast cast -> {
+        var source = checkExpression(cast.source());
         var target = checkType(cast.target());
+        if (source.type() instanceof Semantic.Arithmetic
+          && target instanceof Semantic.Arithmetic)
+        {
+          return new CheckedExpression(
+            new Semantic.Conversion(source.expression(), target),
+            target);
+        }
         return new CheckedExpression(
-          new Semantic.Conversion(
-            checkExpression(cast.source()).expression(),
-            target),
+          coerce(cast.target().location(), source, target),
           target);
       }
       case Node.Access access -> {
