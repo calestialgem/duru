@@ -591,91 +591,134 @@ public final class SymbolChecker {
     Node.UnaryOperator node,
     Function<Semantic.Expression, Semantic.Expression> creator)
   {
-    throw Diagnostic.unimplemented(node.location());
+    var operand = checkExpression(node.operand());
+    if (!(operand.type() instanceof Semantic.Arithmetic))
+      throw Diagnostic
+        .error(
+          node.operand().location(),
+          "`%s` is not arithmetic",
+          operand.type());
+    return new CheckedExpression(
+      creator.apply(operand.expression()),
+      operand.type());
   }
 
   private CheckedExpression checkBitwiseOperation(
     Node.UnaryOperator node,
     Function<Semantic.Expression, Semantic.Expression> creator)
   {
-    throw Diagnostic.unimplemented(node.location());
+    var operand = checkExpression(node.operand());
+    if (!(operand.type() instanceof Semantic.Integral))
+      throw Diagnostic
+        .error(
+          node.operand().location(),
+          "`%s` is not integral",
+          operand.type());
+    return new CheckedExpression(
+      creator.apply(operand.expression()),
+      operand.type());
   }
 
   private CheckedExpression checkLogicalOperation(
     Node.UnaryOperator node,
     Function<Semantic.Expression, Semantic.Expression> creator)
   {
-    throw Diagnostic.unimplemented(node.location());
+    var operand = checkExpression(node.operand());
+    if (!(operand.type() instanceof Semantic.Boolean))
+      throw Diagnostic
+        .error(
+          node.operand().location(),
+          "`%s` is not boolean",
+          operand.type());
+    return new CheckedExpression(
+      creator.apply(operand.expression()),
+      operand.type());
   }
 
   private CheckedExpression checkArithmeticOperation(
     Node.BinaryOperator node,
     BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
   {
-    throw Diagnostic.unimplemented(node.location());
+    var leftOperand = checkExpression(node.leftOperand());
+    if (!(leftOperand.type() instanceof Semantic.Arithmetic))
+      throw Diagnostic
+        .error(
+          node.leftOperand().location(),
+          "`%s` is not arithmetic",
+          leftOperand.type());
+    var rightOperand = checkExpression(node.rightOperand());
+    if (!(rightOperand.type() instanceof Semantic.Arithmetic))
+      throw Diagnostic
+        .error(
+          node.leftOperand().location(),
+          "`%s` is not arithmetic",
+          rightOperand.type());
+    return new CheckedExpression(
+      creator
+        .apply(
+          leftOperand.expression(),
+          coerce(
+            node.rightOperand().location(),
+            rightOperand,
+            leftOperand.type())),
+      leftOperand.type());
   }
 
   private CheckedExpression checkBitwiseOperation(
     Node.BinaryOperator node,
     BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
   {
-    throw Diagnostic.unimplemented(node.location());
+    var leftOperand = checkExpression(node.leftOperand());
+    if (!(leftOperand.type() instanceof Semantic.Integral))
+      throw Diagnostic
+        .error(
+          node.leftOperand().location(),
+          "`%s` is not integral",
+          leftOperand.type());
+    var rightOperand = checkExpression(node.rightOperand());
+    if (!(rightOperand.type() instanceof Semantic.Integral))
+      throw Diagnostic
+        .error(
+          node.leftOperand().location(),
+          "`%s` is not integral",
+          rightOperand.type());
+    return new CheckedExpression(
+      creator
+        .apply(
+          leftOperand.expression(),
+          coerce(
+            node.rightOperand().location(),
+            rightOperand,
+            leftOperand.type())),
+      leftOperand.type());
   }
 
   private CheckedExpression checkComparisonOperation(
     Node.BinaryOperator node,
     BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
   {
-    var left  = checkExpression(node.leftOperand());
-    var right = checkExpression(node.rightOperand());
-    if (!(left.type() instanceof Semantic.Arithmetic)) {
+    var leftOperand = checkExpression(node.leftOperand());
+    if (!(leftOperand.type() instanceof Semantic.Arithmetic))
       throw Diagnostic
         .error(
           node.leftOperand().location(),
           "`%s` is not arithmetic",
-          left.type());
-    }
-    if (!(right.type() instanceof Semantic.Arithmetic)) {
+          leftOperand.type());
+    var rightOperand = checkExpression(node.rightOperand());
+    if (!(rightOperand.type() instanceof Semantic.Arithmetic))
       throw Diagnostic
         .error(
-          node.rightOperand().location(),
+          node.leftOperand().location(),
           "`%s` is not arithmetic",
-          right.type());
-    }
-    if (left.expression() instanceof Semantic.IntegralConstant cl) {
-      if (right.expression() instanceof Semantic.IntegralConstant cr) {
-        return new CheckedExpression(
-          creator
-            .apply(
-              new Semantic.Natural64Constant(cl.value()),
-              new Semantic.Natural64Constant(cr.value())),
-          Semantic.BOOLEAN);
-      }
-      return new CheckedExpression(
-        creator
-          .apply(
-            coerce(node.leftOperand().location(), left, right.type()),
-            right.expression()),
-        Semantic.BOOLEAN);
-    }
-    if (right.expression() instanceof Semantic.IntegralConstant cr) {
-      return new CheckedExpression(
-        creator
-          .apply(
-            left.expression(),
-            coerce(node.rightOperand().location(), right, left.type())),
-        Semantic.BOOLEAN);
-    }
-    if (!left.type().equals(right.type())) {
-      throw Diagnostic
-        .error(
-          node.location(),
-          "`%s` and `%s` cannot be operated",
-          left.type(),
-          right.type());
-    }
+          rightOperand.type());
     return new CheckedExpression(
-      creator.apply(left.expression(), right.expression()),
+      creator
+        .apply(
+          leftOperand.expression(),
+          coerce(
+            node.rightOperand().location(),
+            rightOperand,
+            leftOperand.type())),
       Semantic.BOOLEAN);
   }
 
@@ -683,7 +726,19 @@ public final class SymbolChecker {
     Node.BinaryOperator node,
     BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
   {
-    throw Diagnostic.unimplemented(node.location());
+    var leftOperand  =
+      coerce(
+        node.leftOperand().location(),
+        checkExpression(node.leftOperand()),
+        Semantic.BOOLEAN);
+    var rightOperand =
+      coerce(
+        node.rightOperand().location(),
+        checkExpression(node.rightOperand()),
+        Semantic.BOOLEAN);
+    return new CheckedExpression(
+      creator.apply(leftOperand, rightOperand),
+      Semantic.BOOLEAN);
   }
 
   private CheckedExpression checkCall(
