@@ -398,51 +398,73 @@ public final class SymbolChecker {
   }
 
   private CheckedExpression checkExpression(Node.Expression node) {
-    return switch (node) {
-      case Node.LogicalOr op ->
-        checkLogicalOperation(op, Semantic.LogicalOr::new);
-      case Node.LogicalAnd op ->
-        checkLogicalOperation(op, Semantic.LogicalAnd::new);
-      case Node.NotEqualTo op ->
-        checkComparisonOperation(op, Semantic.NotEqualTo::new);
-      case Node.EqualTo op ->
-        checkComparisonOperation(op, Semantic.EqualTo::new);
-      case Node.GreaterThanOrEqualTo op ->
-        checkComparisonOperation(op, Semantic.GreaterThanOrEqualTo::new);
-      case Node.GreaterThan op ->
-        checkComparisonOperation(op, Semantic.GreaterThan::new);
-      case Node.LessThanOrEqualTo op ->
-        checkComparisonOperation(op, Semantic.LessThanOrEqualTo::new);
-      case Node.LessThan op ->
-        checkComparisonOperation(op, Semantic.LessThan::new);
-      case Node.BitwiseOr op ->
-        checkBitwiseOperation(op, Semantic.BitwiseOr::new);
-      case Node.BitwiseXor op ->
-        checkBitwiseOperation(op, Semantic.BitwiseXor::new);
-      case Node.BitwiseAnd op ->
-        checkBitwiseOperation(op, Semantic.BitwiseAnd::new);
-      case Node.RightShift op ->
-        checkBitwiseOperation(op, Semantic.RightShift::new);
-      case Node.LeftShift op ->
-        checkBitwiseOperation(op, Semantic.LeftShift::new);
-      case Node.Subtraction op ->
-        checkArithmeticOperation(op, Semantic.Subtraction::new);
-      case Node.Addition op ->
-        checkArithmeticOperation(op, Semantic.Addition::new);
-      case Node.Reminder op ->
-        checkArithmeticOperation(op, Semantic.Reminder::new);
-      case Node.Quotient op ->
-        checkArithmeticOperation(op, Semantic.Quotient::new);
-      case Node.Multiplication op ->
-        checkArithmeticOperation(op, Semantic.Multiplication::new);
-      case Node.LogicalNot op ->
-        checkLogicalOperation(op, Semantic.LogicalNot::new);
-      case Node.BitwiseNot op ->
-        checkBitwiseOperation(op, Semantic.BitwiseNot::new);
-      case Node.Negation op ->
-        checkArithmeticOperation(op, Semantic.Negation::new);
-      case Node.Promotion op ->
-        checkArithmeticOperation(op, Semantic.Promotion::new);
+    switch (node) {
+      case Node.LogicalOr op -> {
+        return checkLogicalOperation(op, Semantic.LogicalOr::new);
+      }
+      case Node.LogicalAnd op -> {
+        return checkLogicalOperation(op, Semantic.LogicalAnd::new);
+      }
+      case Node.NotEqualTo op -> {
+        return checkComparisonOperation(op, Semantic.NotEqualTo::new);
+      }
+      case Node.EqualTo op -> {
+        return checkComparisonOperation(op, Semantic.EqualTo::new);
+      }
+      case Node.GreaterThanOrEqualTo op -> {
+        return checkComparisonOperation(op, Semantic.GreaterThanOrEqualTo::new);
+      }
+      case Node.GreaterThan op -> {
+        return checkComparisonOperation(op, Semantic.GreaterThan::new);
+      }
+      case Node.LessThanOrEqualTo op -> {
+        return checkComparisonOperation(op, Semantic.LessThanOrEqualTo::new);
+      }
+      case Node.LessThan op -> {
+        return checkComparisonOperation(op, Semantic.LessThan::new);
+      }
+      case Node.BitwiseOr op -> {
+        return checkBitwiseOperation(op, Semantic.BitwiseOr::new);
+      }
+      case Node.BitwiseXor op -> {
+        return checkBitwiseOperation(op, Semantic.BitwiseXor::new);
+      }
+      case Node.BitwiseAnd op -> {
+        return checkBitwiseOperation(op, Semantic.BitwiseAnd::new);
+      }
+      case Node.RightShift op -> {
+        return checkBitwiseOperation(op, Semantic.RightShift::new);
+      }
+      case Node.LeftShift op -> {
+        return checkBitwiseOperation(op, Semantic.LeftShift::new);
+      }
+      case Node.Subtraction op -> {
+        return checkArithmeticOperation(op, Semantic.Subtraction::new);
+      }
+      case Node.Addition op -> {
+        return checkArithmeticOperation(op, Semantic.Addition::new);
+      }
+      case Node.Reminder op -> {
+        return checkArithmeticOperation(op, Semantic.Reminder::new);
+      }
+      case Node.Quotient op -> {
+        return checkArithmeticOperation(op, Semantic.Quotient::new);
+      }
+      case Node.Multiplication op -> {
+        return checkArithmeticOperation(op, Semantic.Multiplication::new);
+      }
+      case Node.LogicalNot op -> {
+        return checkLogicalOperation(op, Semantic.LogicalNot::new);
+      }
+      case Node.BitwiseNot op -> {
+        return checkBitwiseOperation(op, Semantic.BitwiseNot::new);
+      }
+      case Node.Negation op -> {
+        return checkArithmeticOperation(op, Semantic.Negation::new);
+      }
+      case Node.Promotion op -> {
+        return checkArithmeticOperation(op, Semantic.Promotion::new);
+      }
       case Node.MemberAccess memberAccess -> {
         var object = checkExpression(memberAccess.object());
         if (!(object.type() instanceof Semantic.Struct struct)) {
@@ -461,7 +483,7 @@ public final class SymbolChecker {
               struct,
               memberAccess.member().text());
         }
-        yield new CheckedExpression(
+        return new CheckedExpression(
           new Semantic.MemberAccess(
             object.expression(),
             memberAccess.member().text()),
@@ -471,16 +493,17 @@ public final class SymbolChecker {
         var arguments = ListBuffer.<Node.Expression>create();
         arguments.add(infixCall.firstArgument());
         arguments.addAll(infixCall.remainingArguments());
-        yield checkCall(
+        return checkCall(
           infixCall.location(),
           infixCall.callee(),
           arguments.toList());
       }
-      case Node.PostfixCall postfixCall ->
-        checkCall(
+      case Node.PostfixCall postfixCall -> {
+        return checkCall(
           postfixCall.location(),
           postfixCall.callee(),
           postfixCall.arguments());
+      }
       case Node.Initialization initialization -> {
         var initialized = accessGlobal(initialization.type());
         if (!(initialized instanceof Semantic.Struct struct)) {
@@ -523,13 +546,13 @@ public final class SymbolChecker {
           var value = memberInitializations.get(member);
           members.add(value.getOrElse(Semantic.ZERO));
         }
-        yield new CheckedExpression(
+        return new CheckedExpression(
           new Semantic.Initialization(struct, members.toList()),
           struct);
       }
       case Node.Cast cast -> {
         var target = checkType(cast.target());
-        yield new CheckedExpression(
+        return new CheckedExpression(
           new Semantic.Cast(
             target,
             checkExpression(cast.source()).expression()),
@@ -540,13 +563,13 @@ public final class SymbolChecker {
           var name  = access.mention().identifiers().getFirst().text();
           var local = locals.get(name);
           if (!local.isEmpty()) {
-            yield new CheckedExpression(
+            return new CheckedExpression(
               new Semantic.LocalAccess(name),
               local.getFirst());
           }
         }
         var symbol = accessGlobal(access.mention());
-        yield switch (symbol) {
+        return switch (symbol) {
           case Semantic.Const const_ ->
             new CheckedExpression(
               new Semantic.GlobalAccess(const_.name()),
@@ -566,25 +589,28 @@ public final class SymbolChecker {
               .error(access.location(), "`%s` is not variable", symbol);
         };
       }
-      case Node.Grouping grouping -> checkExpression(grouping.grouped());
+      case Node.Grouping grouping -> {
+        return checkExpression(grouping.grouped());
+      }
       case Node.NumberConstant numberConstant -> {
         try {
-          yield new CheckedExpression(
+          return new CheckedExpression(
             new Semantic.IntegralConstant(
               numberConstant.value().value().toBigIntegerExact()),
             Semantic.CONSTANT_INTEGRAL);
         }
         catch (@SuppressWarnings("unused") ArithmeticException cause) {
-          yield new CheckedExpression(
+          return new CheckedExpression(
             new Semantic.RealConstant(numberConstant.value().value()),
             Semantic.CONSTANT_REAL);
         }
       }
-      case Node.StringConstant stringConstant ->
-        new CheckedExpression(
+      case Node.StringConstant stringConstant -> {
+        return new CheckedExpression(
           new Semantic.StringConstant(stringConstant.value().value()),
           Semantic.BYTE_POINTER);
-    };
+      }
+    }
   }
 
   private CheckedExpression checkArithmeticOperation(
