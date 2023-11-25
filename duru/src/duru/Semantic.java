@@ -43,21 +43,32 @@ public sealed interface Semantic {
     }
   }
 
-  sealed interface Type extends Semantic {
-    default boolean coerces(Type target) {
-      return equals(target);
+  sealed interface Alias extends Symbol {
+    Name aliased();
+  }
+
+  sealed interface Type extends Semantic {}
+
+  sealed interface Constant extends Type {}
+
+  record ConstantString() implements Constant {
+    @Override
+    public String toString() {
+      return "constant-string";
     }
   }
 
   sealed interface Arithmetic extends Type {}
 
-  sealed interface ConstantArithmetic extends Arithmetic {}
+  sealed interface Real extends Arithmetic {
+    boolean canRepresent(BigDecimal value);
 
-  sealed interface Real extends Arithmetic {}
+    default boolean canRepresent(BigInteger value) {
+      return canRepresent(new BigDecimal(value));
+    }
+  }
 
-  sealed interface Float extends Real {}
-
-  record Float32() implements Float, Builtin {
+  record Float32() implements Real, Builtin {
     @Override
     public String external() {
       return "float";
@@ -69,42 +80,68 @@ public sealed interface Semantic {
     }
 
     @Override
+    public boolean canRepresent(BigDecimal value) {
+      return Float.isFinite(value.floatValue());
+    }
+
+    @Override
+    public String toString() {
+      return name().toString();
+    }
+  }
+
+  record Float64() implements Real, Builtin {
+    @Override
+    public String external() {
+      return "float";
+    }
+
+    @Override
+    public String identifier() {
+      return "Float_64";
+    }
+
+    @Override
+    public boolean canRepresent(BigDecimal value) {
+      return Double.isFinite(value.doubleValue());
+    }
+
+    @Override
     public String toString() {
       return name().toString();
     }
   }
 
   sealed interface Integral extends Arithmetic {
-    BigInteger max();
-    Expression constant(BigInteger value);
+    int width();
+    boolean isSigned();
+
+    default BigInteger max() {
+      var magnitude = width();
+      if (isSigned()) {
+        magnitude--;
+      }
+      return BigInteger.ONE.shiftLeft(magnitude).subtract(BigInteger.ONE);
+    }
 
     default boolean canRepresent(BigInteger value) {
       return value.compareTo(max()) <= 0;
     }
   }
 
-  sealed interface Integer extends Integral {}
-
-  sealed interface Natural extends Integral {}
-
-  record Byte() implements Arithmetic, Builtin {
+  sealed interface Natural extends Integral {
     @Override
-    public String external() {
-      return "char";
-    }
-
-    @Override
-    public String identifier() {
-      return "Byte";
-    }
-
-    @Override
-    public String toString() {
-      return name().toString();
+    default boolean isSigned() {
+      return false;
     }
   }
 
-  record Boolean() implements Arithmetic, Builtin {
+  record Boolean() implements Natural, Builtin {
+    @Override
+    public int width() {
+      return 1;
+    }
+
     @Override
     public String external() {
       return "_Bool";
@@ -121,34 +158,73 @@ public sealed interface Semantic {
     }
   }
 
-  record ConstantReal() implements ConstantArithmetic {
+  record ConstantReal() implements Constant {
     @Override
     public String toString() {
       return "constant-real";
     }
   }
 
-  record ConstantIntegral() implements ConstantArithmetic {
+  record ConstantIntegral() implements Constant {
     @Override
     public String toString() {
       return "constant-integral";
     }
   }
 
+  record Natural8() implements Natural, Builtin {
+    @Override
+    public int width() {
+      return 8;
+    }
+
+    @Override
+    public String external() {
+      return "unsigned char";
+    }
+
+    @Override
+    public String identifier() {
+      return "Natural_8";
+    }
+
+    @Override
+    public String toString() {
+      return name().toString();
+    }
+  }
+
+  record Natural16() implements Natural, Builtin {
+    @Override
+    public int width() {
+      return 16;
+    }
+
+    @Override
+    public String external() {
+      return "unsigned short";
+    }
+
+    @Override
+    public String identifier() {
+      return "Natural_16";
+    }
+
+    @Override
+    public String toString() {
+      return name().toString();
+    }
+  }
+
   record Natural32() implements Natural, Builtin {
+    @Override
+    public int width() {
+      return 32;
+    }
+
     @Override
     public String external() {
       return "unsigned";
-    }
-
-    @Override
-    public BigInteger max() {
-      return BigInteger.valueOf(0xffff_ffffL);
-    }
-
-    @Override
-    public Natural32Constant constant(BigInteger value) {
-      return new Natural32Constant(value);
     }
 
     @Override
@@ -164,18 +240,13 @@ public sealed interface Semantic {
 
   record Natural64() implements Natural, Builtin {
     @Override
+    public int width() {
+      return 64;
+    }
+
+    @Override
     public String external() {
       return "unsigned long long";
-    }
-
-    @Override
-    public BigInteger max() {
-      return BigInteger.valueOf(0xffff_ffff_ffff_ffffL);
-    }
-
-    @Override
-    public Natural64Constant constant(BigInteger value) {
-      return new Natural64Constant(value);
     }
 
     @Override
@@ -189,25 +260,115 @@ public sealed interface Semantic {
     }
   }
 
+  sealed interface Integer extends Integral {
+    @Override
+    default boolean isSigned() {
+      return true;
+    }
+  }
+
+  record Integer8() implements Integer, Builtin {
+    @Override
+    public int width() {
+      return 8;
+    }
+
+    @Override
+    public String external() {
+      return "signed char";
+    }
+
+    @Override
+    public String identifier() {
+      return "Integer_8";
+    }
+
+    @Override
+    public String toString() {
+      return name().toString();
+    }
+  }
+
+  record Integer16() implements Integer, Builtin {
+    @Override
+    public int width() {
+      return 16;
+    }
+
+    @Override
+    public String external() {
+      return "short";
+    }
+
+    @Override
+    public String identifier() {
+      return "Integer_16";
+    }
+
+    @Override
+    public String toString() {
+      return name().toString();
+    }
+  }
+
   record Integer32() implements Integer, Builtin {
+    @Override
+    public int width() {
+      return 32;
+    }
+
     @Override
     public String external() {
       return "int";
     }
 
     @Override
-    public BigInteger max() {
-      return BigInteger.valueOf(0x7fff_ffffL);
+    public String identifier() {
+      return "Integer_32";
     }
 
     @Override
-    public Integer32Constant constant(BigInteger value) {
-      return new Integer32Constant(value);
+    public String toString() {
+      return name().toString();
+    }
+  }
+
+  record Integer64() implements Integer, Builtin {
+    @Override
+    public int width() {
+      return 64;
+    }
+
+    @Override
+    public String external() {
+      return "int";
     }
 
     @Override
     public String identifier() {
-      return "Integer_32";
+      return "Integer_64";
+    }
+
+    @Override
+    public String toString() {
+      return name().toString();
+    }
+  }
+
+  record Byte() implements Alias, Builtin {
+    @Override
+    public Name aliased() {
+      return NATURAL_8.name();
+    }
+
+    @Override
+    public String external() {
+      return NATURAL_8.external();
+    }
+
+    @Override
+    public String identifier() {
+      return "Byte";
     }
 
     @Override
@@ -250,7 +411,12 @@ public sealed interface Semantic {
     }
   }
 
-  record Pointer(Type pointee) implements Type {
+  record Pointer(Type pointee) implements Natural {
+    @Override
+    public int width() {
+      return 64;
+    }
+
     @Override
     public String toString() {
       return "*%s".formatted(pointee);
@@ -269,7 +435,7 @@ public sealed interface Semantic {
     Optional<String> externalName,
     boolean isPublic,
     Name name,
-    Name aliased) implements Symbol
+    Name aliased) implements Alias
   {
     @Override
     public String toString() {
@@ -517,8 +683,6 @@ public sealed interface Semantic {
     implements Expression
   {}
 
-  record Cast(Type target, Expression source) implements Expression {}
-
   record GlobalAccess(Name name) implements Expression {}
 
   record LocalAccess(String name) implements Expression {}
@@ -529,24 +693,43 @@ public sealed interface Semantic {
 
   record IntegralConstant(BigInteger value) implements Expression {}
 
-  record Integer32Constant(BigInteger value) implements Expression {}
-
-  record Natural32Constant(BigInteger value) implements Expression {}
-
-  record Natural64Constant(BigInteger value) implements Expression {}
-
   record StringConstant(String value) implements Expression {}
 
-  Byte             BYTE              = new Byte();
-  Boolean          BOOLEAN           = new Boolean();
+  record Conversion(Expression source, Type target) implements Expression {}
+
   Float32          FLOAT_32          = new Float32();
+  Float64          FLOAT_64          = new Float64();
+  Boolean          BOOLEAN           = new Boolean();
+  Natural8         NATURAL_8         = new Natural8();
+  Natural16        NATURAL_16        = new Natural16();
   Natural32        NATURAL_32        = new Natural32();
+  Natural64        NATURAL_64        = new Natural64();
+  Integer8         INTEGER_8         = new Integer8();
+  Integer16        INTEGER_16        = new Integer16();
   Integer32        INTEGER_32        = new Integer32();
+  Integer64        INTEGER_64        = new Integer64();
+  Byte             BYTE              = new Byte();
   Void             VOID              = new Void();
   Noreturn         NORETURN          = new Noreturn();
   List<Builtin>    BUILTINS          =
-    List.of(BYTE, BOOLEAN, FLOAT_32, NATURAL_32, INTEGER_32, VOID, NORETURN);
-  Pointer          BYTE_POINTER      = new Pointer(BYTE);
+    List
+      .of(
+        FLOAT_32,
+        FLOAT_64,
+        BOOLEAN,
+        NATURAL_8,
+        NATURAL_16,
+        NATURAL_32,
+        NATURAL_64,
+        INTEGER_8,
+        INTEGER_16,
+        INTEGER_32,
+        INTEGER_64,
+        BYTE,
+        VOID,
+        NORETURN);
+  Pointer          BYTE_POINTER      = new Pointer(NATURAL_8);
+  ConstantString   CONSTANT_STRING   = new ConstantString();
   ConstantIntegral CONSTANT_INTEGRAL = new ConstantIntegral();
   ConstantReal     CONSTANT_REAL     = new ConstantReal();
   IntegralConstant ZERO              = new IntegralConstant(BigInteger.ZERO);

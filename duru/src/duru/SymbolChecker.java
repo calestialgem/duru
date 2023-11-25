@@ -231,14 +231,16 @@ public final class SymbolChecker {
         else {
           var label = for_.label().getFirst();
           for (var otherLoop : loops) {
-            if (otherLoop.isEmpty())
+            if (otherLoop.isEmpty()) {
               continue;
-            if (otherLoop.getFirst().equals(label.text()))
+            }
+            if (otherLoop.getFirst().equals(label.text())) {
               throw Diagnostic
                 .error(
                   label.location(),
                   "redeclaration of loop `%s`",
                   label.text());
+            }
           }
           loops.add(Optional.present(label.text()));
         }
@@ -383,8 +385,9 @@ public final class SymbolChecker {
     for (var label : optionalLabel) {
       for (var index = loops.length(); index != 0; index--) {
         var loop = loops.get(index);
-        if (loop.isEmpty())
+        if (loop.isEmpty()) {
           continue;
+        }
         if (loop.getFirst().equals(label.text())) {
           return Optional.present(label.text());
         }
@@ -392,8 +395,9 @@ public final class SymbolChecker {
       throw Diagnostic
         .error(label.location(), "there is no loop labeled `%s`", label.text());
     }
-    if (loops.isEmpty())
+    if (loops.isEmpty()) {
       throw Diagnostic.error(fallback, "there is no loop");
+    }
     return Optional.absent();
   }
 
@@ -553,9 +557,9 @@ public final class SymbolChecker {
       case Node.Cast cast -> {
         var target = checkType(cast.target());
         return new CheckedExpression(
-          new Semantic.Cast(
-            target,
-            checkExpression(cast.source()).expression()),
+          new Semantic.Conversion(
+            checkExpression(cast.source()).expression(),
+            target),
           target);
       }
       case Node.Access access -> {
@@ -608,7 +612,7 @@ public final class SymbolChecker {
       case Node.StringConstant stringConstant -> {
         return new CheckedExpression(
           new Semantic.StringConstant(stringConstant.value().value()),
-          Semantic.BYTE_POINTER);
+          Semantic.CONSTANT_STRING);
       }
     }
   }
@@ -618,12 +622,13 @@ public final class SymbolChecker {
     Function<Semantic.Expression, Semantic.Expression> creator)
   {
     var operand = checkExpression(node.operand());
-    if (!(operand.type() instanceof Semantic.Arithmetic))
+    if (!(operand.type() instanceof Semantic.Arithmetic)) {
       throw Diagnostic
         .error(
           node.operand().location(),
           "`%s` is not arithmetic",
           operand.type());
+    }
     return new CheckedExpression(
       creator.apply(operand.expression()),
       operand.type());
@@ -634,12 +639,13 @@ public final class SymbolChecker {
     Function<Semantic.Expression, Semantic.Expression> creator)
   {
     var operand = checkExpression(node.operand());
-    if (!(operand.type() instanceof Semantic.Integral))
+    if (!(operand.type() instanceof Semantic.Integral)) {
       throw Diagnostic
         .error(
           node.operand().location(),
           "`%s` is not integral",
           operand.type());
+    }
     return new CheckedExpression(
       creator.apply(operand.expression()),
       operand.type());
@@ -650,12 +656,13 @@ public final class SymbolChecker {
     Function<Semantic.Expression, Semantic.Expression> creator)
   {
     var operand = checkExpression(node.operand());
-    if (!(operand.type() instanceof Semantic.Boolean))
+    if (!(operand.type() instanceof Semantic.Boolean)) {
       throw Diagnostic
         .error(
           node.operand().location(),
           "`%s` is not boolean",
           operand.type());
+    }
     return new CheckedExpression(
       creator.apply(operand.expression()),
       operand.type());
@@ -666,19 +673,21 @@ public final class SymbolChecker {
     BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
   {
     var leftOperand = checkExpression(node.leftOperand());
-    if (!(leftOperand.type() instanceof Semantic.Arithmetic))
+    if (!(leftOperand.type() instanceof Semantic.Arithmetic)) {
       throw Diagnostic
         .error(
           node.leftOperand().location(),
           "`%s` is not arithmetic",
           leftOperand.type());
+    }
     var rightOperand = checkExpression(node.rightOperand());
-    if (!(rightOperand.type() instanceof Semantic.Arithmetic))
+    if (!(rightOperand.type() instanceof Semantic.Arithmetic)) {
       throw Diagnostic
         .error(
           node.leftOperand().location(),
           "`%s` is not arithmetic",
           rightOperand.type());
+    }
     return new CheckedExpression(
       creator
         .apply(
@@ -695,19 +704,21 @@ public final class SymbolChecker {
     BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
   {
     var leftOperand = checkExpression(node.leftOperand());
-    if (!(leftOperand.type() instanceof Semantic.Integral))
+    if (!(leftOperand.type() instanceof Semantic.Integral)) {
       throw Diagnostic
         .error(
           node.leftOperand().location(),
           "`%s` is not integral",
           leftOperand.type());
+    }
     var rightOperand = checkExpression(node.rightOperand());
-    if (!(rightOperand.type() instanceof Semantic.Integral))
+    if (!(rightOperand.type() instanceof Semantic.Integral)) {
       throw Diagnostic
         .error(
           node.leftOperand().location(),
           "`%s` is not integral",
           rightOperand.type());
+    }
     return new CheckedExpression(
       creator
         .apply(
@@ -724,19 +735,21 @@ public final class SymbolChecker {
     BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
   {
     var leftOperand = checkExpression(node.leftOperand());
-    if (!(leftOperand.type() instanceof Semantic.Arithmetic))
+    if (!(leftOperand.type() instanceof Semantic.Arithmetic)) {
       throw Diagnostic
         .error(
           node.leftOperand().location(),
           "`%s` is not arithmetic",
           leftOperand.type());
+    }
     var rightOperand = checkExpression(node.rightOperand());
-    if (!(rightOperand.type() instanceof Semantic.Arithmetic))
+    if (!(rightOperand.type() instanceof Semantic.Arithmetic)) {
       throw Diagnostic
         .error(
           node.leftOperand().location(),
           "`%s` is not arithmetic",
           rightOperand.type());
+    }
     return new CheckedExpression(
       creator
         .apply(
@@ -799,36 +812,72 @@ public final class SymbolChecker {
 
   private Semantic.Symbol accessGlobal(Node.Mention mention) {
     var symbol = accessor.access(mention.location(), mention.toName());
-    while ((symbol instanceof Semantic.Using using)) {
-      symbol = accessor.access(mention.location(), using.aliased());
+    while (symbol instanceof Semantic.Alias alias) {
+      symbol = accessor.access(mention.location(), alias.aliased());
     }
     return symbol;
   }
 
   private Semantic.Expression coerce(
     Object subject,
-    CheckedExpression raw,
+    CheckedExpression source,
     Semantic.Type target)
   {
-    if (raw.type().coerces(target)) {
-      return raw.expression();
+    if (source.type().equals(target)) {
+      return source.expression();
     }
-    if (!(raw.expression() instanceof Semantic.IntegralConstant constant)) {
-      throw Diagnostic
-        .error(subject, "`%s` cannot coerce to `%s`", raw.type(), target);
+    switch (source.expression()) {
+      case Semantic.StringConstant stringConstant -> {
+        if (target.equals(Semantic.BYTE_POINTER)) {
+          return new Semantic.Conversion(source.expression(), target);
+        }
+        throw Diagnostic
+          .error(subject, "`%s` cannot coerce to `%s`", source.type(), target);
+      }
+      case Semantic.RealConstant realConstant -> {
+        if (target instanceof Semantic.Real real) {
+          if (!real.canRepresent(realConstant.value())) {
+            throw Diagnostic
+              .error(
+                subject,
+                "`%s` cannot represent `%s`",
+                target,
+                Text.format(realConstant.value()));
+          }
+          return new Semantic.Conversion(source.expression(), target);
+        }
+        throw Diagnostic
+          .error(subject, "`%s` cannot coerce to `%s`", source.type(), target);
+      }
+      case Semantic.IntegralConstant integralConstant -> {
+        if (target instanceof Semantic.Real real) {
+          if (!real.canRepresent(integralConstant.value())) {
+            throw Diagnostic
+              .error(
+                subject,
+                "`%s` cannot represent `%s`",
+                target,
+                integralConstant.value());
+          }
+          return new Semantic.Conversion(source.expression(), target);
+        }
+        if (target instanceof Semantic.Integral integral) {
+          if (!integral.canRepresent(integralConstant.value())) {
+            throw Diagnostic
+              .error(
+                subject,
+                "`%s` cannot represent `%s`",
+                target,
+                integralConstant.value());
+          }
+          return new Semantic.Conversion(source.expression(), target);
+        }
+        throw Diagnostic
+          .error(subject, "`%s` cannot coerce to `%s`", source.type(), target);
+      }
+      default ->
+        throw Diagnostic
+          .error(subject, "`%s` cannot coerce to `%s`", source.type(), target);
     }
-    if (!(target instanceof Semantic.Integral type)) {
-      throw Diagnostic
-        .error(
-          subject,
-          "constant integral `%s` cannot coerce to `%s`",
-          constant.value(),
-          target);
-    }
-    if (!type.canRepresent(constant.value())) {
-      throw Diagnostic
-        .error(subject, "`%s` cannot represent `%s`", type, constant.value());
-    }
-    return type.constant(constant.value());
   }
 }
