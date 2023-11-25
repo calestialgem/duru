@@ -349,10 +349,10 @@ public final class SymbolChecker {
             ? Control.SINKS
             : Control.FLOWS);
       }
-      case Node.Increment increment ->
-        throw Diagnostic.unimplemented(node.location());
-      case Node.Decrement decrement ->
-        throw Diagnostic.unimplemented(node.location());
+      case Node.Increment mutate ->
+        checkMutate(mutate, Semantic.Increment::new);
+      case Node.Decrement mutate ->
+        checkMutate(mutate, Semantic.Decrement::new);
       case Node.Assign assign ->
         throw Diagnostic.unimplemented(node.location());
       case Node.MultiplyAssign assign ->
@@ -376,6 +376,23 @@ public final class SymbolChecker {
       case Node.OrAssign assign ->
         throw Diagnostic.unimplemented(node.location());
     };
+  }
+
+  private CheckedStatement checkMutate(
+    Node.Mutate node,
+    Function<Semantic.Expression, Semantic.Statement> creator)
+  {
+    var target = checkExpression(node.target());
+    if (!(target.type() instanceof Semantic.Arithmetic)) {
+      throw Diagnostic
+        .error(
+          node.target().location(),
+          "`%s` is not arithmetic",
+          target.type());
+    }
+    return new CheckedStatement(
+      creator.apply(target.expression()),
+      Control.FLOWS);
   }
 
   private Optional<String> findLoop(
