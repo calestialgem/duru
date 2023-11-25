@@ -507,6 +507,8 @@ public sealed interface Semantic {
     implements Expression
   {}
 
+  record Cast(Type target, Expression source) implements Expression {}
+
   record GlobalAccess(Name name) implements Expression {}
 
   record LocalAccess(String name) implements Expression {}

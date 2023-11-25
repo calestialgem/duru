@@ -306,6 +306,7 @@ public final class SourceLexer {
               case "break" -> lex(Token.Break::new);
               case "continue" -> lex(Token.Continue::new);
               case "return" -> lex(Token.Return::new);
+              case "as" -> lex(Token.As::new);
               default -> tokens.add(new Token.Identifier(location(), text));
             }
             break;

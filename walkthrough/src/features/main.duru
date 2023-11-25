@@ -393,7 +393,7 @@ fn a_function() duru::Void {
   var function_call  duru::Boolean    = is_even(15);
   var infix_call     duru::Boolean    = 15:is_even();
   var grouping       duru::Integer_32 = (56 + 5);
-  var cast           duru::Float_32   = duru::Float_32{10};
+  var cast           duru::Float_32   = 10 as duru::Float_32;
   var initialization Person_Info      = Person_Info{age = 5, height = 56};
   var member_access  duru::Float_32   = initialization.height;
 }

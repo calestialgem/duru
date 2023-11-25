@@ -1,4 +1,4 @@
-F6537F5E
+AAC54DEA
 0035.0001-0035.0006: keyword `using`
 0035.0007-0035.0014: identifier `Integer`
 0035.0015-0035.0016: punctuation `=`
@@ -754,13 +754,12 @@ F6537F5E
 0396.0026-0396.0028: punctuation `::`
 0396.0028-0396.0036: identifier `Float_32`
 0396.0039-0396.0040: punctuation `=`
-0396.0041-0396.0045: identifier `duru`
-0396.0045-0396.0047: punctuation `::`
-0396.0047-0396.0055: identifier `Float_32`
-0396.0055-0396.0056: punctuation `{`
-0396.0056-0396.0058: number `10`
-0396.0058-0396.0059: punctuation `}`
-0396.0059-0396.0060: punctuation `;`
+0396.0041-0396.0043: number `10`
+0396.0044-0396.0046: keyword `as`
+0396.0047-0396.0051: identifier `duru`
+0396.0051-0396.0053: punctuation `::`
+0396.0053-0396.0061: identifier `Float_32`
+0396.0061-0396.0062: punctuation `;`
 0397.0003-0397.0006: keyword `var`
 0397.0007-0397.0021: identifier `initialization`
 0397.0022-0397.0033: identifier `Person_Info`

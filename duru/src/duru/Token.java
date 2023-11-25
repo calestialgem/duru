@@ -94,6 +94,13 @@ public sealed interface Token {
     }
   }
 
+  record As(Location location) implements Token {
+    @Override
+    public String toString() {
+      return "keyword `as`";
+    }
+  }
+
   record OpeningBrace(Location location) implements Token {
     @Override
     public String toString() {

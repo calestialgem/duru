@@ -316,6 +316,10 @@ public sealed interface Node {
     implements UnaryOperator
   {}
 
+  record Cast(Location location, Expression source, Formula target)
+    implements Expression
+  {}
+
   record MemberAccess(
     Location location,
     Expression object,
@@ -345,10 +349,6 @@ public sealed interface Node {
     Location location,
     Token.Identifier member,
     Expression value) implements Node
-  {}
-
-  record Cast(Location location, Mention type, Expression source)
-    implements Expression
   {}
 
   record Access(Mention mention) implements Expression {

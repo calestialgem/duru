@@ -57,7 +57,8 @@ public final class Text {
         "for",
         "break",
         "continue",
-        "return" ->
+        "return",
+        "as" ->
         true;
       default -> false;
     };

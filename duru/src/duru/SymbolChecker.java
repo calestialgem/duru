@@ -527,7 +527,14 @@ public final class SymbolChecker {
           new Semantic.Initialization(struct, members.toList()),
           struct);
       }
-      case Node.Cast cast -> throw Diagnostic.unimplemented(cast.location());
+      case Node.Cast cast -> {
+        var target = checkType(cast.target());
+        yield new CheckedExpression(
+          new Semantic.Cast(
+            target,
+            checkExpression(cast.source()).expression()),
+          target);
+      }
       case Node.Access access -> {
         if (access.mention().identifiers().length() == 1) {
           var name  = access.mention().identifiers().getFirst().text();

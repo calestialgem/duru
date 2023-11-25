@@ -765,6 +765,11 @@ public final class SourceParser {
         suffix = new Node.MemberAccess(location(begin), suffix, member);
         continue;
       }
+      if (take(Token.As.class)) {
+        var target = expect(this::parseFormula, "target type");
+        suffix = new Node.Cast(location(begin), suffix, target);
+        continue;
+      }
       return Optional.present(suffix);
     }
   }
@@ -781,23 +786,6 @@ public final class SourceParser {
     if (!take(Token.OpeningBrace.class)) {
       return Optional.present(new Node.Access(mention.getFirst()));
     }
-    if (take(Token.ClosingBrace.class)) {
-      return Optional
-        .present(
-          new Node.Initialization(
-            location(begin),
-            mention.getFirst(),
-            List.of()));
-    }
-    var insideBegin = index;
-    if (!take(Token.Identifier.class) || !take(Token.Equal.class)) {
-      index = insideBegin;
-      var source = expect(this::parseExpression, "source expression of cast");
-      expect(Token.ClosingBrace.class, "`}` of cast");
-      return Optional
-        .present(new Node.Cast(location(begin), mention.getFirst(), source));
-    }
-    index = insideBegin;
     var memberInitializations = parseSeparated(this::parseMemberInitialization);
     expect(Token.ClosingBrace.class, "`}` of initialization");
     return Optional
