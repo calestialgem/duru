@@ -445,40 +445,20 @@ public final class SymbolChecker {
         checkArithmeticOperation(op, Semantic.Promotion::new);
       case Node.MemberAccess memberAccess ->
         throw Diagnostic.unimplemented(memberAccess.location());
-      case Node.InfixCall infixCall ->
-        throw Diagnostic.unimplemented(infixCall.location());
-      case Node.PostfixCall invocation -> {
-        var accessed = accessGlobal(invocation.procedure());
-        if (!(accessed instanceof Semantic.Procedure procedure)) {
-          throw Diagnostic
-            .error(
-              invocation.procedure().location(),
-              "`%s` is not procedure",
-              accessed.name());
-        }
-        if (invocation.arguments().length()
-          != procedure.parameters().length())
-        {
-          throw Diagnostic
-            .error(
-              invocation.location(),
-              "`%s` takes %d parameters but %d arguments were given",
-              accessed.name(),
-              procedure.parameters().length(),
-              invocation.arguments().length());
-        }
-        var arguments = ListBuffer.<Semantic.Expression>create();
-        for (var i = 0; i < invocation.arguments().length(); i++) {
-          var argument  = invocation.arguments().get(i);
-          var parameter = procedure.parameters().values().get(i);
-          var checked   = checkExpression(argument);
-          var coerced   = coerce(argument.location(), checked, parameter);
-          arguments.add(coerced);
-        }
-        yield new CheckedExpression(
-          new Semantic.Invocation(accessed.name(), arguments.toList()),
-          procedure.returnType());
+      case Node.InfixCall infixCall -> {
+        var arguments = ListBuffer.<Node.Expression>create();
+        arguments.add(infixCall.firstArgument());
+        arguments.addAll(infixCall.remainingArguments());
+        yield checkCall(
+          infixCall.location(),
+          infixCall.callee(),
+          arguments.toList());
       }
+      case Node.PostfixCall postfixCall ->
+        checkCall(
+          postfixCall.location(),
+          postfixCall.callee(),
+          postfixCall.arguments());
       case Node.Initialization initialization ->
         throw Diagnostic.unimplemented(initialization.location());
       case Node.Cast cast -> throw Diagnostic.unimplemented(cast.location());
@@ -493,13 +473,25 @@ public final class SymbolChecker {
           }
         }
         var symbol = accessGlobal(access.mention());
-        if (!(symbol instanceof Semantic.GlobalVariable global)) {
-          throw Diagnostic
-            .error(access.location(), "`%s` is not variable", symbol);
-        }
-        return new CheckedExpression(
-          new Semantic.GlobalAccess(accessed.name()),
-          accessed.type());
+        yield switch (symbol) {
+          case Semantic.Const const_ ->
+            new CheckedExpression(
+              new Semantic.GlobalAccess(const_.name()),
+              const_.type());
+          case Semantic.Var var_ ->
+            new CheckedExpression(
+              new Semantic.GlobalAccess(var_.name()),
+              var_.type());
+          case Semantic.Fn fn ->
+            new CheckedExpression(
+              new Semantic.GlobalAccess(fn.name()),
+              new Semantic.Callable(
+                fn.parameters().transform(Entry::value),
+                fn.returnType()));
+          default ->
+            throw Diagnostic
+              .error(access.location(), "`%s` is not variable", symbol);
+        };
       }
       case Node.Grouping grouping -> checkExpression(grouping.grouped());
       case Node.NumberConstant numberConstant -> {
@@ -619,6 +611,36 @@ public final class SymbolChecker {
     BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Expression> creator)
   {
     throw Diagnostic.unimplemented(node.location());
+  }
+
+  private CheckedExpression checkCall(
+    Location location,
+    Node.Expression calleeNode,
+    List<Node.Expression> argumentNodes)
+  {
+    var callee = checkExpression(calleeNode);
+    if (!(callee.type() instanceof Semantic.Callable callable)) {
+      throw Diagnostic.error(calleeNode.location(), "is not callable");
+    }
+    if (argumentNodes.length() != callable.parameters().length()) {
+      throw Diagnostic
+        .error(
+          location,
+          "callable with %d parameters is called with %d arguments",
+          callable.parameters().length(),
+          argumentNodes.length());
+    }
+    var arguments = ListBuffer.<Semantic.Expression>create();
+    for (var i = 0; i < arguments.length(); i++) {
+      var argument  = argumentNodes.get(i);
+      var parameter = callable.parameters().get(i);
+      var checked   = checkExpression(argument);
+      var coerced   = coerce(argument.location(), checked, parameter);
+      arguments.add(coerced);
+    }
+    return new CheckedExpression(
+      new Semantic.Calling(callee.expression(), arguments.toList()),
+      callable.returnType());
   }
 
   private Semantic.Symbol accessGlobal(Node.Mention mention) {

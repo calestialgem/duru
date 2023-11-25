@@ -748,7 +748,7 @@ public final class SourceParser {
         continue;
       }
       if (take(Token.Colon.class)) {
-        var callee = expect(this::parseMention, "function name");
+        var callee = expect(this::parsePrimary, "callee");
         expect(Token.OpeningParenthesis.class, "`(` of arguments");
         var remainingArguments = parseSeparated(this::parseExpression);
         expect(Token.ClosingParenthesis.class, "`)` of arguments");

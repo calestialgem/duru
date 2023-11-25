@@ -247,6 +247,8 @@ public sealed interface Semantic {
     }
   }
 
+  record Callable(List<Type> parameters, Type returnType) implements Type {}
+
   sealed interface Symbol extends Semantic {
     Optional<String> externalName();
     boolean isPublic();
@@ -277,16 +279,12 @@ public sealed interface Semantic {
     }
   }
 
-  sealed interface GlobalVariable extends Symbol {
-    Type type();
-  }
-
   record Const(
     Optional<String> externalName,
     boolean isPublic,
     Name name,
     Type type,
-    Expression value) implements GlobalVariable
+    Expression value) implements Symbol
   {
     @Override
     public String toString() {
@@ -299,7 +297,7 @@ public sealed interface Semantic {
     boolean isPublic,
     Name name,
     Type type,
-    Expression initialValue) implements GlobalVariable
+    Expression initialValue) implements Symbol
   {
     @Override
     public String toString() {
@@ -501,13 +499,7 @@ public sealed interface Semantic {
 
   record MemberAccess(Expression object, String member) implements Expression {}
 
-  record InfixCall(
-    Expression firstArgument,
-    Name callee,
-    List<Expression> remainingArguments) implements Expression
-  {}
-
-  record PostfixCall(Expression callee, List<Expression> arguments)
+  record Calling(Expression callee, List<Expression> arguments)
     implements Expression
   {}
 

@@ -325,7 +325,7 @@ public sealed interface Node {
   record InfixCall(
     Location location,
     Expression firstArgument,
-    Mention callee,
+    Expression callee,
     List<Expression> remainingArguments) implements Expression
   {}
 
