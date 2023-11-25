@@ -13,8 +13,8 @@ public sealed interface Node {
     Location location,
     Optional<Token.StringConstant> externalName,
     boolean isPublic,
-    Optional<Token.Identifier> newName,
-    Mention aliased) implements Declaration
+    Mention aliased,
+    Optional<Token.Identifier> newName) implements Declaration
   {
     @Override
     public Identifier name() {

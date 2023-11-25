@@ -34,24 +34,12 @@ public final class SourceParser {
     }
     var isPublic = take(Token.Public.class);
     if (take(Token.Using.class)) {
-      var fallback = index;
-      if (!take(Token.Identifier.class) || !take(Token.Equal.class)) {
-        index = fallback;
-        var aliased = expect(this::parseMention, "aliased symbol");
-        expect(Token.Semicolon.class, "`;` of using declaration");
-        return Optional
-          .present(
-            new Node.Using(
-              location(begin),
-              externalName,
-              isPublic,
-              Optional.absent(),
-              aliased));
-      }
-      index = fallback;
-      var newName = expect(Token.Identifier.class, "alias name");
-      expect(Token.Equal.class, "`=` of using declaration");
       var aliased = expect(this::parseMention, "aliased symbol");
+      var newName = Optional.<Token.Identifier>absent();
+      if (take(Token.As.class)) {
+        newName =
+          Optional.present(expect(Token.Identifier.class, "alias name"));
+      }
       expect(Token.Semicolon.class, "`;` of using declaration");
       return Optional
         .present(
@@ -59,8 +47,8 @@ public final class SourceParser {
             location(begin),
             externalName,
             isPublic,
-            Optional.present(newName),
-            aliased));
+            aliased,
+            newName));
     }
     if (take(Token.Struct.class)) {
       var name = expect(Token.Identifier.class, "struct name");

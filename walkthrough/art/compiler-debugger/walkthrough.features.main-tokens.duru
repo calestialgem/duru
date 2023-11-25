@@ -1,11 +1,11 @@
-AAC54DEA
+ADB2333F
 0035.0001-0035.0006: keyword `using`
-0035.0007-0035.0014: identifier `Integer`
-0035.0015-0035.0016: punctuation `=`
-0035.0017-0035.0021: identifier `duru`
-0035.0021-0035.0023: punctuation `::`
-0035.0023-0035.0033: identifier `Integer_32`
-0035.0033-0035.0034: punctuation `;`
+0035.0007-0035.0011: identifier `duru`
+0035.0011-0035.0013: punctuation `::`
+0035.0013-0035.0023: identifier `Integer_32`
+0035.0024-0035.0026: keyword `as`
+0035.0027-0035.0034: identifier `Integer`
+0035.0034-0035.0035: punctuation `;`
 0042.0001-0042.0006: keyword `using`
 0042.0007-0042.0011: identifier `duru`
 0042.0011-0042.0013: punctuation `::`

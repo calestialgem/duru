@@ -32,7 +32,7 @@
 /*
  * Declares `Integer` which is an alias for `duru::Integer_32`.
  */
-using Integer = duru::Integer_32;
+using duru::Integer_32 as Integer;
 
 // If the name is omitted, it is the same as the aliased symbol's name.
 

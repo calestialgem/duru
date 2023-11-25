@@ -1,4 +1,4 @@
-252F2AF4
+D7594583
 C:\Users\Cem\duru\walkthrough\src\features\main.duru
 // Showcases the features of the Duru Programming Language.
 // Copyright (C) 2023 Cem Geçgel <gecgelcem@outlook.com>
@@ -34,7 +34,7 @@ C:\Users\Cem\duru\walkthrough\src\features\main.duru
 /*
  * Declares `Integer` which is an alias for `duru::Integer_32`.
  */
-using Integer = duru::Integer_32;
+using duru::Integer_32 as Integer;
 
 // If the name is omitted, it is the same as the aliased symbol's name.
 
