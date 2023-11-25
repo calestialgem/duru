@@ -121,9 +121,19 @@ public sealed interface Semantic {
     }
   }
 
-  record ConstantReal() implements ConstantArithmetic {}
+  record ConstantReal() implements ConstantArithmetic {
+    @Override
+    public String toString() {
+      return "constant-real";
+    }
+  }
 
-  record ConstantIntegral() implements ConstantArithmetic {}
+  record ConstantIntegral() implements ConstantArithmetic {
+    @Override
+    public String toString() {
+      return "constant-integral";
+    }
+  }
 
   record Natural32() implements Natural, Builtin {
     @Override
