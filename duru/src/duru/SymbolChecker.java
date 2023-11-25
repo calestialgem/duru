@@ -353,28 +353,35 @@ public final class SymbolChecker {
         checkMutate(mutate, Semantic.Increment::new);
       case Node.Decrement mutate ->
         checkMutate(mutate, Semantic.Decrement::new);
-      case Node.Assign assign ->
-        throw Diagnostic.unimplemented(node.location());
+      case Node.Assign assign -> {
+        var target = checkExpression(assign.target());
+        var source = checkExpression(assign.source());
+        yield new CheckedStatement(
+          new Semantic.Assign(
+            target.expression(),
+            coerce(assign.source().location(), source, target.type())),
+          Control.FLOWS);
+      }
       case Node.MultiplyAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkArithmeticAssign(assign, Semantic.MultiplyAssign::new);
       case Node.QuotientAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkArithmeticAssign(assign, Semantic.QuotientAssign::new);
       case Node.ReminderAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkArithmeticAssign(assign, Semantic.ReminderAssign::new);
       case Node.AddAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkArithmeticAssign(assign, Semantic.AddAssign::new);
       case Node.SubtractAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkArithmeticAssign(assign, Semantic.SubtractAssign::new);
       case Node.ShiftLeftAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkBitwiseAssign(assign, Semantic.ShiftLeftAssign::new);
       case Node.ShiftRightAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkBitwiseAssign(assign, Semantic.ShiftRightAssign::new);
       case Node.AndAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkBitwiseAssign(assign, Semantic.AndAssign::new);
       case Node.XorAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkBitwiseAssign(assign, Semantic.XorAssign::new);
       case Node.OrAssign assign ->
-        throw Diagnostic.unimplemented(node.location());
+        checkBitwiseAssign(assign, Semantic.OrAssign::new);
     };
   }
 
@@ -392,6 +399,56 @@ public final class SymbolChecker {
     }
     return new CheckedStatement(
       creator.apply(target.expression()),
+      Control.FLOWS);
+  }
+
+  private CheckedStatement checkArithmeticAssign(
+    Node.BaseAssign node,
+    BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Statement> creator)
+  {
+    var target = checkExpression(node.target());
+    if (!(target.type() instanceof Semantic.Arithmetic)) {
+      throw Diagnostic
+        .error(
+          node.target().location(),
+          "`%s` is not arithmetic",
+          target.type());
+    }
+    var source = checkExpression(node.source());
+    if (!(source.type() instanceof Semantic.Arithmetic)) {
+      throw Diagnostic
+        .error(
+          node.source().location(),
+          "`%s` is not arithmetic",
+          source.type());
+    }
+    return new CheckedStatement(
+      creator
+        .apply(
+          target.expression(),
+          coerce(node.source().location(), source, target.type())),
+      Control.FLOWS);
+  }
+
+  private CheckedStatement checkBitwiseAssign(
+    Node.BaseAssign node,
+    BiFunction<Semantic.Expression, Semantic.Expression, Semantic.Statement> creator)
+  {
+    var target = checkExpression(node.target());
+    if (!(target.type() instanceof Semantic.Integral)) {
+      throw Diagnostic
+        .error(node.target().location(), "`%s` is not integral", target.type());
+    }
+    var source = checkExpression(node.source());
+    if (!(source.type() instanceof Semantic.Integral)) {
+      throw Diagnostic
+        .error(node.source().location(), "`%s` is not integral", source.type());
+    }
+    return new CheckedStatement(
+      creator
+        .apply(
+          target.expression(),
+          coerce(node.source().location(), source, target.type())),
       Control.FLOWS);
   }
 
