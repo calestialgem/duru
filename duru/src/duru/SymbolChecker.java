@@ -22,6 +22,7 @@ public final class SymbolChecker {
   private Name                                  symbolName;
   private MapBuffer<String, Semantic.Type>      locals;
   private Semantic.Type                         returnType;
+  private ListBuffer<Optional<String>>          loops;
 
   private SymbolChecker(
     SetBuffer<String> externalNames,
@@ -38,6 +39,7 @@ public final class SymbolChecker {
   private Semantic.Symbol check() {
     symbolName = packageName.scope(declaration.name().text());
     locals     = MapBuffer.create();
+    loops      = ListBuffer.create();
     var externalName = Optional.<String>absent();
     if (!declaration.externalName().isEmpty()) {
       var token = declaration.externalName().getFirst();
@@ -180,47 +182,121 @@ public final class SymbolChecker {
           new Semantic.Block(innerStatements.toList()),
           control);
       }
-      case Node.Discard discard -> {
-        var discarded = checkExpression(discard.source());
-        yield new CheckedStatement(
-          new Semantic.Discard(discarded.expression()),
-          discarded.type() instanceof Semantic.Noreturn
-            ? Control.SINKS
-            : Control.FLOWS);
-      }
       case Node.If if_ -> {
-        var scope            = locals.length();
-        var checkedCondition = checkExpression(if_.condition());
-        var condition        =
+        var scope                           = locals.length();
+        var checkedInitializationStatements =
+          if_.initializationStatements().transform(this::checkStatement);
+        var control                         =
+          Control
+            .sequence(
+              checkedInitializationStatements
+                .transform(CheckedStatement::control));
+        var checkedCondition                = checkExpression(if_.condition());
+        var condition                       =
           coerce(
             if_.condition().location(),
             checkedCondition,
             Semantic.BOOLEAN);
-        var trueBranchScope  = locals.length();
-        var trueBranch       = checkStatement(if_.trueBranch());
+        var trueBranchScope                 = locals.length();
+        var trueBranch                      = checkStatement(if_.trueBranch());
         locals.removeDownTo(trueBranchScope);
         var falseBranchScope = locals.length();
         var falseBranch      =
           if_.falseBranch().transform(this::checkStatement);
         locals.removeDownTo(falseBranchScope);
-        var control =
-          trueBranch
-            .control()
-            .branch(
-              falseBranch
-                .transform(CheckedStatement::control)
-                .getOrElse(Control.FLOWS));
+        control =
+          control
+            .sequent(
+              trueBranch
+                .control()
+                .branch(
+                  falseBranch
+                    .transform(CheckedStatement::control)
+                    .getOrElse(Control.FLOWS)));
         locals.removeDownTo(scope);
         yield new CheckedStatement(
           new Semantic.If(
+            checkedInitializationStatements
+              .transform(CheckedStatement::statement),
             condition,
             trueBranch.statement(),
             falseBranch.transform(CheckedStatement::statement)),
           control);
       }
+      case Node.For for_ -> {
+        var scope = locals.length();
+        if (for_.label().isEmpty()) {
+          loops.add(Optional.absent());
+        }
+        else {
+          var label = for_.label().getFirst();
+          for (var otherLoop : loops) {
+            if (otherLoop.isEmpty())
+              continue;
+            if (otherLoop.getFirst().equals(label.text()))
+              throw Diagnostic
+                .error(
+                  label.location(),
+                  "redeclaration of loop `%s`",
+                  label.text());
+          }
+          loops.add(Optional.present(label.text()));
+        }
+        var checkedInitializationStatements =
+          for_.initializationStatements().transform(this::checkStatement);
+        var control                         =
+          Control
+            .sequence(
+              checkedInitializationStatements
+                .transform(CheckedStatement::control));
+        var checkedCondition                = checkExpression(for_.condition());
+        var condition                       =
+          coerce(
+            for_.condition().location(),
+            checkedCondition,
+            Semantic.BOOLEAN);
+        var interleavedStatement            =
+          for_.interleavedStatement().transform(this::checkStatement);
+        var loopBranchScope                 = locals.length();
+        var loopBranch                      = checkStatement(for_.loopBranch());
+        locals.removeDownTo(loopBranchScope);
+        var falseBranchScope = locals.length();
+        var falseBranch      =
+          for_.falseBranch().transform(this::checkStatement);
+        locals.removeDownTo(falseBranchScope);
+        var falseBranchControl =
+          falseBranch
+            .transform(CheckedStatement::control)
+            .getOrElse(Control.FLOWS);
+        control =
+          control
+            .sequent(
+              loopBranch.control().unloop(false).branch(falseBranchControl));
+        loops.removeLast();
+        locals.removeDownTo(scope);
+        yield new CheckedStatement(
+          new Semantic.For(
+            for_.label().transform(Token.Identifier::text),
+            checkedInitializationStatements
+              .transform(CheckedStatement::statement),
+            condition,
+            interleavedStatement.transform(CheckedStatement::statement),
+            loopBranch.statement(),
+            falseBranch.transform(CheckedStatement::statement)),
+          control);
+      }
+      case Node.Break break_ ->
+        new CheckedStatement(
+          new Semantic.Break(findLoop(break_.location(), break_.label())),
+          Control.BREAKS);
+      case Node.Continue continue_ ->
+        new CheckedStatement(
+          new Semantic.Continue(
+            findLoop(continue_.location(), continue_.label())),
+          Control.CONTINUES);
       case Node.Return return_ -> {
         var value = return_.value().transform(this::checkExpression);
-        if (value.isEmpty() && !(returnType instanceof Semantic.Unit)) {
+        if (value.isEmpty() && !(returnType instanceof Semantic.Void)) {
           throw Diagnostic
             .error(
               return_.location(),
@@ -235,15 +311,15 @@ public final class SymbolChecker {
                 v -> coerce(return_.value().getFirst(), v, returnType))),
           Control.RETURNS);
       }
-      case Node.Declare var -> {
-        var name           = var.name().text();
-        var typeAnnotation = var.type().transform(this::checkType);
-        var initialValue   = checkExpression(var.initialValue());
+      case Node.Declare declare -> {
+        var name           = declare.name().text();
+        var typeAnnotation = declare.type().transform(this::checkType);
+        var initialValue   = checkExpression(declare.initialValue());
         var type           = typeAnnotation.getOrElse(initialValue::type);
         if (type instanceof Semantic.Noreturn) {
           throw Diagnostic
             .error(
-              var.initialValue().location(),
+              declare.initialValue().location(),
               "`%s.%s` cannot be `duru.Noreturn`",
               symbolName,
               name);
@@ -251,20 +327,74 @@ public final class SymbolChecker {
         if (!locals.add(name, type)) {
           throw Diagnostic
             .error(
-              var.name().location(),
+              declare.name().location(),
               "redeclaration of local `%s.%s`",
               symbolName,
               name);
         }
         yield new CheckedStatement(
-          new Semantic.Var(
+          new Semantic.Declare(
             name,
             type,
-            coerce(var.initialValue().location(), initialValue, type)),
+            coerce(declare.initialValue().location(), initialValue, type)),
           Control.FLOWS);
       }
-      default -> throw Diagnostic.unimplemented(node.location());
+      case Node.Discard discard -> {
+        var discarded = checkExpression(discard.source());
+        yield new CheckedStatement(
+          new Semantic.Discard(discarded.expression()),
+          discarded.type() instanceof Semantic.Noreturn
+            ? Control.SINKS
+            : Control.FLOWS);
+      }
+      case Node.Increment increment ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.Decrement decrement ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.Assign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.MultiplyAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.QuotientAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.ReminderAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.AddAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.SubtractAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.ShiftLeftAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.ShiftRightAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.AndAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.XorAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
+      case Node.OrAssign assign ->
+        throw Diagnostic.unimplemented(node.location());
     };
+  }
+
+  private Optional<String> findLoop(
+    Location fallback,
+    Optional<Token.Identifier> optionalLabel)
+  {
+    for (var label : optionalLabel) {
+      for (var index = loops.length(); index != 0; index--) {
+        var loop = loops.get(index);
+        if (loop.isEmpty())
+          continue;
+        if (loop.getFirst().equals(label.text())) {
+          return Optional.present(label.text());
+        }
+      }
+      throw Diagnostic
+        .error(label.location(), "there is no loop labeled `%s`", label.text());
+    }
+    if (loops.isEmpty())
+      throw Diagnostic.error(fallback, "there is no loop");
+    return Optional.absent();
   }
 
   private CheckedExpression checkExpression(Node.Expression node) {
@@ -377,12 +507,12 @@ public final class SymbolChecker {
           yield new CheckedExpression(
             new Semantic.IntegralConstant(
               numberConstant.value().value().toBigIntegerExact()),
-            CONSTANT_INTEGRAL);
+            Semantic.CONSTANT_INTEGRAL);
         }
         catch (@SuppressWarnings("unused") ArithmeticException cause) {
           yield new CheckedExpression(
             new Semantic.RealConstant(numberConstant.value().value()),
-            CONSTANT_REAL);
+            Semantic.CONSTANT_REAL);
         }
       }
       case Node.StringConstant stringConstant ->

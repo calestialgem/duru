@@ -326,7 +326,7 @@ public sealed interface Semantic {
   record Block(List<Statement> innerStatements) implements Statement {}
 
   record If(
-    List<Declare> initializationStatements,
+    List<Statement> initializationStatements,
     Expression condition,
     Statement trueBranch,
     Optional<Statement> falseBranch) implements Statement
@@ -334,9 +334,9 @@ public sealed interface Semantic {
 
   record For(
     Optional<String> label,
-    List<Declare> initializationStatements,
+    List<Statement> initializationStatements,
     Expression condition,
-    Optional<Affect> interleavedStatement,
+    Optional<Statement> interleavedStatement,
     Statement loopBranch,
     Optional<Statement> falseBranch) implements Statement
   {}
