@@ -310,8 +310,8 @@ fn main() duru::Void {
   {
     var sum     Integer = 0;
     var max_sum Integer = 17;
-    combinations: for(var i Integer = 0; i < 10; i++) {
-      for(var j Integer = i + 1; j < 10; j++) {
+    combinations: for (var i Integer = 0; i < 10; i++) {
+      for (var j Integer = i + 1; j < 10; j++) {
         var combination Integer = i * 10 + j;
         if (sum > max_sum - combination) { break combinations; }
         sum += combination;
@@ -337,8 +337,8 @@ fn main() duru::Void {
   // Takes a label to specify which loop to continue.
   {
     var black_squares Integer = 0;
-    horizontal: for(var x Integer = 0; x < 10; x++) {
-      vertical: for(var y Integer = 0; y < 10; y++) {
+    horizontal: for (var x Integer = 0; x < 10; x++) {
+      vertical: for (var y Integer = 0; y < 10; y++) {
         if (is_even(x + y)) { continue horizontal; }
         black_squares++;
       }
