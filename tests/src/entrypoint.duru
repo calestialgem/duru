@@ -1,0 +1,10 @@
+// Tests entrypoint, which defines what happens when the executable runs.
+//
+// Copyright (C) 2023 Cem Geçgel <gecgelcem@outlook.com>
+
+
+
+/*
+ * Entrypoint for the `tests` module/package. Does not do anything yet.
+ */
+entrypoint {}
