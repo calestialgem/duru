@@ -9,10 +9,10 @@ import duru.Semantic.Target;
 public sealed interface CompilerDebugger {
   final class Active implements CompilerDebugger {
     private final Path directory;
-    private boolean    did_create_directory;
+    private boolean did_create_directory;
 
     private Active(Path directory) {
-      this.directory       = directory;
+      this.directory = directory;
       did_create_directory = false;
     }
 
@@ -22,6 +22,13 @@ public sealed interface CompilerDebugger {
         Persistance.recreate("compiler-debugger", directory);
       }
       Persistance.store("compiler-debugger", directory.resolve(name), text);
+    }
+
+    @Override
+    public void record(Lectics lectics, Name packageName, String sourceName) {
+      store(
+        "%s.%s-tokens.duru".formatted(packageName.joined("."), sourceName),
+        lectics);
     }
 
     @Override
@@ -160,35 +167,6 @@ public sealed interface CompilerDebugger {
       string.append(source.contents());
       store(
         "%s.%s-source.duru".formatted(packageName.joined("."), sourceName),
-        string);
-    }
-
-    @Override
-    public void recordTokens(
-      List<Token> tokens,
-      Name packageName,
-      String sourceName)
-    {
-      var string = new StringBuilder();
-      string
-        .append(Integer.toUnsignedString(tokens.hashCode(), 16).toUpperCase());
-      string.append(System.lineSeparator());
-      for (var token : tokens) {
-        string
-          .append(
-            "%04d.%04d-%04d.%04d"
-              .formatted(
-                token.location().beginLine(),
-                token.location().beginColumn(),
-                token.location().endLine(),
-                token.location().endColumn()));
-        string.append(':');
-        string.append(' ');
-        string.append(token);
-        string.append(System.lineSeparator());
-      }
-      store(
-        "%s.%s-tokens.duru".formatted(packageName.joined("."), sourceName),
         string);
     }
 
@@ -347,11 +325,7 @@ public sealed interface CompilerDebugger {
     {}
 
     @Override
-    public void recordTokens(
-      List<Token> tokens,
-      Name packageName,
-      String sourceName)
-    {}
+    public void record(Lectics lectics, Name packageName, String sourceName) {}
 
     @Override
     public void recordDeclarations(
@@ -378,6 +352,7 @@ public sealed interface CompilerDebugger {
     return new Inactive();
   }
 
+  void record(Lectics lectics, Name packageName, String sourceName);
   void recordConfigurationSource(Source source, String moduleIdentifier);
   void recordConfigurationTokens(
     List<ConfigurationToken> tokens,
@@ -389,7 +364,6 @@ public sealed interface CompilerDebugger {
     Configuration configuration,
     String moduleIdentifier);
   void recordSource(Source source, Name packageName, String sourceName);
-  void recordTokens(List<Token> tokens, Name packageName, String sourceName);
   void recordDeclarations(
     List<Node.Declaration> declarations,
     Name packageName,

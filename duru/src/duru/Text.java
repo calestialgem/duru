@@ -92,5 +92,25 @@ public final class Text {
     return codepoint >= '0' && codepoint <= '9';
   }
 
+  public static boolean is_identifier_body(char c) {
+    return is_identifier_initial(c) || is_digit(c);
+  }
+
+  public static boolean is_identifier_initial(char c) {
+    return is_letter(c) || is_underscore(c);
+  }
+
+  public static boolean is_letter(char c) {
+    return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+  }
+
+  public static boolean is_underscore(char c) {
+    return c == '_';
+  }
+
+  public static boolean is_digit(char c) {
+    return c >= '0' && c <= '9';
+  }
+
   private Text() {}
 }

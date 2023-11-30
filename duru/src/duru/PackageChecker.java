@@ -24,15 +24,16 @@ public final class PackageChecker {
     return checker.check();
   }
 
-  private final CompilerDebugger                 debugger;
-  private final Object                           subject;
-  private final SetBuffer<String>                externalNames;
+  private final CompilerDebugger debugger;
+  private final Object subject;
+  private final SetBuffer<String> externalNames;
   private final Accessor<Name, Semantic.Package> accessor;
-  private final Path                             sources;
-  private final PackageType                      type;
-  private final Name                             packageName;
-  private Map<String, Node.Declaration>          declarations;
-  private AcyclicCache<String, Semantic.Symbol>  symbols;
+  private final Path sources;
+  private final PackageType type;
+  private final Name packageName;
+  private final Lexer lexer;
+  private Map<String, Node.Declaration> declarations;
+  private AcyclicCache<String, Semantic.Symbol> symbols;
 
   private PackageChecker(
     CompilerDebugger debugger,
@@ -43,13 +44,14 @@ public final class PackageChecker {
     PackageType type,
     Name packageName)
   {
-    this.debugger      = debugger;
-    this.subject       = subject;
+    this.debugger = debugger;
+    this.subject = subject;
     this.externalNames = externalNames;
-    this.accessor      = accessor;
-    this.sources       = sources;
-    this.type          = type;
-    this.packageName   = packageName;
+    this.accessor = accessor;
+    this.sources = sources;
+    this.type = type;
+    this.packageName = packageName;
+    lexer = Lexer.create();
   }
 
   private Semantic.Package check() {
@@ -72,7 +74,7 @@ public final class PackageChecker {
   }
 
   private void resolveDeclarations() {
-    var directory           = packageName.resolve(sources);
+    var directory = packageName.resolve(sources);
     var packageDeclarations = MapBuffer.<String, Node.Declaration>create();
     for (var file : Persistance.list(subject, directory)) {
       var fullFilename = file.getFileName().toString();
@@ -81,23 +83,23 @@ public final class PackageChecker {
       }
       var filename =
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
-      var source   = new Source(file, Persistance.load(directory, file));
+      var source = new Source(file, Persistance.load(directory, file));
       debugger.recordSource(source, packageName, filename);
-      var tokens = SourceLexer.lex(source);
-      debugger.recordTokens(tokens, packageName, filename);
-      var declarations = SourceParser.parse(tokens);
-      debugger.recordDeclarations(declarations, packageName, filename);
-      for (var declaration : declarations) {
-        var identifier = declaration.name().text();
-        if (packageDeclarations.contains(identifier)) {
-          throw Diagnostic
-            .error(
-              declaration.name().location(),
-              "redeclaration of `%s`",
-              packageName.scope(identifier));
-        }
-        packageDeclarations.add(identifier, declaration);
-      }
+      var tokens = lexer.lex(source.path(), source.contents());
+      debugger.record(tokens, packageName, filename);
+      // var declarations = SourceParser.parse(tokens);
+      // debugger.recordDeclarations(declarations, packageName, filename);
+      // for (var declaration : declarations) {
+      // var identifier = declaration.name().text();
+      // if (packageDeclarations.contains(identifier)) {
+      // throw Diagnostic
+      // .error(
+      // declaration.name().location(),
+      // "redeclaration of `%s`",
+      // packageName.scope(identifier));
+      // }
+      // packageDeclarations.add(identifier, declaration);
+      // }
     }
     declarations = packageDeclarations.toMap();
     debugger.recordResolution(declarations, packageName);
