@@ -7,7 +7,23 @@ import duru.Node.Declaration;
 import duru.Semantic.Target;
 
 public sealed interface CompilerDebugger {
-  record Active(Path directory) implements CompilerDebugger {
+  final class Active implements CompilerDebugger {
+    private final Path directory;
+    private boolean    did_create_directory;
+
+    private Active(Path directory) {
+      this.directory       = directory;
+      did_create_directory = false;
+    }
+
+    private void store(String name, Object text) {
+      if (!did_create_directory) {
+        did_create_directory = true;
+        Persistance.recreate("compiler-debugger", directory);
+      }
+      Persistance.store("compiler-debugger", directory.resolve(name), text);
+    }
+
     @Override
     public void recordConfigurationSource(
       Source source,
@@ -20,12 +36,7 @@ public sealed interface CompilerDebugger {
       string.append(source.path());
       string.append(System.lineSeparator());
       string.append(source.contents());
-      Persistance
-        .store(
-          "compiler-debugger",
-          directory
-            .resolve("%s-config.source.duru".formatted(moduleIdentifier)),
-          string);
+      store("%s-config.source.duru".formatted(moduleIdentifier), string);
     }
 
     @Override
@@ -51,12 +62,7 @@ public sealed interface CompilerDebugger {
         string.append(token);
         string.append(System.lineSeparator());
       }
-      Persistance
-        .store(
-          "compiler-debugger",
-          directory
-            .resolve("%s-config.tokens.duru".formatted(moduleIdentifier)),
-          string);
+      store("%s-config.tokens.duru".formatted(moduleIdentifier), string);
     }
 
     @Override
@@ -87,12 +93,7 @@ public sealed interface CompilerDebugger {
         string.append('`');
         string.append(System.lineSeparator());
       }
-      Persistance
-        .store(
-          "compiler-debugger",
-          directory
-            .resolve("%s-config.declarations.duru".formatted(moduleIdentifier)),
-          string);
+      store("%s-config.declarations.duru".formatted(moduleIdentifier), string);
     }
 
     @Override
@@ -141,12 +142,7 @@ public sealed interface CompilerDebugger {
         string.append('`');
         string.append(System.lineSeparator());
       }
-      Persistance
-        .store(
-          "compiler-debugger",
-          directory
-            .resolve("%s-config.resolution.duru".formatted(moduleIdentifier)),
-          string);
+      store("%s-config.resolution.duru".formatted(moduleIdentifier), string);
     }
 
     @Override
@@ -162,14 +158,9 @@ public sealed interface CompilerDebugger {
       string.append(source.path());
       string.append(System.lineSeparator());
       string.append(source.contents());
-      Persistance
-        .store(
-          "compiler-debugger",
-          directory
-            .resolve(
-              "%s.%s-source.duru"
-                .formatted(packageName.joined("."), sourceName)),
-          string);
+      store(
+        "%s.%s-source.duru".formatted(packageName.joined("."), sourceName),
+        string);
     }
 
     @Override
@@ -196,14 +187,9 @@ public sealed interface CompilerDebugger {
         string.append(token);
         string.append(System.lineSeparator());
       }
-      Persistance
-        .store(
-          "compiler-debugger",
-          directory
-            .resolve(
-              "%s.%s-tokens.duru"
-                .formatted(packageName.joined("."), sourceName)),
-          string);
+      store(
+        "%s.%s-tokens.duru".formatted(packageName.joined("."), sourceName),
+        string);
     }
 
     @Override
@@ -245,14 +231,10 @@ public sealed interface CompilerDebugger {
         string.append('`');
         string.append(System.lineSeparator());
       }
-      Persistance
-        .store(
-          "compiler-debugger",
-          directory
-            .resolve(
-              "%s.%s-declarations.duru"
-                .formatted(packageName.joined("."), sourceName)),
-          string);
+      store(
+        "%s.%s-declarations.duru"
+          .formatted(packageName.joined("."), sourceName),
+        string);
     }
 
     @Override
@@ -297,12 +279,7 @@ public sealed interface CompilerDebugger {
         string.append('`');
         string.append(System.lineSeparator());
       }
-      Persistance
-        .store(
-          "compiler-debugger",
-          directory
-            .resolve("%s.resolution.duru".formatted(packageName.joined("."))),
-          string);
+      store("%s.resolution.duru".formatted(packageName.joined(".")), string);
     }
 
     @Override
@@ -333,8 +310,7 @@ public sealed interface CompilerDebugger {
           }
         }
       }
-      Persistance
-        .store("compiler-debugger", directory.resolve("target.duru"), string);
+      store("target.duru", string);
     }
   }
 
@@ -395,9 +371,7 @@ public sealed interface CompilerDebugger {
   }
 
   static CompilerDebugger active(Path artifacts) {
-    var directory = artifacts.resolve("compiler-debugger");
-    Persistance.recreate("compiler-debugger", directory);
-    return new Active(directory);
+    return new Active(artifacts.resolve("compiler-debugger"));
   }
 
   static CompilerDebugger inactive() {

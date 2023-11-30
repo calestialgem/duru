@@ -57,7 +57,7 @@ public final class Persistance {
 
   public static void create(Object subject, Path directory) {
     try {
-      Files.createDirectory(directory);
+      Files.createDirectories(directory);
     }
     catch (IOException cause) {
       throw Diagnostic

@@ -50,6 +50,7 @@ public final class Builder {
           buildNewLine();
           string.append('}');
           buildNewLine();
+          Persistance.ensure(subject, artifacts);
           var code   = artifacts.resolve("%s.c".formatted(package_.name()));
           var binary = artifacts.resolve("%s.exe".formatted(package_.name()));
           Persistance.store(subject, code, string);

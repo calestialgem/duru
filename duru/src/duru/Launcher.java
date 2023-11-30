@@ -162,10 +162,11 @@ builds up a list depending on the flag.
     this.moduleBases     = moduleBases.toList();
     this.passedArguments = passedArguments.toList();
     artifacts            = modulePath.resolve("art");
-    Persistance.ensure("", artifacts);
-    debugger = CompilerDebugger.inactive();
     if (debug) {
       debugger = CompilerDebugger.active(artifacts);
+    }
+    else {
+      debugger = CompilerDebugger.inactive();
     }
     switch (command.getFirst()) {
       case "help" -> printUsage();
