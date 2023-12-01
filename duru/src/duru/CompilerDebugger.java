@@ -27,7 +27,7 @@ public sealed interface CompilerDebugger {
     @Override
     public void record(Lectics lectics, Name packageName, String sourceName) {
       store(
-        "%s.%s-tokens.duru".formatted(packageName.joined("."), sourceName),
+        "%s.%s-lectics.duru".formatted(packageName.joined("."), sourceName),
         lectics);
     }
 
