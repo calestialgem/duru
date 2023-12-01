@@ -5,14 +5,14 @@ import java.util.Arrays;
 import java.util.Formatter;
 
 public final class Lectics {
-  public static final int OPENING_BRACE = 1;
-  public static final int CLOSING_BRACE = 2;
-  public static final int KEYWORD_ENTRYPOINT = 3;
+  public static final byte OPENING_BRACE = 0x01;
+  public static final byte CLOSING_BRACE = 0x02;
+  public static final byte KEYWORD_ENTRYPOINT = 0x03;
 
   public static Lectics of(
     Path path,
     String contents,
-    int[] types,
+    byte[] types,
     int[] indices,
     int count)
   {
@@ -25,10 +25,10 @@ public final class Lectics {
 
   private final Path path;
   private final String contents;
-  private final int[] types;
+  private final byte[] types;
   private final int[] indices;
 
-  private Lectics(Path path, String contents, int[] types, int[] indices) {
+  private Lectics(Path path, String contents, byte[] types, int[] indices) {
     this.path = path;
     this.contents = contents;
     this.types = types;
@@ -78,7 +78,7 @@ public final class Lectics {
           }
           index++;
         }
-        f.format("%04d.%04d-", line, column);
+        f.format("%04d: %04d.%04d-", i, line, column);
         switch (types[i]) {
           case OPENING_BRACE -> f.format("%04d: punctuation `{`", column + 1);
           case CLOSING_BRACE -> f.format("%04d: punctuation `}`", column + 1);

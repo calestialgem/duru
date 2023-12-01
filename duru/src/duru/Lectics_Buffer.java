@@ -5,14 +5,14 @@ import java.util.Arrays;
 
 public final class Lectics_Buffer {
   public static Lectics_Buffer create() {
-    return new Lectics_Buffer(new int[0], new int[0], 0);
+    return new Lectics_Buffer(new byte[0], new int[0], 0);
   }
 
-  private int[] types;
+  private byte[] types;
   private int[] indices;
   private int count;
 
-  private Lectics_Buffer(int[] types, int[] indices, int count) {
+  private Lectics_Buffer(byte[] types, int[] indices, int count) {
     this.types = types;
     this.indices = indices;
     this.count = count;
@@ -22,7 +22,7 @@ public final class Lectics_Buffer {
     count = 0;
   }
 
-  public void add_token(int type, int index) {
+  public void add_token(byte type, int index) {
     if (count == types.length) {
       var capacity = types.length * 2;
       if (capacity == 0)
