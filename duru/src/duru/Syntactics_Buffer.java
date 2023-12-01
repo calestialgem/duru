@@ -3,16 +3,16 @@ package duru;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public final class Lectics_Buffer {
-  public static Lectics_Buffer create() {
-    return new Lectics_Buffer(new byte[0], new int[0], 0);
+public final class Syntactics_Buffer {
+  public static Syntactics_Buffer create() {
+    return new Syntactics_Buffer(new byte[0], new int[0], 0);
   }
 
   private byte[] types;
   private int[] begins;
   private int count;
 
-  private Lectics_Buffer(byte[] types, int[] begins, int count) {
+  private Syntactics_Buffer(byte[] types, int[] begins, int count) {
     this.types = types;
     this.begins = begins;
     this.count = count;
@@ -22,7 +22,7 @@ public final class Lectics_Buffer {
     count = 0;
   }
 
-  public void add_token(byte type, int begin) {
+  public void add_node(byte type, int begin) {
     if (count == types.length) {
       var capacity = types.length * 2;
       if (capacity == 0)
@@ -35,7 +35,7 @@ public final class Lectics_Buffer {
     count++;
   }
 
-  public Lectics bake(Path path, String contents) {
-    return Lectics.of(path, contents, types, begins, count);
+  public Syntactics bake(Path path, String contents) {
+    return Syntactics.of(path, contents, types, begins, count);
   }
 }

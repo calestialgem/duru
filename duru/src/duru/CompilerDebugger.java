@@ -32,6 +32,17 @@ public sealed interface CompilerDebugger {
     }
 
     @Override
+    public void record(
+      Syntactics syntactics,
+      Name packageName,
+      String sourceName)
+    {
+      store(
+        "%s.%s-syntactics.duru".formatted(packageName.joined("."), sourceName),
+        syntactics);
+    }
+
+    @Override
     public void recordConfigurationSource(
       Source source,
       String moduleIdentifier)
@@ -171,51 +182,6 @@ public sealed interface CompilerDebugger {
     }
 
     @Override
-    public void recordDeclarations(
-      List<Declaration> declarations,
-      Name packageName,
-      String sourceName)
-    {
-      var string = new StringBuilder();
-      string
-        .append(
-          Integer.toUnsignedString(declarations.hashCode(), 16).toUpperCase());
-      string.append(System.lineSeparator());
-      for (var declaration : declarations) {
-        string
-          .append(
-            "%04d.%04d-%04d.%04d"
-              .formatted(
-                declaration.name().location().beginLine(),
-                declaration.name().location().beginColumn(),
-                declaration.name().location().endLine(),
-                declaration.name().location().endColumn()));
-        string.append(':');
-        string.append(' ');
-        for (var externalName : declaration.externalName()) {
-          string.append("extern");
-          string.append(' ');
-          Text.quote(string, externalName.value());
-          string.append(' ');
-        }
-        if (declaration.isPublic()) {
-          string.append("public");
-          string.append(' ');
-        }
-        string.append(declaration.getClass().getSimpleName());
-        string.append(' ');
-        string.append('`');
-        string.append(declaration.name().text());
-        string.append('`');
-        string.append(System.lineSeparator());
-      }
-      store(
-        "%s.%s-declarations.duru"
-          .formatted(packageName.joined("."), sourceName),
-        string);
-    }
-
-    @Override
     public void recordResolution(
       Map<String, Declaration> resolution,
       Name packageName)
@@ -328,8 +294,8 @@ public sealed interface CompilerDebugger {
     public void record(Lectics lectics, Name packageName, String sourceName) {}
 
     @Override
-    public void recordDeclarations(
-      List<Declaration> declarations,
+    public void record(
+      Syntactics syntactics,
       Name packageName,
       String sourceName)
     {}
@@ -353,6 +319,7 @@ public sealed interface CompilerDebugger {
   }
 
   void record(Lectics lectics, Name packageName, String sourceName);
+  void record(Syntactics syntactics, Name packageName, String sourceName);
   void recordConfigurationSource(Source source, String moduleIdentifier);
   void recordConfigurationTokens(
     List<ConfigurationToken> tokens,
@@ -364,10 +331,6 @@ public sealed interface CompilerDebugger {
     Configuration configuration,
     String moduleIdentifier);
   void recordSource(Source source, Name packageName, String sourceName);
-  void recordDeclarations(
-    List<Node.Declaration> declarations,
-    Name packageName,
-    String sourceName);
   void recordResolution(
     Map<String, Node.Declaration> resolution,
     Name packageName);

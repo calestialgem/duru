@@ -32,6 +32,7 @@ public final class PackageChecker {
   private final PackageType type;
   private final Name packageName;
   private final Lexer lexer;
+  private final Parser parser;
   private Map<String, Node.Declaration> declarations;
   private AcyclicCache<String, Semantic.Symbol> symbols;
 
@@ -52,6 +53,7 @@ public final class PackageChecker {
     this.type = type;
     this.packageName = packageName;
     lexer = Lexer.create();
+    parser = Parser.create();
   }
 
   private Semantic.Package check() {
@@ -85,10 +87,10 @@ public final class PackageChecker {
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
       var source = new Source(file, Persistance.load(directory, file));
       debugger.recordSource(source, packageName, filename);
-      var tokens = lexer.lex(source.path(), source.contents());
-      debugger.record(tokens, packageName, filename);
-      // var declarations = SourceParser.parse(tokens);
-      // debugger.recordDeclarations(declarations, packageName, filename);
+      var lectics = lexer.lex(source.path(), source.contents());
+      debugger.record(lectics, packageName, filename);
+      var syntactics = parser.parse(lectics);
+      debugger.record(syntactics, packageName, filename);
       // for (var declaration : declarations) {
       // var identifier = declaration.name().text();
       // if (packageDeclarations.contains(identifier)) {

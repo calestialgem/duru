@@ -4,54 +4,54 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Formatter;
 
-public final class Lectics {
-  public static final byte OPENING_BRACE = 0x01;
-  public static final byte CLOSING_BRACE = 0x02;
-  public static final byte KEYWORD_ENTRYPOINT = 0x03;
+public final class Syntactics {
+  public static final byte ENTRYPOINT_DECLARATION = 0x01;
+  public static final byte BLOCK_STATEMENT_BEGIN = 0x02;
+  public static final byte BLOCK_STATEMENT_END = 0x03;
 
-  public static Lectics of(
+  public static Syntactics of(
     Path path,
     String contents,
     byte[] types,
     int[] begins,
     int count)
   {
-    return new Lectics(
+    return new Syntactics(
       path,
       contents,
       Arrays.copyOf(types, count),
       Arrays.copyOf(begins, count));
   }
 
-  public final Path path;
-  public final String contents;
+  private final Path path;
+  private final String contents;
   private final byte[] types;
   private final int[] begins;
 
-  private Lectics(Path path, String contents, byte[] types, int[] begins) {
+  private Syntactics(Path path, String contents, byte[] types, int[] begins) {
     this.path = path;
     this.contents = contents;
     this.types = types;
     this.begins = begins;
   }
 
-  public int token_count() {
+  public int node_count() {
     return types.length;
   }
 
-  public byte type_of(int token) {
-    return types[token];
+  public byte type_of(int node) {
+    return types[node];
   }
 
-  public int begin_of(int token) {
-    return begins[token];
+  public int begin_of(int node) {
+    return begins[node];
   }
 
-  public Object subject_of(int token) {
+  public Object subject_of(int node) {
     var index = 0;
     var line = 1;
     var column = 1;
-    while (index != begin_of(token)) {
+    while (index != begin_of(node)) {
       if (contents.charAt(index) != '\n') {
         column++;
       }
@@ -62,21 +62,21 @@ public final class Lectics {
       index++;
     }
     return "%s:%d.%d-%d"
-      .formatted(path, line, column, column + length_of(token));
+      .formatted(path, line, column, column + length_of(node));
   }
 
-  public String explain(int token) {
-    switch (type_of(token)) {
-      case OPENING_BRACE -> {
-        return "punctuation `{`";
+  public String explain(int node) {
+    switch (type_of(node)) {
+      case ENTRYPOINT_DECLARATION -> {
+        return "entrypoint declaration";
       }
-      case CLOSING_BRACE -> {
-        return "punctuation `}`";
+      case BLOCK_STATEMENT_BEGIN -> {
+        return "block statement begin";
       }
-      case KEYWORD_ENTRYPOINT -> {
-        return "keyword `entrypoint`";
+      case BLOCK_STATEMENT_END -> {
+        return "block statement end";
       }
-      default -> throw unknown(token);
+      default -> throw unknown(node);
     }
   }
 
@@ -93,7 +93,7 @@ public final class Lectics {
   @Override
   public boolean equals(Object obj) {
     return this == obj
-      || obj instanceof Lectics other
+      || obj instanceof Syntactics other
         && path.equals(other.path)
         && contents.equals(other.contents)
         && Arrays.equals(types, other.types)
@@ -106,14 +106,14 @@ public final class Lectics {
     try (var f = new Formatter(string)) {
       f
         .format(
-          "'%s's lexical representation.%n%nHash: %X%n%n",
+          "'%s's syntactical representation.%n%nHash: %X%n%n",
           path,
           hashCode());
-      var line = 1;
-      var column = 1;
-      var index = 0;
-      for (var token = 0; token < token_count(); token++) {
-        while (index != begin_of(token)) {
+      for (var node = 0; node < node_count(); node++) {
+        var line = 1;
+        var column = 1;
+        var index = 0;
+        while (index != begin_of(node)) {
           if (contents.charAt(index) == '\n') {
             line++;
             column = 1;
@@ -126,33 +126,33 @@ public final class Lectics {
         f
           .format(
             "%04d: %04d.%04d-%04d: %s%n",
-            token,
+            node,
             line,
             column,
-            column + length_of(token),
-            explain(token));
+            column + length_of(node),
+            explain(node));
       }
     }
     return string.toString();
   }
 
-  private int length_of(int token) {
-    switch (type_of(token)) {
-      case OPENING_BRACE -> {
-        return "{".length();
-      }
-      case CLOSING_BRACE -> {
-        return "}".length();
-      }
-      case KEYWORD_ENTRYPOINT -> {
+  private int length_of(int node) {
+    switch (type_of(node)) {
+      case ENTRYPOINT_DECLARATION -> {
         return "entrypoint".length();
       }
-      default -> throw unknown(token);
+      case BLOCK_STATEMENT_BEGIN -> {
+        return "{".length();
+      }
+      case BLOCK_STATEMENT_END -> {
+        return "}".length();
+      }
+      default -> throw unknown(node);
     }
   }
 
-  private RuntimeException unknown(int token) {
-    var begin = begin_of(token);
+  private RuntimeException unknown(int node) {
+    var begin = begin_of(node);
     var index = 0;
     var line = 1;
     var column = 1;
@@ -169,7 +169,7 @@ public final class Lectics {
     return Diagnostic
       .failure(
         "%s:%d.%d".formatted(path, line, column),
-        "unknown token type %d",
-        type_of(token));
+        "unknown node type %d",
+        type_of(node));
   }
 }
