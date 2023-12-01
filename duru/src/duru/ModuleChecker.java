@@ -15,16 +15,16 @@ public final class ModuleChecker {
     return checker.check();
   }
 
-  private final CompilerDebugger                  debugger;
-  private final Object                            subject;
-  private final SetBuffer<String>                 externalNames;
+  private final CompilerDebugger debugger;
+  private final Object subject;
+  private final SetBuffer<String> externalNames;
   private final Accessor<String, Semantic.Module> accessor;
-  private final Path                              directory;
-  private String                                  moduleIdentifier;
-  private Path                                    sources;
-  private Path                                    artifacts;
-  private Configuration                           configuration;
-  private AcyclicCache<Name, Semantic.Package>    packages;
+  private final Path directory;
+  private String moduleIdentifier;
+  private Path sources;
+  private Path artifacts;
+  private Configuration configuration;
+  private AcyclicCache<Name, Semantic.Package> packages;
 
   private ModuleChecker(
     CompilerDebugger debugger,
@@ -33,17 +33,17 @@ public final class ModuleChecker {
     Accessor<String, Semantic.Module> accessor,
     Path directory)
   {
-    this.debugger      = debugger;
-    this.subject       = subject;
+    this.debugger = debugger;
+    this.subject = subject;
     this.externalNames = externalNames;
-    this.accessor      = accessor;
-    this.directory     = directory;
+    this.accessor = accessor;
+    this.directory = directory;
   }
 
   private Semantic.Module check() {
     moduleIdentifier = directory.getFileName().toString();
-    sources          = directory.resolve("src");
-    artifacts        = directory.resolve("art");
+    sources = directory.resolve("src");
+    artifacts = directory.resolve("art");
     Persistance.ensure(directory, artifacts);
     resolveConfiguration();
     packages = AcyclicCache.create(this::checkPackage);
@@ -63,21 +63,21 @@ public final class ModuleChecker {
           .error(
             executable.value(),
             "executable package `%s` does not have a main function",
-            executable);
+            executable.key());
       }
       if (!fn.parameters().isEmpty()) {
         throw Diagnostic
           .error(
             executable.value(),
             "executable package `%s` has a main function with parameters",
-            executable);
+            executable.key());
       }
       if (!(fn.returnType() instanceof Semantic.Void)) {
         throw Diagnostic
           .error(
             executable.value(),
             "executable package `%s` has a main function with a non-void return type",
-            executable);
+            executable.key());
       }
     }
     for (var library : configuration.libraries()) {
@@ -88,13 +88,13 @@ public final class ModuleChecker {
           .error(
             library.value(),
             "library package `%s` has a main function",
-            library);
+            library.key());
       }
     }
   }
 
   private void resolveConfiguration() {
-    var configurationFile   = directory.resolve("module.duru");
+    var configurationFile = directory.resolve("module.duru");
     var configurationSource =
       new Source(
         configurationFile,
