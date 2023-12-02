@@ -2,7 +2,6 @@ package duru;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Formatter;
 
 public final class Syntactics {
   public static final byte ENTRYPOINT_DECLARATION = 0x01;
@@ -113,42 +112,6 @@ public final class Syntactics {
         && contents.equals(other.contents)
         && Arrays.equals(types, other.types)
         && Arrays.equals(begins, other.begins);
-  }
-
-  @Override
-  public String toString() {
-    var string = new StringBuilder();
-    try (var f = new Formatter(string)) {
-      f
-        .format(
-          "'%s's syntactical representation.%n%nHash: %X%n%n",
-          path,
-          hashCode());
-      for (var node = 0; node < node_count(); node++) {
-        var line = 1;
-        var column = 1;
-        var index = 0;
-        while (index != begin_of(node)) {
-          if (contents.charAt(index) == '\n') {
-            line++;
-            column = 1;
-          }
-          else {
-            column++;
-          }
-          index++;
-        }
-        f
-          .format(
-            "%04d: %04d.%04d-%04d: %s%n",
-            node,
-            line,
-            column,
-            column + length_of(node),
-            explain(node));
-      }
-    }
-    return string.toString();
   }
 
   private RuntimeException unknown(int node) {

@@ -2,7 +2,6 @@ package duru;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Formatter;
 
 public final class Lectics {
   public static final byte OPENING_BRACE = 0x01;
@@ -56,6 +55,21 @@ public final class Lectics {
       .formatted(path, line, column, column + length_of(token));
   }
 
+  public int length_of(int token) {
+    switch (type_of(token)) {
+      case OPENING_BRACE -> {
+        return "{".length();
+      }
+      case CLOSING_BRACE -> {
+        return "}".length();
+      }
+      case KEYWORD_ENTRYPOINT -> {
+        return "entrypoint".length();
+      }
+      default -> throw unknown(token);
+    }
+  }
+
   public String explain(int token) {
     switch (type_of(token)) {
       case OPENING_BRACE -> {
@@ -89,57 +103,6 @@ public final class Lectics {
         && contents.equals(other.contents)
         && Arrays.equals(types, other.types)
         && Arrays.equals(begins, other.begins);
-  }
-
-  @Override
-  public String toString() {
-    var string = new StringBuilder();
-    try (var f = new Formatter(string)) {
-      f
-        .format(
-          "'%s's lexical representation.%n%nHash: %X%n%n",
-          path,
-          hashCode());
-      var line = 1;
-      var column = 1;
-      var index = 0;
-      for (var token = 0; token < token_count(); token++) {
-        while (index != begin_of(token)) {
-          if (contents.charAt(index) == '\n') {
-            line++;
-            column = 1;
-          }
-          else {
-            column++;
-          }
-          index++;
-        }
-        f
-          .format(
-            "%04d: %04d.%04d-%04d: %s%n",
-            token,
-            line,
-            column,
-            column + length_of(token),
-            explain(token));
-      }
-    }
-    return string.toString();
-  }
-
-  private int length_of(int token) {
-    switch (type_of(token)) {
-      case OPENING_BRACE -> {
-        return "{".length();
-      }
-      case CLOSING_BRACE -> {
-        return "}".length();
-      }
-      case KEYWORD_ENTRYPOINT -> {
-        return "entrypoint".length();
-      }
-      default -> throw unknown(token);
-    }
   }
 
   private RuntimeException unknown(int token) {

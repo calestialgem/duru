@@ -26,9 +26,40 @@ public sealed interface CompilerDebugger {
 
     @Override
     public void record(Lectics lectics, Name packageName, String sourceName) {
+      var string = new StringBuilder();
+      try (var f = new Formatter(string)) {
+        f
+          .format(
+            "'%s's lexical representation.%n%nHash: %X%n%n",
+            lectics.path,
+            lectics.hashCode());
+        var line = 1;
+        var column = 1;
+        var index = 0;
+        for (var token = 0; token < lectics.token_count(); token++) {
+          while (index != lectics.begin_of(token)) {
+            if (lectics.contents.charAt(index) == '\n') {
+              line++;
+              column = 1;
+            }
+            else {
+              column++;
+            }
+            index++;
+          }
+          f
+            .format(
+              "%04d: %04d.%04d-%04d: %s%n",
+              token,
+              line,
+              column,
+              column + lectics.length_of(token),
+              lectics.explain(token));
+        }
+      }
       store(
         "%s.%s-lectics.duru".formatted(packageName.joined("."), sourceName),
-        lectics);
+        string);
     }
 
     @Override
@@ -37,9 +68,40 @@ public sealed interface CompilerDebugger {
       Name packageName,
       String sourceName)
     {
+      var string = new StringBuilder();
+      try (var f = new Formatter(string)) {
+        f
+          .format(
+            "'%s's syntactical representation.%n%nHash: %X%n%n",
+            syntactics.path,
+            syntactics.hashCode());
+        for (var node = 0; node < syntactics.node_count(); node++) {
+          var line = 1;
+          var column = 1;
+          var index = 0;
+          while (index != syntactics.begin_of(node)) {
+            if (syntactics.contents.charAt(index) == '\n') {
+              line++;
+              column = 1;
+            }
+            else {
+              column++;
+            }
+            index++;
+          }
+          f
+            .format(
+              "%04d: %04d.%04d-%04d: %s%n",
+              node,
+              line,
+              column,
+              column + syntactics.length_of(node),
+              syntactics.explain(node));
+        }
+      }
       store(
         "%s.%s-syntactics.duru".formatted(packageName.joined("."), sourceName),
-        syntactics);
+        string);
     }
 
     @Override
