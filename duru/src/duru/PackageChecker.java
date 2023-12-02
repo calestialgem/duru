@@ -7,6 +7,8 @@ public final class PackageChecker {
   private final Lexer lexer;
   private final Parser parser;
   private final AcyclicCache<String, Semantic.Symbol> symbols;
+  private final Node_Iterator primary_iterator;
+  private final Node_Iterator secondary_iterator;
   private Syntactics[] sources;
   private int source_count;
   private SetBuffer<String> externalNames;
@@ -17,6 +19,8 @@ public final class PackageChecker {
     lexer = new Lexer();
     parser = new Parser();
     symbols = AcyclicCache.create(this::checkSymbol);
+    primary_iterator = new Node_Iterator();
+    secondary_iterator = new Node_Iterator();
     sources = new Syntactics[0];
   }
 
@@ -48,22 +52,24 @@ public final class PackageChecker {
       explorer.record(lectics, package_name, filename);
       var syntactics = parser.parse(lectics);
       explorer.record(syntactics, package_name, filename);
-      for (var node = 0; node < syntactics.node_count(); node++) {
-        if (!syntactics.kind_of(node).is_declaration())
+      for (
+        primary_iterator.iterate(syntactics);
+        primary_iterator.has(); primary_iterator.advance()) {
+        if (!primary_iterator.kind().is_declaration())
           continue;
-        var identifier = syntactics.text_of(node);
+        var identifier = primary_iterator.text();
         for (
-          var other_node = node + 1;
-          other_node < syntactics.node_count();
-          other_node++)
+secondary_iterator.iterate_remaining(primary_iterator);
+          secondary_iterator.has();
+          secondary_iterator.advance())
         {
-          if (!syntactics.kind_of(other_node).is_declaration())
+          if (!secondary_iterator.kind().is_declaration())
             continue;
-          var other_identifier = syntactics.text_of(other_node);
+          var other_identifier = secondary_iterator.text();
           if (identifier.equals(other_identifier)) {
             throw Diagnostic
               .error(
-                syntactics.subject_of(other_node),
+                secondary_iterator.subject(),
                 "redeclaration of `%s`",
                 package_name.scope(other_identifier));
           }
@@ -74,17 +80,16 @@ public final class PackageChecker {
           previous_source++)
         {
           for (
-            var other_node = 0;
-            other_node < sources[previous_source].node_count();
-            other_node++)
+secondary_iterator.iterate(sources[previous_source]);
+           secondary_iterator.has(); secondary_iterator.advance())
           {
-            if (!sources[previous_source].kind_of(other_node).is_declaration())
+            if (!secondary_iterator.kind().is_declaration())
               continue;
-            var other_identifier = sources[previous_source].text_of(other_node);
+            var other_identifier = secondary_iterator.text();
             if (identifier.equals(other_identifier)) {
               throw Diagnostic
                 .error(
-                  syntactics.subject_of(node),
+                  primary_iterator.subject(),
                   "redeclaration of `%s`",
                   package_name.scope(identifier));
             }
@@ -107,11 +112,12 @@ public final class PackageChecker {
       }
     }
     for (var source = 0; source < source_count; source++) {
-      for (var node = 0; node < sources[source].node_count(); node++) {
-        if (!sources[source].kind_of(node).is_declaration())
+      for (primary_iterator.iterate(sources[source]); primary_iterator.has();
+    primary_iterator.advance()) {
+        if (!primary_iterator.kind().is_declaration())
           continue;
         symbols
-          .get(sources[source].subject_of(node), sources[source].text_of(node));
+          .get(primary_iterator.subject(), primary_iterator.text());
       }
     }
     return switch (package_type) {
@@ -125,10 +131,11 @@ public final class PackageChecker {
 
   private Semantic.Symbol checkSymbol(Object subject, String identifier) {
     for (var source = 0; source < source_count; source++) {
-      for (var node = 0; node < sources[source].node_count(); node++) {
-        if (!sources[source].kind_of(node).is_declaration())
+      for (primary_iterator.iterate(sources[source]); primary_iterator.has();
+    primary_iterator.advance()) {
+        if (!primary_iterator.kind().is_declaration())
           continue;
-        if (identifier.equals(sources[source].text_of(node))) {
+        if (identifier.equals(primary_iterator.text())) {
           // TODO: fix checking after rewriting SymbolChecker
           throw Diagnostic.unimplemented(subject);
         }

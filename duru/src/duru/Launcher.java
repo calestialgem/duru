@@ -186,44 +186,47 @@ builds up a list depending on the flag.
 
   private void build() {
     var target = Checker.check(explorer, "", modulePath, moduleBases);
-    Builder.build("", artifacts, target);
+    throw Diagnostic.unimplemented("");
+    //Builder.build("", artifacts, target);
   }
 
   private void run() {
     var target = Checker.check(explorer, "", modulePath, moduleBases);
-    Builder.build("", artifacts, target);
-    var module = target.modules().get(target.main()).getFirst();
-    String name;
-    if (!packageName.isEmpty()) {
-      name = packageName.getFirst();
-    }
-    else {
-      var executables = ListBuffer.<Name>create();
-      for (var package_ : module.packages().values()) {
-        if (package_ instanceof Semantic.Executable executable) {
-          executables.add(executable.name());
-        }
-      }
-      if (executables.length() > 1) {
-        throw Diagnostic
-          .error("", "which executable out of `%s`", executables.toList());
-      }
-      if (executables.isEmpty()) {
-        throw Diagnostic.error("", "no executable in `%s`", module.name());
-      }
-      name = executables.getFirst().joined(".");
-    }
-    var binary = artifacts.resolve("%s.exe".formatted(name));
-    var exitCode = Processes.execute("", true, binary, passedArguments);
-    if (exitCode != 0) {
-      System.err.printf("note: `%s` exited with %d%n", binary, exitCode);
-    }
+    throw Diagnostic.unimplemented("");
+    //Builder.build("", artifacts, target);
+    //var module = target.modules().get(target.main()).getFirst();
+    //String name;
+    //if (!packageName.isEmpty()) {
+    //  name = packageName.getFirst();
+    //}
+    //else {
+    //  var executables = ListBuffer.<Name>create();
+    //  for (var package_ : module.packages().values()) {
+    //    if (package_ instanceof Semantic.Executable executable) {
+    //      executables.add(executable.name());
+    //    }
+    //  }
+    //  if (executables.length() > 1) {
+    //    throw Diagnostic
+    //      .error("", "which executable out of `%s`", executables.toList());
+    //  }
+    //  if (executables.isEmpty()) {
+    //    throw Diagnostic.error("", "no executable in `%s`", module.name());
+    //  }
+    //  name = executables.getFirst().joined(".");
+    //}
+    //var binary = artifacts.resolve("%s.exe".formatted(name));
+    //var exitCode = Processes.execute("", true, binary, passedArguments);
+    //if (exitCode != 0) {
+    //  System.err.printf("note: `%s` exited with %d%n", binary, exitCode);
+    //}
   }
 
   private void testCompilerByDeletingWholeModulePath() {
     Persistance.recreate("", modulePath);
     Initializer.initialize(modulePath);
     var target = Checker.check(explorer, "", modulePath, moduleBases);
-    Builder.build("", artifacts, target);
+    throw Diagnostic.unimplemented("");
+    //Builder.build("", artifacts, target);
   }
 }

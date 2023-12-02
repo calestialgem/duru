@@ -1,7 +1,7 @@
-'C:\Users\Cem\duru\tests\src\entrypoint.duru's syntactical representation.
+'C:\users\cem\duru\tests\src\entrypoint.duru's syntactical representation.
 
-Hash: D3995AE
+Hash: 99F92013
 
 0000: 0010.0012-0013: block statement end
-0001: 0010.0013-0014: block statement begin
-0002: 0010.0001-0011: entrypoint declaration
+0001: 0019.0013-0014: block statement begin
+0002: 0028.0001-0011: entrypoint declaration

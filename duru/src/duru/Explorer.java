@@ -9,11 +9,15 @@ import duru.Semantic.Target;
 public final class Explorer {
   private final Path directory;
   private final boolean active;
+  private final Token_Iterator token_iterator;
+  private final Node_Iterator node_iterator;
   private boolean did_create_directory;
 
   public Explorer(Path artifacts, boolean active) {
     directory = artifacts.resolve("exploration");
     this.active = active;
+    token_iterator = new Token_Iterator();
+    node_iterator = new Node_Iterator();
   }
 
   private void store(String name, Object text) {
@@ -34,17 +38,15 @@ public final class Explorer {
           "'%s's lexical representation.%n%nHash: %X%n%n",
           lectics.path,
           lectics.hashCode());
-
-      var iterator = new Token_Iterator();
-      for (iterator.iterate(lectics); iterator.has(); iterator.advance()) {
+      for (token_iterator.iterate(lectics); token_iterator.has(); token_iterator.advance()) {
         f
           .format(
             "%04d: %04d.%04d-%04d: %s%n",
-            iterator.index(),
-            iterator.line(),
-            iterator.begin_column(),
-            iterator.end_column(),
-            iterator.explanation());
+            token_iterator.index(),
+            token_iterator.line(),
+            token_iterator.begin_column(),
+            token_iterator.end_column(),
+            token_iterator.explanation());
       }
     }
     store(
@@ -66,28 +68,15 @@ public final class Explorer {
           "'%s's syntactical representation.%n%nHash: %X%n%n",
           syntactics.path,
           syntactics.hashCode());
-      for (var node = 0; node < syntactics.node_count(); node++) {
-        var line = 1;
-        var column = 1;
-        var index = 0;
-        while (index != syntactics.begin_of(node)) {
-          if (syntactics.content.charAt(index) == '\n') {
-            line++;
-            column = 1;
-          }
-          else {
-            column++;
-          }
-          index++;
-        }
+      for (node_iterator.iterate(syntactics); node_iterator.has(); node_iterator.advance()) {
         f
           .format(
             "%04d: %04d.%04d-%04d: %s%n",
-            node,
-            line,
-            column,
-            column + syntactics.length_of(node),
-            syntactics.explain(node));
+            node_iterator.index(),
+            node_iterator.line(),
+            node_iterator.begin_column(),
+            node_iterator.end_column(),
+            node_iterator.explanation());
       }
     }
     store(
@@ -109,32 +98,18 @@ public final class Explorer {
       for (var source = 0; source < source_count; source++) {
         var filename = sources[source].path.getFileName().toString();
         filename = filename.substring(0, filename.length() - ".duru".length());
-        var line = 1;
-        var column = 1;
-        var index = 0;
-        for (var node = 0; node < sources[source].node_count(); node++) {
-          Node kind = sources[source].kind_of(node);
-          if (!kind.is_declaration())
+        for (node_iterator.iterate(sources[source]); node_iterator.has(); node_iterator.advance()) {
+          if (!node_iterator.kind().is_declaration())
             continue;
-          while (index != sources[source].begin_of(node)) {
-            if (sources[source].content.charAt(index) == '\n') {
-              line++;
-              column = 1;
-            }
-            else {
-              column++;
-            }
-            index++;
-          }
           f
             .format(
               "%s:%04d.%04d-%04d: %s `%s`%n",
               filename,
-              line,
-              column,
-              column + sources[source].length_of(node),
-              kind,
-              sources[source].text_of(node));
+              node_iterator.index(),
+              node_iterator.begin_column(),
+              node_iterator.end_column(),
+              node_iterator.kind(),
+              node_iterator.text());
         }
       }
     }

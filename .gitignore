@@ -1,3 +1,4 @@
 .metadata/
 **.exe
 .vscode/
+bin/
