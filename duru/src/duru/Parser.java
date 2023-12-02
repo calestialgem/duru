@@ -1,33 +1,33 @@
 package duru;
 
-public final class Parser {
-  public static Parser create() {
-    return new Parser(Syntactics_Buffer.create(), null, 0);
-  }
+import java.util.Arrays;
 
-  private final Syntactics_Buffer syntactics;
+public final class Parser {
+  private byte[] node_types;
+  private int[] node_begins;
+  private int node_count;
   private Lectics lectics;
   private int current_token;
 
-  private Parser(
-    Syntactics_Buffer syntactics,
-    Lectics lectics,
-    int current_token)
-  {
-    this.syntactics = syntactics;
-    this.lectics = lectics;
-    this.current_token = current_token;
+  public Parser() {
+    node_types = new byte[0];
+    node_begins = new int[0];
   }
 
   public Syntactics parse(Lectics lectics) {
-    syntactics.clear();
+    node_count = 0;
     this.lectics = lectics;
     current_token = 0;
     while (current_token != lectics.token_count()) {
       if (!parse_declaration())
         throw missing("top level declaration");
     }
-    return syntactics.bake(lectics.path, lectics.contents);
+    return new Syntactics(
+      lectics.path,
+      lectics.contents,
+      node_types,
+      node_begins,
+      node_count);
   }
 
   private boolean parse_declaration() {
@@ -94,6 +94,15 @@ public final class Parser {
   }
 
   private void add_node(byte node_type, int representative_token) {
-    syntactics.add_node(node_type, lectics.begin_of(representative_token));
+    if (node_count == node_types.length) {
+      var new_capacity = node_count * 2;
+      if (new_capacity == 0)
+        new_capacity = 1;
+      node_types = Arrays.copyOf(node_types, new_capacity);
+      node_begins = Arrays.copyOf(node_begins, new_capacity);
+    }
+    node_types[node_count] = node_type;
+    node_begins[node_count] = lectics.begin_of(representative_token);
+    node_count++;
   }
 }

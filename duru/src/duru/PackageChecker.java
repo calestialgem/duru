@@ -15,7 +15,7 @@ public final class PackageChecker {
 
   public PackageChecker() {
     lexer = Lexer.create();
-    parser = Parser.create();
+    parser = new Parser();
     symbols = AcyclicCache.create(this::checkSymbol);
     sources = new Syntactics[0];
   }

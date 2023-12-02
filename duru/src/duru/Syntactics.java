@@ -13,30 +13,22 @@ public final class Syntactics {
     return type == ENTRYPOINT_DECLARATION;
   }
 
-  public static Syntactics of(
+  public final Path path;
+  public final String contents;
+  private final byte[] types;
+  private final int[] begins;
+
+  public Syntactics(
     Path path,
     String contents,
     byte[] types,
     int[] begins,
     int count)
   {
-    return new Syntactics(
-      path,
-      contents,
-      Arrays.copyOf(types, count),
-      Arrays.copyOf(begins, count));
-  }
-
-  public final Path path;
-  public final String contents;
-  private final byte[] types;
-  private final int[] begins;
-
-  private Syntactics(Path path, String contents, byte[] types, int[] begins) {
     this.path = path;
     this.contents = contents;
-    this.types = types;
-    this.begins = begins;
+    this.types = Arrays.copyOf(types, count);
+    this.begins = Arrays.copyOf(begins, count);
   }
 
   public int node_count() {
