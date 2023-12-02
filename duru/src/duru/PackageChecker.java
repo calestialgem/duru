@@ -1,83 +1,40 @@
 package duru;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public final class PackageChecker {
-  public static Semantic.Package check(
-    CompilerDebugger debugger,
-    Object subject,
-    SetBuffer<String> externalNames,
-    Accessor<Name, Semantic.Package> accessor,
-    Path sources,
-    PackageType type,
-    Name packageName)
-  {
-    var checker =
-      new PackageChecker(
-        debugger,
-        subject,
-        externalNames,
-        accessor,
-        sources,
-        type,
-        packageName);
-    return checker.check();
-  }
-
-  private final CompilerDebugger debugger;
-  private final Object subject;
-  private final SetBuffer<String> externalNames;
-  private final Accessor<Name, Semantic.Package> accessor;
-  private final Path sources;
-  private final PackageType type;
-  private final Name packageName;
   private final Lexer lexer;
   private final Parser parser;
-  private Map<String, Node.Declaration> declarations;
-  private AcyclicCache<String, Semantic.Symbol> symbols;
+  private final AcyclicCache<String, Semantic.Symbol> symbols;
+  private Syntactics[] sources;
+  private int source_count;
+  private SetBuffer<String> externalNames;
+  private Accessor<Name, Semantic.Package> accessor;
+  private Name package_name;
 
-  private PackageChecker(
+  public PackageChecker() {
+    lexer = Lexer.create();
+    parser = Parser.create();
+    symbols = AcyclicCache.create(this::checkSymbol);
+    sources = new Syntactics[0];
+  }
+
+  public Semantic.Package check(
     CompilerDebugger debugger,
     Object subject,
     SetBuffer<String> externalNames,
     Accessor<Name, Semantic.Package> accessor,
-    Path sources,
-    PackageType type,
-    Name packageName)
+    Path root_source_directory,
+    Name package_name,
+    PackageType package_type)
   {
-    this.debugger = debugger;
-    this.subject = subject;
+    symbols.clear();
+    source_count = 0;
     this.externalNames = externalNames;
     this.accessor = accessor;
-    this.sources = sources;
-    this.type = type;
-    this.packageName = packageName;
-    lexer = Lexer.create();
-    parser = Parser.create();
-  }
-
-  private Semantic.Package check() {
-    resolveDeclarations();
-    symbols = AcyclicCache.create(this::checkSymbol);
-    if (packageName.equals(Name.of("duru"))) {
-      for (var builtin : Semantic.BUILTINS) {
-        symbols.add(builtin.identifier(), builtin);
-      }
-    }
-    for (var declaration : declarations) {
-      symbols.get(declaration.value().location(), declaration.key());
-    }
-    return switch (type) {
-      case EXECUTABLE -> new Semantic.Executable(packageName, symbols.getAll());
-      case LIBRARY -> new Semantic.Library(packageName, symbols.getAll());
-      case IMPLEMENTATION ->
-        new Semantic.Implementation(packageName, symbols.getAll());
-    };
-  }
-
-  private void resolveDeclarations() {
-    var directory = packageName.resolve(sources);
-    var packageDeclarations = MapBuffer.<String, Node.Declaration>create();
+    this.package_name = package_name;
+    var directory = package_name.resolve(root_source_directory);
     for (var file : Persistance.list(subject, directory)) {
       var fullFilename = file.getFileName().toString();
       if (!fullFilename.endsWith(".duru")) {
@@ -86,42 +43,104 @@ public final class PackageChecker {
       var filename =
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
       var source = new Source(file, Persistance.load(directory, file));
-      debugger.recordSource(source, packageName, filename);
+      debugger.recordSource(source, package_name, filename);
       var lectics = lexer.lex(source.path(), source.contents());
-      debugger.record(lectics, packageName, filename);
+      debugger.record(lectics, package_name, filename);
       var syntactics = parser.parse(lectics);
-      debugger.record(syntactics, packageName, filename);
-      // for (var declaration : declarations) {
-      // var identifier = declaration.name().text();
-      // if (packageDeclarations.contains(identifier)) {
-      // throw Diagnostic
-      // .error(
-      // declaration.name().location(),
-      // "redeclaration of `%s`",
-      // packageName.scope(identifier));
-      // }
-      // packageDeclarations.add(identifier, declaration);
-      // }
+      debugger.record(syntactics, package_name, filename);
+      for (var node = 0; node < syntactics.node_count(); node++) {
+        if (!Syntactics.is_declaration(syntactics.type_of(node)))
+          continue;
+        var identifier = syntactics.text_of(node);
+        for (
+          var other_node = node + 1;
+          other_node < syntactics.node_count();
+          other_node++)
+        {
+          if (!Syntactics.is_declaration(syntactics.type_of(other_node)))
+            continue;
+          var other_identifier = syntactics.text_of(other_node);
+          if (identifier.equals(other_identifier)) {
+            throw Diagnostic
+              .error(
+                syntactics.subject_of(other_node),
+                "redeclaration of `%s`",
+                package_name.scope(other_identifier));
+          }
+        }
+        for (
+          var previous_source = 0;
+          previous_source < source_count;
+          previous_source++)
+        {
+          for (
+            var other_node = 0;
+            other_node < sources[previous_source].node_count();
+            other_node++)
+          {
+            if (!Syntactics
+              .is_declaration(sources[previous_source].type_of(other_node)))
+              continue;
+            var other_identifier = sources[previous_source].text_of(other_node);
+            if (identifier.equals(other_identifier)) {
+              throw Diagnostic
+                .error(
+                  syntactics.subject_of(node),
+                  "redeclaration of `%s`",
+                  package_name.scope(identifier));
+            }
+          }
+        }
+      }
+      if (source_count == sources.length) {
+        var capacity = source_count * 2;
+        if (capacity == 0)
+          capacity = 1;
+        sources = Arrays.copyOf(sources, capacity, Syntactics[].class);
+      }
+      sources[source_count] = syntactics;
+      source_count++;
     }
-    declarations = packageDeclarations.toMap();
-    debugger.recordResolution(declarations, packageName);
+    debugger.record(sources, source_count, package_name);
+    if (package_name.equals(Name.of("duru"))) {
+      for (var builtin : Semantic.BUILTINS) {
+        symbols.add(builtin.identifier(), builtin);
+      }
+    }
+    for (var source = 0; source < source_count; source++) {
+      for (var node = 0; node < sources[source].node_count(); node++) {
+        if (!Syntactics.is_declaration(sources[source].type_of(node)))
+          continue;
+        symbols
+          .get(sources[source].subject_of(node), sources[source].text_of(node));
+      }
+    }
+    return switch (package_type) {
+      case EXECUTABLE ->
+        new Semantic.Executable(package_name, symbols.getAll());
+      case LIBRARY -> new Semantic.Library(package_name, symbols.getAll());
+      case IMPLEMENTATION ->
+        new Semantic.Implementation(package_name, symbols.getAll());
+    };
   }
 
   private Semantic.Symbol checkSymbol(Object subject, String identifier) {
-    var checked = declarations.get(identifier);
-    if (checked.isEmpty()) {
-      throw Diagnostic
-        .error(
-          subject,
-          "there is no symbol `%s`",
-          packageName.scope(identifier));
+    for (var source = 0; source < source_count; source++) {
+      for (var node = 0; node < sources[source].node_count(); node++) {
+        if (!Syntactics.is_declaration(sources[source].type_of(node)))
+          continue;
+        if (identifier.equals(sources[source].text_of(node))) {
+          // TODO: fix checking after rewriting SymbolChecker
+          return SymbolChecker
+            .check(externalNames, this::accessSymbol, package_name, null);
+        }
+      }
     }
-    return SymbolChecker
-      .check(
-        externalNames,
-        this::accessSymbol,
-        packageName,
-        checked.getFirst());
+    throw Diagnostic
+      .error(
+        subject,
+        "there is no symbol `%s`",
+        package_name.scope(identifier));
   }
 
   private Semantic.Symbol accessSymbol(Object subject, Name mention) {
@@ -130,7 +149,7 @@ public final class PackageChecker {
       return symbols.get(subject, mentionedSymbol);
     }
     var mentionedPackage = mention.getPackage();
-    if (mentionedPackage.equals(packageName)) {
+    if (mentionedPackage.equals(package_name)) {
       return symbols.get(subject, mentionedSymbol);
     }
     var accessedSymbol =

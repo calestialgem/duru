@@ -10,8 +10,8 @@ public final class AcyclicCache<Key, Value> {
   }
 
   private final BiFunction<Object, Key, Value> function;
-  private final MapBuffer<Key, Value>          cache;
-  private final SetBuffer<Key>                 current;
+  private final MapBuffer<Key, Value> cache;
+  private final SetBuffer<Key> current;
 
   private AcyclicCache(
     BiFunction<Object, Key, Value> function,
@@ -19,8 +19,15 @@ public final class AcyclicCache<Key, Value> {
     SetBuffer<Key> current)
   {
     this.function = function;
-    this.cache    = cache;
-    this.current  = current;
+    this.cache = cache;
+    this.current = current;
+  }
+
+  public void clear() {
+    if (!current.isEmpty()) {
+      throw Diagnostic.failure("", "cyclic clearing of `%s`", current);
+    }
+    cache.clear();
   }
 
   public void add(Key key, Value value) {

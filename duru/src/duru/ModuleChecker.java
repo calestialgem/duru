@@ -20,6 +20,7 @@ public final class ModuleChecker {
   private final SetBuffer<String> externalNames;
   private final Accessor<String, Semantic.Module> accessor;
   private final Path directory;
+  private final PackageChecker package_checker;
   private String moduleIdentifier;
   private Path sources;
   private Path artifacts;
@@ -38,6 +39,7 @@ public final class ModuleChecker {
     this.externalNames = externalNames;
     this.accessor = accessor;
     this.directory = directory;
+    package_checker = new PackageChecker();
   }
 
   private Semantic.Module check() {
@@ -120,15 +122,15 @@ public final class ModuleChecker {
     else {
       type = PackageType.IMPLEMENTATION;
     }
-    return PackageChecker
+    return package_checker
       .check(
         debugger,
         subject,
         externalNames,
         this::accessPackage,
         sources,
-        type,
-        packageName);
+        packageName,
+        type);
   }
 
   private Semantic.Package accessPackage(

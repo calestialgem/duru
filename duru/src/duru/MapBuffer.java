@@ -11,8 +11,8 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
       ListBuffer.create());
   }
 
-  private final ListBuffer<Key>     keys;
-  private final ListBuffer<Value>   values;
+  private final ListBuffer<Key> keys;
+  private final ListBuffer<Value> values;
   private final ListBuffer<Integer> buckets;
 
   private MapBuffer(
@@ -20,8 +20,8 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
     ListBuffer<Value> values,
     ListBuffer<Integer> buckets)
   {
-    this.keys    = keys;
-    this.values  = values;
+    this.keys = keys;
+    this.values = values;
     this.buckets = buckets;
   }
 
@@ -40,7 +40,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = Math.floorMod(hash + i, buckets.length());
-      var index  = buckets.get(bucket);
+      var index = buckets.get(bucket);
       if (index == -1) {
         return false;
       }
@@ -56,7 +56,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = Math.floorMod(hash + i, buckets.length());
-      var index  = buckets.get(bucket);
+      var index = buckets.get(bucket);
       if (index == -1) {
         return Optional.absent();
       }
@@ -112,7 +112,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = Math.floorMod(hash + i, buckets.length());
-      var index  = buckets.get(bucket);
+      var index = buckets.get(bucket);
       if (index == -1) {
         buckets.set(bucket, keys.length());
         keys.add(key);
@@ -133,7 +133,7 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
     var hash = key.hashCode();
     for (var i = 0; i < buckets.length(); i++) {
       var bucket = Math.floorMod(hash + i, buckets.length());
-      var index  = buckets.get(bucket);
+      var index = buckets.get(bucket);
       if (index == -1) {
         return false;
       }
@@ -153,15 +153,21 @@ public final class MapBuffer<Key, Value> implements MapLike<Key, Value> {
     rehash();
   }
 
+  public void clear() {
+    keys.clear();
+    values.clear();
+    buckets.clear();
+  }
+
   private void rehash() {
     buckets.clear();
     buckets.fill(-1, keys.length() * 2);
     for (var k = 0; k < keys.length(); k++) {
-      var key  = keys.get(k);
+      var key = keys.get(k);
       var hash = key.hashCode();
       for (var i = 0; i < buckets.length(); i++) {
         var bucket = Math.floorMod(hash + i, buckets.length());
-        var index  = buckets.get(bucket);
+        var index = buckets.get(bucket);
         if (index == -1) {
           buckets.set(bucket, k);
           break;

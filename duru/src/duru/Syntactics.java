@@ -9,6 +9,10 @@ public final class Syntactics {
   public static final byte BLOCK_STATEMENT_BEGIN = 0x02;
   public static final byte BLOCK_STATEMENT_END = 0x03;
 
+  public static boolean is_declaration(byte type) {
+    return type == ENTRYPOINT_DECLARATION;
+  }
+
   public static Syntactics of(
     Path path,
     String contents,
@@ -23,8 +27,8 @@ public final class Syntactics {
       Arrays.copyOf(begins, count));
   }
 
-  private final Path path;
-  private final String contents;
+  public final Path path;
+  public final String contents;
   private final byte[] types;
   private final int[] begins;
 
@@ -47,6 +51,10 @@ public final class Syntactics {
     return begins[node];
   }
 
+  public String text_of(int node) {
+    return contents.substring(begin_of(node), begin_of(node) + length_of(node));
+  }
+
   public Object subject_of(int node) {
     var index = 0;
     var line = 1;
@@ -63,6 +71,21 @@ public final class Syntactics {
     }
     return "%s:%d.%d-%d"
       .formatted(path, line, column, column + length_of(node));
+  }
+
+  public int length_of(int node) {
+    switch (type_of(node)) {
+      case ENTRYPOINT_DECLARATION -> {
+        return "entrypoint".length();
+      }
+      case BLOCK_STATEMENT_BEGIN -> {
+        return "{".length();
+      }
+      case BLOCK_STATEMENT_END -> {
+        return "}".length();
+      }
+      default -> throw unknown(node);
+    }
   }
 
   public String explain(int node) {
@@ -134,21 +157,6 @@ public final class Syntactics {
       }
     }
     return string.toString();
-  }
-
-  private int length_of(int node) {
-    switch (type_of(node)) {
-      case ENTRYPOINT_DECLARATION -> {
-        return "entrypoint".length();
-      }
-      case BLOCK_STATEMENT_BEGIN -> {
-        return "{".length();
-      }
-      case BLOCK_STATEMENT_END -> {
-        return "}".length();
-      }
-      default -> throw unknown(node);
-    }
   }
 
   private RuntimeException unknown(int node) {

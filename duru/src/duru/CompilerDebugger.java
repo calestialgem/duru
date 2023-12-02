@@ -1,9 +1,9 @@
 package duru;
 
 import java.nio.file.Path;
+import java.util.Formatter;
 
 import duru.ConfigurationNode.PackageDeclaration;
-import duru.Node.Declaration;
 import duru.Semantic.Target;
 
 public sealed interface CompilerDebugger {
@@ -40,6 +40,60 @@ public sealed interface CompilerDebugger {
       store(
         "%s.%s-syntactics.duru".formatted(packageName.joined("."), sourceName),
         syntactics);
+    }
+
+    @Override
+    public void record(
+      Syntactics[] sources,
+      int source_count,
+      Name packageName)
+    {
+      var hash = 1;
+      for (var source = 0; source < source_count; source++) {
+        hash *= 31;
+        hash += sources[source].hashCode();
+      }
+      var string = new StringBuilder();
+      try (var f = new Formatter(string)) {
+        f.format("`%s`s declarations.%n%nHash: %X%n%n", packageName, hash);
+        for (var source = 0; source < source_count; source++) {
+          var filename = sources[source].path.getFileName().toString();
+          filename =
+            filename.substring(0, filename.length() - ".duru".length());
+          var line = 1;
+          var column = 1;
+          var index = 0;
+          for (var node = 0; node < sources[source].node_count(); node++) {
+            String type;
+            switch (sources[source].type_of(node)) {
+              case Syntactics.ENTRYPOINT_DECLARATION -> type = "entrypoint";
+              default -> {
+                continue;
+              }
+            }
+            while (index != sources[source].begin_of(node)) {
+              if (sources[source].contents.charAt(index) == '\n') {
+                line++;
+                column = 1;
+              }
+              else {
+                column++;
+              }
+              index++;
+            }
+            f
+              .format(
+                "%s:%04d.%04d-%04d: %s `%s`%n",
+                filename,
+                line,
+                column,
+                column + sources[source].length_of(node),
+                type,
+                sources[source].text_of(node));
+          }
+        }
+      }
+      store("%s-resolution.duru".formatted(packageName.joined(".")), string);
     }
 
     @Override
@@ -182,51 +236,6 @@ public sealed interface CompilerDebugger {
     }
 
     @Override
-    public void recordResolution(
-      Map<String, Declaration> resolution,
-      Name packageName)
-    {
-      var string = new StringBuilder();
-      string
-        .append(
-          Integer.toUnsignedString(resolution.hashCode(), 16).toUpperCase());
-      string.append(System.lineSeparator());
-      for (var declaration : resolution.values()) {
-        var filename =
-          declaration.location().source().path().getFileName().toString();
-        string
-          .append(filename.substring(0, filename.length() - ".duru".length()));
-        string
-          .append(
-            ":%04d.%04d-%04d.%04d"
-              .formatted(
-                declaration.name().location().beginLine(),
-                declaration.name().location().beginColumn(),
-                declaration.name().location().endLine(),
-                declaration.name().location().endColumn()));
-        string.append(':');
-        string.append(' ');
-        for (var externalName : declaration.externalName()) {
-          string.append("extern");
-          string.append(' ');
-          Text.quote(string, externalName.value());
-          string.append(' ');
-        }
-        if (declaration.isPublic()) {
-          string.append("public");
-          string.append(' ');
-        }
-        string.append(declaration.getClass().getSimpleName());
-        string.append(' ');
-        string.append('`');
-        string.append(declaration.name().text());
-        string.append('`');
-        string.append(System.lineSeparator());
-      }
-      store("%s.resolution.duru".formatted(packageName.joined(".")), string);
-    }
-
-    @Override
     public void recordTarget(Target target) {
       var string = new StringBuilder();
       string
@@ -260,6 +269,23 @@ public sealed interface CompilerDebugger {
 
   record Inactive() implements CompilerDebugger {
     @Override
+    public void record(Lectics lectics, Name packageName, String sourceName) {}
+
+    @Override
+    public void record(
+      Syntactics syntactics,
+      Name packageName,
+      String sourceName)
+    {}
+
+    @Override
+    public void record(
+      Syntactics[] sources,
+      int source_count,
+      Name packageName)
+    {}
+
+    @Override
     public void recordConfigurationSource(
       Source source,
       String moduleIdentifier)
@@ -291,22 +317,6 @@ public sealed interface CompilerDebugger {
     {}
 
     @Override
-    public void record(Lectics lectics, Name packageName, String sourceName) {}
-
-    @Override
-    public void record(
-      Syntactics syntactics,
-      Name packageName,
-      String sourceName)
-    {}
-
-    @Override
-    public void recordResolution(
-      Map<String, Declaration> resolution,
-      Name packageName)
-    {}
-
-    @Override
     public void recordTarget(Target target) {}
   }
 
@@ -320,6 +330,7 @@ public sealed interface CompilerDebugger {
 
   void record(Lectics lectics, Name packageName, String sourceName);
   void record(Syntactics syntactics, Name packageName, String sourceName);
+  void record(Syntactics[] sources, int source_count, Name packageName);
   void recordConfigurationSource(Source source, String moduleIdentifier);
   void recordConfigurationTokens(
     List<ConfigurationToken> tokens,
@@ -331,8 +342,5 @@ public sealed interface CompilerDebugger {
     Configuration configuration,
     String moduleIdentifier);
   void recordSource(Source source, Name packageName, String sourceName);
-  void recordResolution(
-    Map<String, Node.Declaration> resolution,
-    Name packageName);
   void recordTarget(Semantic.Target target);
 }
