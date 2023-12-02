@@ -4,33 +4,30 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 public final class Lectics {
-  public static final byte OPENING_BRACE = 0x01;
-  public static final byte CLOSING_BRACE = 0x02;
-  public static final byte KEYWORD_ENTRYPOINT = 0x03;
   public final Path path;
-  public final String contents;
-  private final byte[] types;
+  public final String content;
+  private final byte[] kinds;
   private final int[] begins;
 
   public Lectics(
     Path path,
-    String contents,
-    byte[] types,
+    String content,
+    byte[] kinds,
     int[] begins,
     int count)
   {
     this.path = path;
-    this.contents = contents;
-    this.types = Arrays.copyOf(types, count);
+    this.content = content;
+    this.kinds = Arrays.copyOf(kinds, count);
     this.begins = Arrays.copyOf(begins, count);
   }
 
   public int token_count() {
-    return types.length;
+    return kinds.length;
   }
 
-  public byte type_of(int token) {
-    return types[token];
+  public Token kind_of(int token) {
+    return Token.values()[kinds[token]];
   }
 
   public int begin_of(int token) {
@@ -42,7 +39,7 @@ public final class Lectics {
     var line = 1;
     var column = 1;
     while (index != begin_of(token)) {
-      if (contents.charAt(index) != '\n') {
+      if (content.charAt(index) != '\n') {
         column++;
       }
       else {
@@ -56,14 +53,14 @@ public final class Lectics {
   }
 
   public int length_of(int token) {
-    switch (type_of(token)) {
-      case OPENING_BRACE -> {
+    switch (kind_of(token)) {
+      case Token.OPENING_BRACE -> {
         return "{".length();
       }
-      case CLOSING_BRACE -> {
+      case Token.CLOSING_BRACE -> {
         return "}".length();
       }
-      case KEYWORD_ENTRYPOINT -> {
+      case Token.ENTRYPOINT -> {
         return "entrypoint".length();
       }
       default -> throw unknown(token);
@@ -71,14 +68,14 @@ public final class Lectics {
   }
 
   public String explain(int token) {
-    switch (type_of(token)) {
-      case OPENING_BRACE -> {
+    switch (kind_of(token)) {
+      case Token.OPENING_BRACE -> {
         return "punctuation `{`";
       }
-      case CLOSING_BRACE -> {
+      case Token.CLOSING_BRACE -> {
         return "punctuation `}`";
       }
-      case KEYWORD_ENTRYPOINT -> {
+      case Token.ENTRYPOINT -> {
         return "keyword `entrypoint`";
       }
       default -> throw unknown(token);
@@ -89,8 +86,8 @@ public final class Lectics {
   public int hashCode() {
     var result = 1;
     result = 31 * result + path.hashCode();
-    result = 31 * result + contents.hashCode();
-    result = 31 * result + Arrays.hashCode(types);
+    result = 31 * result + content.hashCode();
+    result = 31 * result + Arrays.hashCode(kinds);
     result = 31 * result + Arrays.hashCode(begins);
     return result;
   }
@@ -100,8 +97,8 @@ public final class Lectics {
     return this == obj
       || obj instanceof Lectics other
         && path.equals(other.path)
-        && contents.equals(other.contents)
-        && Arrays.equals(types, other.types)
+        && content.equals(other.content)
+        && Arrays.equals(kinds, other.kinds)
         && Arrays.equals(begins, other.begins);
   }
 
@@ -111,7 +108,7 @@ public final class Lectics {
     var line = 1;
     var column = 1;
     while (index != begin) {
-      if (contents.charAt(index) != '\n') {
+      if (content.charAt(index) != '\n') {
         column++;
       }
       else {
@@ -123,7 +120,7 @@ public final class Lectics {
     return Diagnostic
       .failure(
         "%s:%d.%d".formatted(path, line, column),
-        "unknown token type %d",
-        type_of(token));
+        "unknown token kind %s",
+        kind_of(token));
   }
 }

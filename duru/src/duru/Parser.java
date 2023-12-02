@@ -24,7 +24,7 @@ public final class Parser {
     }
     return new Syntactics(
       lectics.path,
-      lectics.contents,
+      lectics.content,
       node_types,
       node_begins,
       node_count);
@@ -37,7 +37,7 @@ public final class Parser {
   }
 
   private boolean parse_entrypoint() {
-    var keyword_token = take(Lectics.KEYWORD_ENTRYPOINT);
+    var keyword_token = take(Token.ENTRYPOINT);
     if (keyword_token == -1)
       return false;
     if (!parse_statement()) {
@@ -55,14 +55,14 @@ public final class Parser {
   }
 
   private boolean parse_block() {
-    var opening_token = take(Lectics.OPENING_BRACE);
+    var opening_token = take(Token.OPENING_BRACE);
     if (opening_token == -1)
       return false;
     add_node(Syntactics.BLOCK_STATEMENT_END, opening_token);
     while (true) {
       if (parse_statement())
         continue;
-      var closing_token = take(Lectics.CLOSING_BRACE);
+      var closing_token = take(Token.CLOSING_BRACE);
       if (closing_token == -1)
         throw missing("`}` of block");
       add_node(Syntactics.BLOCK_STATEMENT_BEGIN, closing_token);
@@ -87,8 +87,8 @@ public final class Parser {
         lectics.explain(current_token));
   }
 
-  private int take(byte token_type) {
-    if (lectics.type_of(current_token) != token_type)
+  private int take(Token kind) {
+    if (lectics.kind_of(current_token) != kind)
       return -1;
     return current_token++;
   }

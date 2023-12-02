@@ -39,7 +39,7 @@ public final class Explorer {
       var index = 0;
       for (var token = 0; token < lectics.token_count(); token++) {
         while (index != lectics.begin_of(token)) {
-          if (lectics.contents.charAt(index) == '\n') {
+          if (lectics.content.charAt(index) == '\n') {
             line++;
             column = 1;
           }
