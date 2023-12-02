@@ -4,38 +4,30 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 public final class Syntactics {
-  public static final byte ENTRYPOINT_DECLARATION = 0x01;
-  public static final byte BLOCK_STATEMENT_BEGIN = 0x02;
-  public static final byte BLOCK_STATEMENT_END = 0x03;
-
-  public static boolean is_declaration(byte type) {
-    return type == ENTRYPOINT_DECLARATION;
-  }
-
   public final Path path;
-  public final String contents;
-  private final byte[] types;
+  public final String content;
+  private final byte[] kinds;
   private final int[] begins;
 
   public Syntactics(
     Path path,
-    String contents,
-    byte[] types,
+    String content,
+    byte[] kinds,
     int[] begins,
     int count)
   {
     this.path = path;
-    this.contents = contents;
-    this.types = Arrays.copyOf(types, count);
+    this.content = content;
+    this.kinds = Arrays.copyOf(kinds, count);
     this.begins = Arrays.copyOf(begins, count);
   }
 
   public int node_count() {
-    return types.length;
+    return kinds.length;
   }
 
-  public byte type_of(int node) {
-    return types[node];
+  public Node kind_of(int node) {
+    return Node.values()[kinds[node]];
   }
 
   public int begin_of(int node) {
@@ -43,7 +35,7 @@ public final class Syntactics {
   }
 
   public String text_of(int node) {
-    return contents.substring(begin_of(node), begin_of(node) + length_of(node));
+    return content.substring(begin_of(node), begin_of(node) + length_of(node));
   }
 
   public Object subject_of(int node) {
@@ -51,7 +43,7 @@ public final class Syntactics {
     var line = 1;
     var column = 1;
     while (index != begin_of(node)) {
-      if (contents.charAt(index) != '\n') {
+      if (content.charAt(index) != '\n') {
         column++;
       }
       else {
@@ -65,14 +57,14 @@ public final class Syntactics {
   }
 
   public int length_of(int node) {
-    switch (type_of(node)) {
-      case ENTRYPOINT_DECLARATION -> {
+    switch (kind_of(node)) {
+      case Node.ENTRYPOINT -> {
         return "entrypoint".length();
       }
-      case BLOCK_STATEMENT_BEGIN -> {
+      case Node.BLOCK_BEGIN -> {
         return "{".length();
       }
-      case BLOCK_STATEMENT_END -> {
+      case Node.BLOCK_END -> {
         return "}".length();
       }
       default -> throw unknown(node);
@@ -80,14 +72,14 @@ public final class Syntactics {
   }
 
   public String explain(int node) {
-    switch (type_of(node)) {
-      case ENTRYPOINT_DECLARATION -> {
+    switch (kind_of(node)) {
+      case Node.ENTRYPOINT -> {
         return "entrypoint declaration";
       }
-      case BLOCK_STATEMENT_BEGIN -> {
+      case Node.BLOCK_BEGIN -> {
         return "block statement begin";
       }
-      case BLOCK_STATEMENT_END -> {
+      case Node.BLOCK_END -> {
         return "block statement end";
       }
       default -> throw unknown(node);
@@ -98,8 +90,8 @@ public final class Syntactics {
   public int hashCode() {
     var result = 1;
     result = 31 * result + path.hashCode();
-    result = 31 * result + contents.hashCode();
-    result = 31 * result + Arrays.hashCode(types);
+    result = 31 * result + content.hashCode();
+    result = 31 * result + Arrays.hashCode(kinds);
     result = 31 * result + Arrays.hashCode(begins);
     return result;
   }
@@ -109,8 +101,8 @@ public final class Syntactics {
     return this == obj
       || obj instanceof Syntactics other
         && path.equals(other.path)
-        && contents.equals(other.contents)
-        && Arrays.equals(types, other.types)
+        && content.equals(other.content)
+        && Arrays.equals(kinds, other.kinds)
         && Arrays.equals(begins, other.begins);
   }
 
@@ -120,7 +112,7 @@ public final class Syntactics {
     var line = 1;
     var column = 1;
     while (index != begin) {
-      if (contents.charAt(index) != '\n') {
+      if (content.charAt(index) != '\n') {
         column++;
       }
       else {
@@ -132,7 +124,7 @@ public final class Syntactics {
     return Diagnostic
       .failure(
         "%s:%d.%d".formatted(path, line, column),
-        "unknown node type %d",
-        type_of(node));
+        "unknown node kind %s",
+        kind_of(node));
   }
 }

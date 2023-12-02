@@ -49,7 +49,7 @@ public final class PackageChecker {
       var syntactics = parser.parse(lectics);
       explorer.record(syntactics, package_name, filename);
       for (var node = 0; node < syntactics.node_count(); node++) {
-        if (!Syntactics.is_declaration(syntactics.type_of(node)))
+        if (!syntactics.kind_of(node).is_declaration())
           continue;
         var identifier = syntactics.text_of(node);
         for (
@@ -57,7 +57,7 @@ public final class PackageChecker {
           other_node < syntactics.node_count();
           other_node++)
         {
-          if (!Syntactics.is_declaration(syntactics.type_of(other_node)))
+          if (!syntactics.kind_of(other_node).is_declaration())
             continue;
           var other_identifier = syntactics.text_of(other_node);
           if (identifier.equals(other_identifier)) {
@@ -78,8 +78,7 @@ public final class PackageChecker {
             other_node < sources[previous_source].node_count();
             other_node++)
           {
-            if (!Syntactics
-              .is_declaration(sources[previous_source].type_of(other_node)))
+            if (!sources[previous_source].kind_of(other_node).is_declaration())
               continue;
             var other_identifier = sources[previous_source].text_of(other_node);
             if (identifier.equals(other_identifier)) {
@@ -109,7 +108,7 @@ public final class PackageChecker {
     }
     for (var source = 0; source < source_count; source++) {
       for (var node = 0; node < sources[source].node_count(); node++) {
-        if (!Syntactics.is_declaration(sources[source].type_of(node)))
+        if (!sources[source].kind_of(node).is_declaration())
           continue;
         symbols
           .get(sources[source].subject_of(node), sources[source].text_of(node));
@@ -127,12 +126,11 @@ public final class PackageChecker {
   private Semantic.Symbol checkSymbol(Object subject, String identifier) {
     for (var source = 0; source < source_count; source++) {
       for (var node = 0; node < sources[source].node_count(); node++) {
-        if (!Syntactics.is_declaration(sources[source].type_of(node)))
+        if (!sources[source].kind_of(node).is_declaration())
           continue;
         if (identifier.equals(sources[source].text_of(node))) {
           // TODO: fix checking after rewriting SymbolChecker
-          return SymbolChecker
-            .check(externalNames, this::accessSymbol, package_name, null);
+          throw Diagnostic.unimplemented(subject);
         }
       }
     }

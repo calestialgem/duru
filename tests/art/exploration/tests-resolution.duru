@@ -2,4 +2,4 @@
 
 Hash: D3995CD
 
-entrypoint:0010.0001-0011: entrypoint `entrypoint`
+entrypoint:0010.0001-0011: ENTRYPOINT `entrypoint`

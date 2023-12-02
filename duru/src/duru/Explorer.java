@@ -82,7 +82,7 @@ public final class Explorer {
         var column = 1;
         var index = 0;
         while (index != syntactics.begin_of(node)) {
-          if (syntactics.contents.charAt(index) == '\n') {
+          if (syntactics.content.charAt(index) == '\n') {
             line++;
             column = 1;
           }
@@ -124,15 +124,11 @@ public final class Explorer {
         var column = 1;
         var index = 0;
         for (var node = 0; node < sources[source].node_count(); node++) {
-          String type;
-          switch (sources[source].type_of(node)) {
-            case Syntactics.ENTRYPOINT_DECLARATION -> type = "entrypoint";
-            default -> {
-              continue;
-            }
-          }
+          Node kind = sources[source].kind_of(node);
+          if (!kind.is_declaration())
+            continue;
           while (index != sources[source].begin_of(node)) {
-            if (sources[source].contents.charAt(index) == '\n') {
+            if (sources[source].content.charAt(index) == '\n') {
               line++;
               column = 1;
             }
@@ -148,7 +144,7 @@ public final class Explorer {
               line,
               column,
               column + sources[source].length_of(node),
-              type,
+              kind,
               sources[source].text_of(node));
         }
       }

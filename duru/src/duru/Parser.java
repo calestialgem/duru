@@ -1,33 +1,23 @@
 package duru;
 
-import java.util.Arrays;
-
 public final class Parser {
-  private byte[] node_types;
-  private int[] node_begins;
-  private int node_count;
+  private final Syntactics_Buffer syntactics;
   private Lectics lectics;
   private int current_token;
 
   public Parser() {
-    node_types = new byte[0];
-    node_begins = new int[0];
+    syntactics = new Syntactics_Buffer();
   }
 
   public Syntactics parse(Lectics lectics) {
-    node_count = 0;
+    syntactics.clear();
     this.lectics = lectics;
     current_token = 0;
     while (current_token != lectics.token_count()) {
       if (!parse_declaration())
         throw missing("top level declaration");
     }
-    return new Syntactics(
-      lectics.path,
-      lectics.content,
-      node_types,
-      node_begins,
-      node_count);
+    return syntactics.bake(lectics.path, lectics.content);
   }
 
   private boolean parse_declaration() {
@@ -43,7 +33,7 @@ public final class Parser {
     if (!parse_statement()) {
       throw missing("body of entrypoint");
     }
-    add_node(Syntactics.ENTRYPOINT_DECLARATION, keyword_token);
+    add_node(Node.ENTRYPOINT, keyword_token);
     return true;
   }
 
@@ -58,14 +48,14 @@ public final class Parser {
     var opening_token = take(Token.OPENING_BRACE);
     if (opening_token == -1)
       return false;
-    add_node(Syntactics.BLOCK_STATEMENT_END, opening_token);
+    add_node(Node.BLOCK_END, opening_token);
     while (true) {
       if (parse_statement())
         continue;
       var closing_token = take(Token.CLOSING_BRACE);
       if (closing_token == -1)
         throw missing("`}` of block");
-      add_node(Syntactics.BLOCK_STATEMENT_BEGIN, closing_token);
+      add_node(Node.BLOCK_BEGIN, closing_token);
       return true;
     }
   }
@@ -93,16 +83,7 @@ public final class Parser {
     return current_token++;
   }
 
-  private void add_node(byte node_type, int representative_token) {
-    if (node_count == node_types.length) {
-      var new_capacity = node_count * 2;
-      if (new_capacity == 0)
-        new_capacity = 1;
-      node_types = Arrays.copyOf(node_types, new_capacity);
-      node_begins = Arrays.copyOf(node_begins, new_capacity);
-    }
-    node_types[node_count] = node_type;
-    node_begins[node_count] = lectics.begin_of(representative_token);
-    node_count++;
+  private void add_node(Node kind, int representative_token) {
+    syntactics.add(kind, lectics.begin_of(representative_token));
   }
 }

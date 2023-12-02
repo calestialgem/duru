@@ -3,12 +3,12 @@ package duru;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public final class Lectics_Buffer {
+public final class Syntactics_Buffer {
   private byte[] kinds;
   private int[] begins;
   private int count;
 
-  public Lectics_Buffer() {
+  public Syntactics_Buffer() {
     kinds = new byte[0];
     begins = new int[0];
   }
@@ -17,7 +17,7 @@ public final class Lectics_Buffer {
     count = 0;
   }
 
-  public void add(Token kind, int begin) {
+  public void add(Node kind, int begin) {
     if (count == kinds.length) {
       var new_capacity = count * 2;
       if (new_capacity == 0)
@@ -30,7 +30,7 @@ public final class Lectics_Buffer {
     count++;
   }
 
-  public Lectics bake(Path path, String content) {
-    return new Lectics(path, content, kinds, begins, count);
+  public Syntactics bake(Path path, String content) {
+    return new Syntactics(path, content, kinds, begins, count);
   }
 }
