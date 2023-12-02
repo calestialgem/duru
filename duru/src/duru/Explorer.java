@@ -34,28 +34,17 @@ public final class Explorer {
           "'%s's lexical representation.%n%nHash: %X%n%n",
           lectics.path,
           lectics.hashCode());
-      var line = 1;
-      var column = 1;
-      var index = 0;
-      for (var token = 0; token < lectics.token_count(); token++) {
-        while (index != lectics.begin_of(token)) {
-          if (lectics.content.charAt(index) == '\n') {
-            line++;
-            column = 1;
-          }
-          else {
-            column++;
-          }
-          index++;
-        }
+
+      var iterator = new Token_Iterator();
+      for (iterator.iterate(lectics); iterator.has(); iterator.advance()) {
         f
           .format(
             "%04d: %04d.%04d-%04d: %s%n",
-            token,
-            line,
-            column,
-            column + lectics.length_of(token),
-            lectics.explain(token));
+            iterator.index(),
+            iterator.line(),
+            iterator.begin_column(),
+            iterator.end_column(),
+            iterator.explanation());
       }
     }
     store(

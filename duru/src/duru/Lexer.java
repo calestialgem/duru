@@ -76,7 +76,7 @@ public final class Lexer {
             var text = content.substring(begin, index);
             switch (text) {
               case "entrypoint" -> add_token(Token.ENTRYPOINT);
-              default -> throw Diagnostic.unimplemented(subject());
+              default -> add_varying_token(Token.IDENTIFIER);
             }
             break;
           }
@@ -116,5 +116,9 @@ public final class Lexer {
 
   private void add_token(Token kind) {
     lectics.add(kind, begin);
+  }
+
+  private void add_varying_token(Token kind) {
+    lectics.add_varying(kind, begin, index);
   }
 }

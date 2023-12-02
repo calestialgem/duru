@@ -2,18 +2,17 @@ package duru;
 
 public final class Parser {
   private final Syntactics_Buffer syntactics;
-  private Lectics lectics;
-  private int current_token;
+  private final Token_Iterator iterator;
 
   public Parser() {
     syntactics = new Syntactics_Buffer();
+    iterator = new Token_Iterator();
   }
 
   public Syntactics parse(Lectics lectics) {
     syntactics.clear();
-    this.lectics = lectics;
-    current_token = 0;
-    while (current_token != lectics.token_count()) {
+    iterator.iterate(lectics);
+    while (iterator.has()) {
       if (!parse_declaration())
         throw missing("top level declaration");
     }
@@ -27,13 +26,14 @@ public final class Parser {
   }
 
   private boolean parse_entrypoint() {
-    var keyword_token = take(Token.ENTRYPOINT);
-    if (keyword_token == -1)
+    if (iterator.kind() != Token.ENTRYPOINT)
       return false;
+    var begin = iterator.begin();
+    iterator.advance();
     if (!parse_statement()) {
       throw missing("body of entrypoint");
     }
-    add_node(Node.ENTRYPOINT, keyword_token);
+    syntactics.add(Node.ENTRYPOINT, begin);
     return true;
   }
 
@@ -45,45 +45,27 @@ public final class Parser {
   }
 
   private boolean parse_block() {
-    var opening_token = take(Token.OPENING_BRACE);
-    if (opening_token == -1)
+    if (iterator.kind() != Token.OPENING_BRACE)
       return false;
-    add_node(Node.BLOCK_END, opening_token);
+    syntactics.add(Node.BLOCK_END, iterator.begin());
+    iterator.advance();
     while (true) {
       if (parse_statement())
         continue;
-      var closing_token = take(Token.CLOSING_BRACE);
-      if (closing_token == -1)
+      if (iterator.kind() != Token.CLOSING_BRACE)
         throw missing("`}` of block");
-      add_node(Node.BLOCK_BEGIN, closing_token);
+      syntactics.add(Node.BLOCK_BEGIN, iterator.begin());
+      iterator.advance();
       return true;
     }
   }
 
   private RuntimeException missing(String explanation) {
-    if (current_token == lectics.token_count()) {
-      return Diagnostic
-        .error(
-          lectics.subject_of(current_token - 1),
-          "expected %s after %s",
-          explanation,
-          lectics.explain(current_token - 1));
-    }
     return Diagnostic
       .error(
-        lectics.subject_of(current_token),
+        iterator.subject(),
         "expected %s instead of %s",
         explanation,
-        lectics.explain(current_token));
-  }
-
-  private int take(Token kind) {
-    if (lectics.kind_of(current_token) != kind)
-      return -1;
-    return current_token++;
-  }
-
-  private void add_node(Node kind, int representative_token) {
-    syntactics.add(kind, lectics.begin_of(representative_token));
+        iterator.explanation());
   }
 }
