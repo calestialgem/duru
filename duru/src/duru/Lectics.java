@@ -8,31 +8,22 @@ public final class Lectics {
   public static final byte OPENING_BRACE = 0x01;
   public static final byte CLOSING_BRACE = 0x02;
   public static final byte KEYWORD_ENTRYPOINT = 0x03;
+  public final Path path;
+  public final String contents;
+  private final byte[] types;
+  private final int[] begins;
 
-  public static Lectics of(
+  public Lectics(
     Path path,
     String contents,
     byte[] types,
     int[] begins,
     int count)
   {
-    return new Lectics(
-      path,
-      contents,
-      Arrays.copyOf(types, count),
-      Arrays.copyOf(begins, count));
-  }
-
-  public final Path path;
-  public final String contents;
-  private final byte[] types;
-  private final int[] begins;
-
-  private Lectics(Path path, String contents, byte[] types, int[] begins) {
     this.path = path;
     this.contents = contents;
-    this.types = types;
-    this.begins = begins;
+    this.types = Arrays.copyOf(types, count);
+    this.begins = Arrays.copyOf(begins, count);
   }
 
   public int token_count() {
