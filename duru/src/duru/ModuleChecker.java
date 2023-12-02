@@ -4,18 +4,18 @@ import java.nio.file.Path;
 
 public final class ModuleChecker {
   public static Semantic.Module check(
-    CompilerDebugger debugger,
+    Explorer explorer,
     Object subject,
     SetBuffer<String> externalNames,
     Accessor<String, Semantic.Module> accessor,
     Path directory)
   {
     var checker =
-      new ModuleChecker(debugger, subject, externalNames, accessor, directory);
+      new ModuleChecker(explorer, subject, externalNames, accessor, directory);
     return checker.check();
   }
 
-  private final CompilerDebugger debugger;
+  private final Explorer explorer;
   private final Object subject;
   private final SetBuffer<String> externalNames;
   private final Accessor<String, Semantic.Module> accessor;
@@ -28,13 +28,13 @@ public final class ModuleChecker {
   private AcyclicCache<Name, Semantic.Package> packages;
 
   private ModuleChecker(
-    CompilerDebugger debugger,
+    Explorer explorer,
     Object subject,
     SetBuffer<String> externalNames,
     Accessor<String, Semantic.Module> accessor,
     Path directory)
   {
-    this.debugger = debugger;
+    this.explorer = explorer;
     this.subject = subject;
     this.externalNames = externalNames;
     this.accessor = accessor;
@@ -101,14 +101,14 @@ public final class ModuleChecker {
       new Source(
         configurationFile,
         Persistance.load(subject, configurationFile));
-    debugger.recordConfigurationSource(configurationSource, moduleIdentifier);
+    explorer.recordConfigurationSource(configurationSource, moduleIdentifier);
     var configurationTokens = ConfigurationLexer.lex(configurationSource);
-    debugger.recordConfigurationTokens(configurationTokens, moduleIdentifier);
+    explorer.recordConfigurationTokens(configurationTokens, moduleIdentifier);
     var configurationNode = ConfigurationParser.parse(configurationTokens);
-    debugger
+    explorer
       .recordConfigurationDeclarations(configurationNode, moduleIdentifier);
     configuration = ConfigurationResolver.resolve(configurationNode);
-    debugger.recordConfiguration(configuration, moduleIdentifier);
+    explorer.recordConfiguration(configuration, moduleIdentifier);
   }
 
   private Semantic.Package checkPackage(Object subject, Name packageName) {
@@ -124,7 +124,7 @@ public final class ModuleChecker {
     }
     return package_checker
       .check(
-        debugger,
+        explorer,
         subject,
         externalNames,
         this::accessPackage,

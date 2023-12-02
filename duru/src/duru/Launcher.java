@@ -63,39 +63,39 @@ builds up a list depending on the flag.
       Can be used more than once to build up a list.
       Defaults to an empty list.
 
---debug, -d as Boolean
-      Launches the compiler in debug mode. In debug mode, the compiler records
-    the various representations of the program in the artifact directories of
-    respective modules.
+--explore, -e as Boolean
+      Launches the compiler in exploration mode. In this mode, the compiler
+    records the various representations of the program in the artifact
+    directory of the launched module.
       Defaults to false.
 """);
     System.exit(-1);
   }
 
   private final List<String> arguments;
-  private Path               modulePath;
-  private List<Path>         moduleBases;
-  private Optional<String>   packageName;
-  private List<String>       passedArguments;
-  private Path               artifacts;
-  private CompilerDebugger   debugger;
+  private Path modulePath;
+  private List<Path> moduleBases;
+  private Optional<String> packageName;
+  private List<String> passedArguments;
+  private Path artifacts;
+  private Explorer explorer;
 
   private Launcher(List<String> arguments) {
     this.arguments = arguments;
   }
 
   private void launch() {
-    modulePath  = Persistance.path(".");
+    modulePath = Persistance.path(".");
     packageName = Optional.absent();
-    var moduleBases     = ListBuffer.<Path>create();
-    var debug           = false;
-    var command         = Optional.<String>absent();
+    var moduleBases = ListBuffer.<Path>create();
+    var explore = false;
+    var command = Optional.<String>absent();
     var passedArguments = ListBuffer.<String>create();
     for (var i = 0; i != arguments.length(); i++) {
       var argument = arguments.get(i);
       if (argument.startsWith("-")) {
         var separator = argument.indexOf('=');
-        var flag      = argument;
+        var flag = argument;
         if (separator != -1) {
           flag = argument.substring(0, separator);
         }
@@ -140,11 +140,11 @@ builds up a list depending on the flag.
               moduleBases.add(Persistance.path(arguments.get(i)));
             }
           }
-          case "--debug", "-d" -> {
+          case "--explore", "-e" -> {
             if (separator != -1) {
               throw Diagnostic.error("", "`%s` does not take value", flag);
             }
-            debug = true;
+            explore = true;
           }
           default -> throw Diagnostic.error("", "unknown flag `%s`", flag);
         }
@@ -159,15 +159,10 @@ builds up a list depending on the flag.
     if (command.isEmpty()) {
       throw Diagnostic.error("", "there is no command");
     }
-    this.moduleBases     = moduleBases.toList();
+    this.moduleBases = moduleBases.toList();
     this.passedArguments = passedArguments.toList();
-    artifacts            = modulePath.resolve("art");
-    if (debug) {
-      debugger = CompilerDebugger.active(artifacts);
-    }
-    else {
-      debugger = CompilerDebugger.inactive();
-    }
+    artifacts = modulePath.resolve("art");
+    explorer = new Explorer(artifacts, explore);
     switch (command.getFirst()) {
       case "help" -> printUsage();
       case "init" -> init();
@@ -186,18 +181,18 @@ builds up a list depending on the flag.
   }
 
   private void check() {
-    Checker.check(debugger, "", modulePath, moduleBases);
+    Checker.check(explorer, "", modulePath, moduleBases);
   }
 
   private void build() {
-    var target = Checker.check(debugger, "", modulePath, moduleBases);
+    var target = Checker.check(explorer, "", modulePath, moduleBases);
     Builder.build("", artifacts, target);
   }
 
   private void run() {
-    var target = Checker.check(debugger, "", modulePath, moduleBases);
+    var target = Checker.check(explorer, "", modulePath, moduleBases);
     Builder.build("", artifacts, target);
-    var    module = target.modules().get(target.main()).getFirst();
+    var module = target.modules().get(target.main()).getFirst();
     String name;
     if (!packageName.isEmpty()) {
       name = packageName.getFirst();
@@ -218,7 +213,7 @@ builds up a list depending on the flag.
       }
       name = executables.getFirst().joined(".");
     }
-    var binary   = artifacts.resolve("%s.exe".formatted(name));
+    var binary = artifacts.resolve("%s.exe".formatted(name));
     var exitCode = Processes.execute("", true, binary, passedArguments);
     if (exitCode != 0) {
       System.err.printf("note: `%s` exited with %d%n", binary, exitCode);
@@ -228,7 +223,7 @@ builds up a list depending on the flag.
   private void testCompilerByDeletingWholeModulePath() {
     Persistance.recreate("", modulePath);
     Initializer.initialize(modulePath);
-    var target = Checker.check(debugger, "", modulePath, moduleBases);
+    var target = Checker.check(explorer, "", modulePath, moduleBases);
     Builder.build("", artifacts, target);
   }
 }

@@ -5,42 +5,42 @@ import java.nio.file.Path;
 
 public final class Checker {
   public static Semantic.Target check(
-    CompilerDebugger debugger,
+    Explorer explorer,
     Object subject,
     Path directory,
     List<Path> moduleBases)
   {
-    var checker = new Checker(debugger, subject, directory, moduleBases);
+    var checker = new Checker(explorer, subject, directory, moduleBases);
     return checker.check();
   }
 
-  private final CompilerDebugger                debugger;
-  private final Object                          subject;
-  private final Path                            directory;
-  private final List<Path>                      moduleBases;
-  private String                                main;
+  private final Explorer explorer;
+  private final Object subject;
+  private final Path directory;
+  private final List<Path> moduleBases;
+  private String main;
   private AcyclicCache<String, Semantic.Module> modules;
-  private SetBuffer<String>                     externalNames;
+  private SetBuffer<String> externalNames;
 
   private Checker(
-    CompilerDebugger debugger,
+    Explorer explorer,
     Object subject,
     Path directory,
     List<Path> moduleBases)
   {
-    this.debugger    = debugger;
-    this.subject     = subject;
-    this.directory   = directory;
+    this.explorer = explorer;
+    this.subject = subject;
+    this.directory = directory;
     this.moduleBases = moduleBases;
   }
 
   private Semantic.Target check() {
-    main          = directory.getFileName().toString();
-    modules       = AcyclicCache.create(this::checkModule);
+    main = directory.getFileName().toString();
+    modules = AcyclicCache.create(this::checkModule);
     externalNames = SetBuffer.create();
     modules.get(subject, main);
     var target = new Semantic.Target(main, modules.getAll());
-    debugger.recordTarget(target);
+    explorer.recordTarget(target);
     return target;
   }
 
@@ -75,7 +75,7 @@ public final class Checker {
 
   private Semantic.Module checkModule(Object subject, Path directory) {
     return ModuleChecker
-      .check(debugger, subject, externalNames, this::accessModule, directory);
+      .check(explorer, subject, externalNames, this::accessModule, directory);
   }
 
   private Semantic.Module accessModule(Object subject, String name) {

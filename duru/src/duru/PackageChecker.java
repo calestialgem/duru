@@ -21,7 +21,7 @@ public final class PackageChecker {
   }
 
   public Semantic.Package check(
-    CompilerDebugger debugger,
+    Explorer explorer,
     Object subject,
     SetBuffer<String> externalNames,
     Accessor<Name, Semantic.Package> accessor,
@@ -43,11 +43,11 @@ public final class PackageChecker {
       var filename =
         fullFilename.substring(0, fullFilename.length() - ".duru".length());
       var source = new Source(file, Persistance.load(directory, file));
-      debugger.recordSource(source, package_name, filename);
+      explorer.recordSource(source, package_name, filename);
       var lectics = lexer.lex(source.path(), source.contents());
-      debugger.record(lectics, package_name, filename);
+      explorer.record(lectics, package_name, filename);
       var syntactics = parser.parse(lectics);
-      debugger.record(syntactics, package_name, filename);
+      explorer.record(syntactics, package_name, filename);
       for (var node = 0; node < syntactics.node_count(); node++) {
         if (!Syntactics.is_declaration(syntactics.type_of(node)))
           continue;
@@ -101,7 +101,7 @@ public final class PackageChecker {
       sources[source_count] = syntactics;
       source_count++;
     }
-    debugger.record(sources, source_count, package_name);
+    explorer.record(sources, source_count, package_name);
     if (package_name.equals(Name.of("duru"))) {
       for (var builtin : Semantic.BUILTINS) {
         symbols.add(builtin.identifier(), builtin);
