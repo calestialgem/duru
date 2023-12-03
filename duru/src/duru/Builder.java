@@ -1,3 +1,11 @@
 package duru;
 
-public final class Builder {}
+import java.nio.file.Path;
+
+public final class Builder {
+  public Builder() {}
+
+  public void build(Path artifacts, Semantics semantics) {
+    throw Diagnostic.unimplemented("");
+  }
+}

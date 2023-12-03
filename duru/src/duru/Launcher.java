@@ -72,6 +72,8 @@ builds up a list depending on the flag.
     System.exit(-1);
   }
 
+  private final Checker checker;
+  private final Builder builder;
   private final List<String> arguments;
   private Path modulePath;
   private List<Path> moduleBases;
@@ -81,6 +83,8 @@ builds up a list depending on the flag.
   private Explorer explorer;
 
   private Launcher(List<String> arguments) {
+    checker = new Checker();
+    builder = new Builder();
     this.arguments = arguments;
   }
 
@@ -181,52 +185,50 @@ builds up a list depending on the flag.
   }
 
   private void check() {
-    Checker.check(explorer, "", modulePath, moduleBases);
+    checker.check(explorer, modulePath, moduleBases);
   }
 
   private void build() {
-    var target = Checker.check(explorer, "", modulePath, moduleBases);
-    throw Diagnostic.unimplemented("");
-    //Builder.build("", artifacts, target);
+    var target = checker.check(explorer, modulePath, moduleBases);
+    builder.build(artifacts, target);
   }
 
   private void run() {
-    var target = Checker.check(explorer, "", modulePath, moduleBases);
-    throw Diagnostic.unimplemented("");
-    //Builder.build("", artifacts, target);
-    //var module = target.modules().get(target.main()).getFirst();
-    //String name;
-    //if (!packageName.isEmpty()) {
-    //  name = packageName.getFirst();
-    //}
-    //else {
-    //  var executables = ListBuffer.<Name>create();
-    //  for (var package_ : module.packages().values()) {
-    //    if (package_ instanceof Semantic.Executable executable) {
-    //      executables.add(executable.name());
-    //    }
-    //  }
-    //  if (executables.length() > 1) {
-    //    throw Diagnostic
-    //      .error("", "which executable out of `%s`", executables.toList());
-    //  }
-    //  if (executables.isEmpty()) {
-    //    throw Diagnostic.error("", "no executable in `%s`", module.name());
-    //  }
-    //  name = executables.getFirst().joined(".");
-    //}
-    //var binary = artifacts.resolve("%s.exe".formatted(name));
-    //var exitCode = Processes.execute("", true, binary, passedArguments);
-    //if (exitCode != 0) {
-    //  System.err.printf("note: `%s` exited with %d%n", binary, exitCode);
-    //}
+    var target = checker.check(explorer, modulePath, moduleBases);
+    builder.build(artifacts, target);
+    String name;
+    if (!packageName.isEmpty()) {
+      name = packageName.getFirst();
+    }
+    else {
+      throw Diagnostic.unimplemented(modulePath);
+      // var module = target.modules().get(target.main()).getFirst();
+      // var executables = ListBuffer.<Name>create();
+      // for (var package_ : module.packages().values()) {
+      // if (package_ instanceof Semantic.Executable executable) {
+      // executables.add(executable.name());
+      // }
+      // }
+      // if (executables.length() > 1) {
+      // throw Diagnostic
+      // .error("", "which executable out of `%s`", executables.toList());
+      // }
+      // if (executables.isEmpty()) {
+      // throw Diagnostic.error("", "no executable in `%s`", module.name());
+      // }
+      // name = executables.getFirst().joined(".");
+    }
+    var binary = artifacts.resolve("%s.exe".formatted(name));
+    var exitCode = Processes.execute("", true, binary, passedArguments);
+    if (exitCode != 0) {
+      System.err.printf("note: `%s` exited with %d%n", binary, exitCode);
+    }
   }
 
   private void testCompilerByDeletingWholeModulePath() {
     Persistance.recreate("", modulePath);
     Initializer.initialize(modulePath);
-    var target = Checker.check(explorer, "", modulePath, moduleBases);
-    throw Diagnostic.unimplemented("");
-    //Builder.build("", artifacts, target);
+    var target = checker.check(explorer, modulePath, moduleBases);
+    builder.build(artifacts, target);
   }
 }

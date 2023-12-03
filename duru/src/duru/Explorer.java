@@ -3,9 +3,6 @@ package duru;
 import java.nio.file.Path;
 import java.util.Formatter;
 
-import duru.ConfigurationNode.PackageDeclaration;
-import duru.Semantic.Target;
-
 public final class Explorer {
   private final Path directory;
   private final boolean active;
@@ -38,7 +35,11 @@ public final class Explorer {
           "'%s's lexical representation.%n%nHash: %X%n%n",
           lectics.path,
           lectics.hashCode());
-      for (token_iterator.iterate(lectics); token_iterator.has(); token_iterator.advance()) {
+      for (
+        token_iterator.iterate(lectics);
+        token_iterator.has();
+        token_iterator.advance())
+      {
         f
           .format(
             "%04d: %04d.%04d-%04d: %s%n",
@@ -68,7 +69,11 @@ public final class Explorer {
           "'%s's syntactical representation.%n%nHash: %X%n%n",
           syntactics.path,
           syntactics.hashCode());
-      for (node_iterator.iterate(syntactics); node_iterator.has(); node_iterator.advance()) {
+      for (
+        node_iterator.iterate(syntactics);
+        node_iterator.has();
+        node_iterator.advance())
+      {
         f
           .format(
             "%04d: %04d.%04d-%04d: %s%n",
@@ -98,7 +103,11 @@ public final class Explorer {
       for (var source = 0; source < source_count; source++) {
         var filename = sources[source].path.getFileName().toString();
         filename = filename.substring(0, filename.length() - ".duru".length());
-        for (node_iterator.iterate(sources[source]); node_iterator.has(); node_iterator.advance()) {
+        for (
+          node_iterator.iterate(sources[source]);
+          node_iterator.has();
+          node_iterator.advance())
+        {
           if (!node_iterator.kind().is_declaration())
             continue;
           f
@@ -160,7 +169,7 @@ public final class Explorer {
   }
 
   public void recordConfigurationDeclarations(
-    List<PackageDeclaration> declarations,
+    List<ConfigurationNode.PackageDeclaration> declarations,
     String moduleIdentifier)
   {
     if (!active)
@@ -254,37 +263,5 @@ public final class Explorer {
     store(
       "%s.%s-source.duru".formatted(packageName.joined("."), sourceName),
       string);
-  }
-
-  public void recordTarget(Target target) {
-    if (!active)
-      return;
-    var string = new StringBuilder();
-    string
-      .append(Integer.toUnsignedString(target.hashCode(), 16).toUpperCase());
-    string.append(System.lineSeparator());
-    for (var module : target.modules().values()) {
-      for (var package_ : module.packages().values()) {
-        for (var declaration : package_.symbols().values()) {
-          for (var externalName : declaration.externalName()) {
-            string.append("extern");
-            string.append(' ');
-            Text.quote(string, externalName);
-            string.append(' ');
-          }
-          if (declaration.isPublic()) {
-            string.append("public");
-            string.append(' ');
-          }
-          string.append(declaration.getClass().getSimpleName());
-          string.append(' ');
-          string.append('`');
-          string.append(declaration.name());
-          string.append('`');
-          string.append(System.lineSeparator());
-        }
-      }
-    }
-    store("target.duru", string);
   }
 }
