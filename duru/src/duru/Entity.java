@@ -1,0 +1,15 @@
+package duru;
+
+public enum Entity {
+  NO_ENTITY,
+  MODULE_BEGIN,
+  MODULE_END,
+  PACKAGE_BEGIN,
+  PACKAGE_END,
+  ENTRYPOINT,
+  BLOCK_BEGIN,
+  BLOCK_END,
+  NAME_BEGIN,
+  NAME_END,
+  IDENTIFIER;
+}
